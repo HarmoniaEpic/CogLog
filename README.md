@@ -3,7 +3,7 @@ CogLog — a meta-cognition log for LLMs.
 工事中 / under construction
 
 ---
-
+```
 原型（なぜ）      DESIGN-v0.9.1.md
                       │
          ┌────────────┼────────────┐
@@ -15,3 +15,4 @@ CogLog — a meta-cognition log for LLMs.
          ┌────┬───────┼───────┬────┐
          ▼    ▼       ▼       ▼    ▼
 実用（どう） Python  Node.js   C++  Rust
+```
