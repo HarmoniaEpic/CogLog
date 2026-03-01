@@ -1,0 +1,29 @@
+[package]
+name = "coglog"
+version = "0.9.1"
+edition = "2021"
+description = "CogLog — a meta-cognition log for LLMs"
+license = "MIT"
+keywords = ["llm", "metacognition", "mcp", "ai", "cognitive"]
+categories = ["command-line-utilities"]
+# repository = "https://github.com/xxx/coglog"
+
+[dependencies]
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+libc = "0.2"
+
+[[bin]]
+name = "coglog"
+path = "src/bin/coglog.rs"
+
+[[bin]]
+name = "coglog-mcp-server"
+path = "src/bin/coglog-mcp-server.rs"
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true
