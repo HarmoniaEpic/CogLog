@@ -1,15 +1,15 @@
 ---
-name: metalog
-description: "Provide cognitive continuity across conversation turns using a single-window log. Use this skill whenever maintaining context between turns matters: multi-turn creative collaboration, character roleplay, TRPG sessions, coding with iterative refinement, tutoring, or any conversation where the AI should remember what it was thinking (not just what it said) in the previous turn. Also use when the user mentions 'metalog', 'meta-log', 'self-narrative', 'current_focus', 'turn memory', or asks the AI to reflect on its own reasoning process across turns."
+name: coglog
+description: "Provide cognitive continuity across conversation turns using a single-window log. Use this skill whenever maintaining context between turns matters: multi-turn creative collaboration, character roleplay, TRPG sessions, coding with iterative refinement, tutoring, or any conversation where the AI should remember what it was thinking (not just what it said) in the previous turn. Also use when the user mentions 'coglog', 'cog-log', 'metalog', 'meta-log', 'self-narrative', 'current_focus', 'turn memory', or asks the AI to reflect on its own reasoning process across turns."
 ---
 
-# MetaLog v0.9.1
+# CogLog v0.9.1
 
 Minimal cognitive continuity for LLMs. A single-window (size 1) log that records the previous turn's three-layer structure and four-axis interpretation, making it available at the start of the next turn. Each entry is self-documenting via a `_schema` field.
 
 ## Core Concept
 
-Current LLM architecture resets cognitive state every turn. The conversation history contains what was said, but **the distinction between "what I thought but didn't say" and "what I said" is lost**. MetaLog preserves this distinction by recording three layers (user input, thinking process, assistant output) plus four axes of interpretation (current_focus, theory of mind, self-narrative, annotation).
+Current LLM architecture resets cognitive state every turn. The conversation history contains what was said, but **the distinction between "what I thought but didn't say" and "what I said" is lost**. CogLog preserves this distinction by recording three layers (user input, thinking process, assistant output) plus four axes of interpretation (current_focus, theory of mind, self-narrative, annotation).
 
 The structure is a recurrence relation: $a_{n+1} = f(a_n)$. Window size 1 gives the system Markov property — the future depends only on the present state, not the full history. This constraint forces compression and selection, making the choice of what to record a metacognitive act in itself.
 
@@ -53,7 +53,7 @@ The structure is a recurrence relation: $a_{n+1} = f(a_n)$. Window size 1 gives 
 
 The `_schema` field is auto-generated on every write. It makes the JSON file self-documenting: the data itself describes how to read and write it. Like a door handle that says "grip and turn", `_schema` tells the reader what each field expects. This is an affordance — the data provides its own usage instructions.
 
-When exporting a metalog from a previous session, `_schema` travels with the data. No README or DESIGN document is needed for the next session's AI to understand the format.
+When exporting a coglog from a previous session, `_schema` travels with the data. No README or DESIGN document is needed for the next session's AI to understand the format.
 
 ### Two-tier validation
 
@@ -87,13 +87,13 @@ Boundaries between the four are intentionally blurred. Overlap is permitted and 
 Turn start
     │
     ▼
-metalog read    ← Load previous turn's _schema + three layers + four axes
+coglog read     ← Load previous turn's _schema + three layers + four axes
     │              (_schema acts as a per-turn anchor against drift)
     ▼
-Normal processing ← Generate response with metalog as context
+Normal processing ← Generate response with coglog as context
     │
     ▼
-metalog write   ← Save current turn (_schema auto-generated; previous overwritten)
+coglog write    ← Save current turn (_schema auto-generated; previous overwritten)
 ```
 
 ## Usage
@@ -102,13 +102,13 @@ metalog write   ← Save current turn (_schema auto-generated; previous overwrit
 
 ```python
 import sys
-sys.path.insert(0, '/mnt/skills/user/metalog/scripts')
-from metalog import MetaLog
+sys.path.insert(0, '/mnt/skills/user/coglog/scripts')
+from coglog import CogLog
 
-ml = MetaLog()  # writes to /home/claude/.metalog/ by default
+cl = CogLog()  # writes to ~/.coglog/ by default
 
 # Read previous turn
-prev = ml.read()
+prev = cl.read()
 if prev:
     print(f"Previous turn #{prev['turn_id']}:")
     print(f"  current_focus: {prev['current_focus']}")
@@ -117,7 +117,7 @@ if prev:
     print(f"  annotation: {prev['annotation']}")
 
 # After generating response, write current turn
-ml.write(
+cl.write(
     user="the user's message this turn",
     thinking="my internal reasoning this turn",
     assistant="my visible response this turn",
@@ -132,14 +132,14 @@ ml.write(
 
 ```bash
 # Read
-python3 /mnt/skills/user/metalog/scripts/metalog.py read
+python3 /mnt/skills/user/coglog/scripts/coglog.py read
 
 # Write (JSON on stdin)
 echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' \
-  | python3 /mnt/skills/user/metalog/scripts/metalog.py write
+  | python3 /mnt/skills/user/coglog/scripts/coglog.py write
 
 # Clear
-python3 /mnt/skills/user/metalog/scripts/metalog.py clear
+python3 /mnt/skills/user/coglog/scripts/coglog.py clear
 ```
 
 ### Option C: Minimal (no tools needed)
@@ -147,13 +147,13 @@ python3 /mnt/skills/user/metalog/scripts/metalog.py clear
 Share this template in the system prompt or conversation:
 
 ```
-At the end of each response, output a metalog block:
+At the end of each response, output a coglog block:
 {"current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}
 ```
 
 Even without file I/O, the recurrence relation runs through the conversation history.
 
-## When to use MetaLog
+## When to use CogLog
 
 - **Multi-turn collaboration**: Track evolving understanding across turns
 - **Character / roleplay**: Maintain self-narrative as a character that grows through interaction
@@ -170,6 +170,7 @@ Even without file I/O, the recurrence relation runs through the conversation his
 - **All fields required**: The act of filling each field — or deliberately leaving it empty — is the metacognitive act
 - **Free-form text**: Interpretation fields are unstructured. What to write is part of the judgment
 - **Zero dependencies**: Pure Python stdlib. JSON read/write only
+- **Sandbox-native**: Runs inside the host's sandbox. No authentication, encryption, or network access. Security is the sandbox's responsibility
 - **Portable**: Same protocol works as file I/O, MCP server, Ollama tool, or system prompt convention
 
 For full design rationale, read `references/DESIGN.md`.
