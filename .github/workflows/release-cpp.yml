@@ -53,7 +53,8 @@ jobs:
           DIRNAME="coglog-cpp-${VERSION}"
           mkdir -p "$DIRNAME"
           cp coglog-cli coglog-mcp "$DIRNAME/"
-          cp README.md "$DIRNAME/"
+          cp cpp/coglog/README.md "$DIRNAME/README-cli.md"
+          cp cpp/coglog-mcp/README.md "$DIRNAME/README-mcp.md"
           zip -r "coglog-cpp-${VERSION}.zip" "$DIRNAME/"
           echo "ASSET=coglog-cpp-${VERSION}.zip" >> "$GITHUB_ENV"
 
