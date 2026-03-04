@@ -9,7 +9,8 @@
  * Transport: stdio (newline-delimited JSON)
  *
  * Build with cosmocc for universal binary:
- *   cosmocc -std=c++17 -Os -o coglog-mcp-server coglog-mcp-server-v0.9.1.cpp
+ *   cosmocc -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
+ *           -o coglog-mcp coglog-mcp.cpp
  *
  * License: MIT
  */
@@ -24,10 +25,12 @@
 #include <utility>
 #include <stdexcept>
 #include <sys/stat.h>
+#include <pwd.h>
+#include <unistd.h>
 #include <unistd.h>
 
 // ═══════════════════════════════════════════════════════════════════
-// Mini JSON library (shared with coglog-v0.9.1.cpp)
+// Mini JSON library (shared with coglog-cli.cpp)
 // ═══════════════════════════════════════════════════════════════════
 
 namespace json {
@@ -348,7 +351,7 @@ public:
 } // namespace json
 
 // ═══════════════════════════════════════════════════════════════════
-// MetaLog core (shared with coglog-v0.9.1.cpp)
+// MetaLog core (shared with coglog-cli.cpp)
 // ═══════════════════════════════════════════════════════════════════
 
 namespace metalog {
@@ -392,29 +395,20 @@ static const Json SCHEMA = make_schema();
 
 // ── Path utilities ──
 
-static std::string get_exe_dir(const char* argv0) {
-    char buf[4096];
-    ssize_t len = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-    if (len > 0) {
-        buf[len] = '\0';
-        std::string path(buf);
-        auto pos = path.rfind('/');
-        return pos != std::string::npos ? path.substr(0, pos) : ".";
-    }
-    if (::realpath(argv0, buf)) {
-        std::string path(buf);
-        auto pos = path.rfind('/');
-        return pos != std::string::npos ? path.substr(0, pos) : ".";
-    }
-    return ".";
+static std::string default_coglog_dir() {
+    if (const char* env = std::getenv("COGLOG_DIR")) return env;
+    if (const char* home = std::getenv("HOME"))
+        return std::string(home) + "/.coglog";
+    if (const struct passwd* pw = getpwuid(getuid()))
+        return std::string(pw->pw_dir) + "/.coglog";
+    return ".coglog";
 }
 
 static std::string data_dir;
 static std::string current_file;
 
-static void init_paths(const char* argv0) {
-    std::string dir = get_exe_dir(argv0);
-    data_dir = dir + "/.metalog";
+static void init_paths(const char* coglog_dir_override = nullptr) {
+    data_dir = coglog_dir_override ? coglog_dir_override : default_coglog_dir();
     current_file = data_dir + "/current.json";
 }
 
@@ -793,7 +787,12 @@ static void run() {
 
 int main(int argc, char* argv[]) {
     (void)argc;
-    metalog::init_paths(argv[0]);
+    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
+        metalog::init_paths(argv[2]);
+    } else {
+        metalog::init_paths();
+    }
 
     try {
         mcp::run();
