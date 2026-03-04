@@ -1,5 +1,12 @@
 # CogLog v0.9.1 リリース準備計画
 
+> **改訂履歴**
+>
+> | 日付 | 内容 |
+> |------|------|
+> | 初版 | PLAN-release-v0.9.1.md 作成 |
+> | 2026-03-05 | リポジトリ実構造との整合: DESIGN-v0.9.1.md → docs/designs/ 移動、cpp/ と bash/ のサブディレクトリ化、skill/ → coglog-skill/coglog/ 改称、docs/ 配下に designs/ と研究ノートを追加、.github/workflows/ を構成図に追加 |
+
 ## 変更の性質
 
 **MINOR VERSION 相当**（既存コードへの機能変更はないが、パッケージング構造の新規追加・11言語展開・Haskell/CL/Go/Ruby/Java/C#/Bash の新規実装を伴う）
@@ -89,7 +96,6 @@ Quicklisp リカレントクワイン版: `(ql:quickload :coglog-quine)`
 coglog/
 ├── README.md
 ├── LICENSE
-├── DESIGN-v0.9.1.md
 ├── THIRD_PARTY_LICENSES.md
 │
 ├── rust/                               # ── crates.io ──
@@ -213,25 +219,40 @@ coglog/
 │       └── recurrent-quine.lisp        # 自己書き換え版
 │
 ├── cpp/                                # ── GitHub Releases（cosmocc）──
-│   ├── coglog-cli.cpp                  # CLI 版シングルファイル
-│   └── coglog-mcp.cpp                  # MCP サーバー版シングルファイル
+│   ├── coglog/
+│   │   ├── coglog-cli.cpp              # CLI 版シングルファイル
+│   │   └── README.md
+│   └── coglog-mcp/
+│       ├── coglog-mcp.cpp              # MCP サーバー版シングルファイル
+│       └── README.md
 │
 ├── bash/                               # ── リポジトリ同梱（CLI のみ）──
-│   └── coglog-cli.sh                   # bash + jq グルー実装
+│   └── coglog/
+│       ├── coglog-cli.sh               # bash + jq グルー実装
+│       └── README.md
 │
-├── skill/                              # ── Claude Skill ──
-│   ├── SKILL.md
-│   ├── references/
-│   │   └── DESIGN.md
-│   └── scripts/
-│       └── coglog.py
+├── coglog-skill/                       # ── Claude Skill ──
+│   └── coglog/
+│       ├── SKILL.md
+│       ├── references/
+│       │   └── DESIGN.md
+│       └── scripts/
+│           └── coglog.py
+│
+├── .github/
+│   └── workflows/
+│       ├── release-cpp.yml             # C++ cosmocc ビルド + リリース
+│       └── release-bash.yml            # Bash スクリプトパッケージ + リリース
 │
 └── docs/
+    ├── designs/
+    │   └── DESIGN-v0.9.1.md            # 設計書
     ├── oldsources/
     │   ├── coglog-cli-v0_9_1_qjs.js    # QuickJS CLI 版（アーカイブ）
     │   └── coglog-mcp-v0_9_1_qjs.js    # QuickJS MCP 版（アーカイブ）
-    └── plans/
-        └── PLAN-release-v0.9.1.md      # ← 本文書
+    ├── plans/
+    │   └── PLAN-release-v0.9.1.md      # ← 本文書
+    └── coglog-research-notes-01.md     # 研究ノート
 ```
 
 ---
@@ -288,8 +309,8 @@ coglog/
 
 | 現在 | 移動先 | 変更内容 |
 |---|---|---|
-| `coglog-cli-v0.9.1.cpp` | `cpp/coglog-cli.cpp` | ファイル名のみ |
-| `coglog-mcp-v0.9.1.cpp` | `cpp/coglog-mcp.cpp` | ファイル名のみ |
+| `coglog-cli-v0.9.1.cpp` | `cpp/coglog/coglog-cli.cpp` | ファイル名のみ |
+| `coglog-mcp-v0.9.1.cpp` | `cpp/coglog-mcp/coglog-mcp.cpp` | ファイル名のみ |
 
 ### QuickJS（アーカイブ）
 
@@ -424,7 +445,8 @@ csharp/
 
 ```
 bash/
-└── coglog-cli.sh           # bash + jq グルー実装（単一ファイル）
+└── coglog/
+    └── coglog-cli.sh           # bash + jq グルー実装（単一ファイル）
 ```
 
 **構造の特徴:**
@@ -836,7 +858,7 @@ Phase 10: GitHub Releases
  □ dotnet pack（coglog, coglog-mcp）
  □ cabal build（coglog, coglog-mcp）
  □ sbcl --load coglog.asd
- □ bash -n bash/coglog-cli.sh（構文検証）
+ □ bash -n bash/coglog/coglog-cli.sh（構文検証）
 
 【機能検証 — CLI（全11実装）】
  □ Rust:    coglog-cli read/write/clear
