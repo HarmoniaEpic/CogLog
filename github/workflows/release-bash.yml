@@ -1,0 +1,34 @@
+name: Release Bash Script
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package
+        run: |
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          DIRNAME="coglog-bash-${VERSION}"
+          mkdir -p "$DIRNAME"
+          cp bash/coglog-cli.sh "$DIRNAME/"
+          cp README.md "$DIRNAME/"
+          zip -r "coglog-bash-${VERSION}.zip" "$DIRNAME/"
+          echo "ASSET=coglog-bash-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET }}
+          generate_release_notes: true

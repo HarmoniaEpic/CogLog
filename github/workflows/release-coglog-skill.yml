@@ -1,0 +1,31 @@
+name: Release coglog-skill
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package
+        run: |
+          VERSION="${GITHUB_REF_NAME:-dev}"
+          # coglog-skill/coglog/ という二重構造を zip 内に保持する
+          zip -r "coglog-skill-${VERSION}.zip" coglog-skill/
+          echo "ASSET=coglog-skill-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release and upload asset
+        uses: softprops/action-gh-release@v2
+        with:
+          files: ${{ env.ASSET }}
+          generate_release_notes: true
