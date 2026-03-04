@@ -1,0 +1,16 @@
+cabal-version: 2.4
+name:          coglog
+version:       0.9.1
+synopsis:      CogLog — a meta-cognition log for LLMs
+description:   CogLog provides scaffolding for temporal cognition mimicry in LLMs.
+               Haskell edition: pure core (CogLog.lhs) + IO adapter (Adapter.hs).
+license:       MIT
+author:        HarmoniaEpic
+build-type:    Simple
+
+executable coglog-cli
+  main-is:       Adapter.hs
+  other-modules: CogLog
+  build-depends: base >=4.14 && <5, time >=1.9, directory, filepath
+  default-language: Haskell2010
+  ghc-options:   -Wall

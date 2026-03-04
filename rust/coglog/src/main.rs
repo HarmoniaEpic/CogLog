@@ -1,17 +1,18 @@
 //! CogLog CLI v0.9.1
 //!
 //! Usage:
-//!   coglog read
-//!   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog write
-//!   coglog clear
+//!   coglog-cli read
+//!   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
+//!   coglog-cli clear
 
-use coglog::{Error, MetaLog, WriteArgs};
+use coglog_core::{default_coglog_dir, Error, MetaLog, WriteArgs};
 use std::io::Read;
+use std::path::PathBuf;
 use std::process;
 
 fn print_usage() {
     print!(
-        "usage: coglog <read|write|clear>\n\
+        "usage: coglog-cli <read|write|clear>\n\
          \n\
          \x20 read    — display the previous turn's metalog\n\
          \x20 write   — save current turn (reads JSON from stdin)\n\
@@ -35,14 +36,22 @@ fn print_usage() {
 }
 
 fn run() -> Result<(), Error> {
-    let args: Vec<String> = std::env::args().collect();
+    let mut args: Vec<String> = std::env::args().collect();
+
+    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    let ml = if args.len() >= 3 && args[1] == "--coglog-dir" {
+        let dir = PathBuf::from(&args[2]);
+        args.remove(1);
+        args.remove(1);
+        MetaLog::with_dir(dir)
+    } else {
+        MetaLog::new()
+    };
 
     if args.len() < 2 {
         print_usage();
         return Ok(());
     }
-
-    let ml = MetaLog::new();
 
     match args[1].as_str() {
         "read" => {

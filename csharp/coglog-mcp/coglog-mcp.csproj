@@ -1,0 +1,15 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <OutputType>Exe</OutputType>
+    <TargetFramework>net8.0</TargetFramework>
+    <PackAsTool>true</PackAsTool>
+    <ToolCommandName>coglog-mcp</ToolCommandName>
+    <PackageId>coglog-mcp</PackageId>
+    <Version>0.9.1</Version>
+    <Description>CogLog MCP server — a meta-cognition log for LLMs</Description>
+    <Authors>HarmoniaEpic</Authors>
+    <PackageLicenseExpression>MIT</PackageLicenseExpression>
+    <RepositoryUrl>https://github.com/HarmoniaEpic/coglog</RepositoryUrl>
+    <PackageTags>metacognition;llm;cognitive;log;mcp;mcp-server;ai</PackageTags>
+  </PropertyGroup>
+</Project>

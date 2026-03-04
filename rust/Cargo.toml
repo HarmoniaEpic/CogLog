@@ -1,0 +1,17 @@
+[workspace]
+members = ["coglog-core", "coglog", "coglog-mcp"]
+resolver = "2"
+
+[workspace.package]
+version = "0.9.1"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/HarmoniaEpic/coglog"
+keywords = ["llm", "metacognition", "mcp", "ai", "cognitive"]
+
+[profile.release]
+opt-level = "z"
+lto = true
+codegen-units = 1
+panic = "abort"
+strip = true

@@ -1,0 +1,16 @@
+cabal-version: 2.4
+name:          coglog-mcp
+version:       0.9.1
+synopsis:      CogLog MCP server — a meta-cognition log for LLMs
+description:   MCP (Model Context Protocol) server for CogLog.
+               Imports the pure core from CogLog.lhs.
+license:       MIT
+author:        HarmoniaEpic
+build-type:    Simple
+
+executable coglog-mcp
+  main-is:       McpServer.hs
+  other-modules: CogLog
+  build-depends: base >=4.14 && <5, time >=1.9, directory, filepath
+  default-language: Haskell2010
+  ghc-options:   -Wall

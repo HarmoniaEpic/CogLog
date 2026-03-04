@@ -194,15 +194,15 @@ pub fn utc_timestamp() -> String {
 // Path resolution
 // ═══════════════════════════════════════════════════════════════════
 
-pub fn exe_dir() -> PathBuf {
-    // Try the executable's directory
-    if let Ok(exe) = std::env::current_exe() {
-        if let Some(dir) = exe.parent() {
-            return dir.to_path_buf();
-        }
+pub fn default_coglog_dir() -> PathBuf {
+    // 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+    if let Ok(d) = std::env::var("COGLOG_DIR") {
+        return PathBuf::from(d);
     }
-    // Fallback to current directory
-    PathBuf::from(".")
+    if let Ok(home) = std::env::var("HOME") {
+        return PathBuf::from(home).join(".coglog");
+    }
+    PathBuf::from(".coglog")
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -216,8 +216,7 @@ pub struct MetaLog {
 
 impl MetaLog {
     pub fn new() -> Self {
-        let dir = exe_dir();
-        let data_dir = dir.join(".metalog");
+        let data_dir = default_coglog_dir();
         let current_file = data_dir.join("current.json");
         MetaLog {
             data_dir,

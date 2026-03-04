@@ -5,7 +5,7 @@
 //! Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
 //! Transport: stdio (newline-delimited JSON)
 
-use coglog::{MetaLog, WriteArgs};
+use coglog_core::{MetaLog, WriteArgs};
 use serde_json::{json, Value};
 use std::io::{self, BufRead, Write};
 
@@ -173,7 +173,13 @@ fn handle_ping(id: &Value) {
 // ═══════════════════════════════════════════════════════════════════
 
 fn main() {
-    let ml = MetaLog::new();
+    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    let argv: Vec<String> = std::env::args().collect();
+    let ml = if argv.len() >= 3 && argv[1] == "--coglog-dir" {
+        MetaLog::with_dir(std::path::PathBuf::from(&argv[2]))
+    } else {
+        MetaLog::new()
+    };
     log("server started");
 
     let stdin = io::stdin();
