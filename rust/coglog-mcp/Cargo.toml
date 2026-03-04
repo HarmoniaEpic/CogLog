@@ -1,0 +1,13 @@
+[package]
+name = "coglog-mcp"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+description = "CogLog MCP server — a meta-cognition log for LLMs"
+categories = ["command-line-utilities"]
+
+[dependencies]
+coglog-core = { path = "../coglog-core", version = "0.9.1" }
+serde_json = "1"

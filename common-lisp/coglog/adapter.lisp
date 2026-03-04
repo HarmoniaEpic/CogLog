@@ -13,16 +13,22 @@
 ;;;; パス解決
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-(defvar *script-dir*
-  (if *load-truename*
-      (directory-namestring *load-truename*)
-      (namestring (truename "."))))
+(defun default-coglog-dir ()
+  "COGLOG_DIR 環境変数 > $HOME/.coglog/ の順で解決する。"
+  (let ((env (sb-ext:posix-getenv "COGLOG_DIR")))
+    (if env
+        (parse-namestring (concatenate 'string env "/"))
+        (merge-pathnames ".coglog/" (user-homedir-pathname)))))
 
-(defvar *data-dir*
-  (merge-pathnames ".metalog/" *script-dir*))
+(defvar *data-dir* (default-coglog-dir))
 
 (defvar *current-file*
   (merge-pathnames "current.json" *data-dir*))
+
+(defun set-coglog-dir (dir)
+  "データディレクトリを動的に変更する。"
+  (setf *data-dir*    (parse-namestring (concatenate 'string dir "/")))
+  (setf *current-file* (merge-pathnames "current.json" *data-dir*)))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
@@ -308,8 +314,15 @@
   (format t "  clear   — reset metalog~%"))
 
 (defun main ()
-  (let ((args #+sbcl sb-ext:*posix-argv*
-              #-sbcl (list "coglog")))
+  (let* ((all-args #+sbcl sb-ext:*posix-argv*
+                   #-sbcl (list "coglog"))
+         ;; --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+         (args (if (and (>= (length all-args) 3)
+                        (string= (second all-args) "--coglog-dir"))
+                   (progn
+                     (set-coglog-dir (third all-args))
+                     (cons (first all-args) (cdddr all-args)))
+                   all-args)))
     (if (< (length args) 2)
         (usage)
         (let ((cmd (second args)))

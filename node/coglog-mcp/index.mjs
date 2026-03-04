@@ -16,13 +16,13 @@ import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { homedir } from 'node:os';
 
 // ═══════════════════════════════════════════════════════════════
-// MetaLog class (copied from metalog-v0.9.1.mjs)
+// MetaLog class (copied from coglog/index.mjs)
 // ═══════════════════════════════════════════════════════════════
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, '.metalog');
+const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
@@ -45,9 +45,9 @@ const SCHEMA = {
 };
 
 class MetaLog {
-  constructor() {
-    this.dataDir = DATA_DIR;
-    this.currentFile = CURRENT_FILE;
+  constructor(dataDir = null) {
+    this.dataDir = dataDir ?? DATA_DIR;
+    this.currentFile = join(this.dataDir, 'current.json');
   }
 
   async _ensureDir() {
@@ -237,7 +237,14 @@ function handlePing(msgId) {
 // Main loop (serialized: each message fully processed before next)
 // ═══════════════════════════════════════════════════════════════
 
-const ml = new MetaLog();
+// --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+{
+  const argv = process.argv.slice(2);
+  if (argv[0] === '--coglog-dir' && argv[1]) {
+    process.env.COGLOG_DIR = argv[1];
+  }
+}
+const ml = new MetaLog(process.env.COGLOG_DIR ?? null);
 const rl = createInterface({ input: process.stdin, terminal: false });
 
 // Queue + drain loop to serialize async handlers.

@@ -1,0 +1,33 @@
+{
+  "name": "coglog",
+  "version": "0.9.1",
+  "description": "CogLog — a meta-cognition log for LLMs",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.mts",
+  "bin": {
+    "coglog-cli": "./index.mjs"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "types": "./index.d.mts"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.d.mts",
+    "README.md"
+  ],
+  "keywords": ["llm", "metacognition", "mcp", "ai", "cognitive"],
+  "author": "HarmoniaEpic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HarmoniaEpic/coglog",
+    "directory": "node/coglog"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

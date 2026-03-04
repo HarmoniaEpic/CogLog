@@ -1,0 +1,33 @@
+{
+  "name": "coglog-mcp",
+  "version": "0.9.1",
+  "description": "CogLog MCP server — a meta-cognition log for LLMs",
+  "type": "module",
+  "main": "./index.mjs",
+  "types": "./index.d.mts",
+  "bin": {
+    "coglog-mcp": "./index.mjs"
+  },
+  "exports": {
+    ".": {
+      "import": "./index.mjs",
+      "types": "./index.d.mts"
+    }
+  },
+  "files": [
+    "index.mjs",
+    "index.d.mts",
+    "README.md"
+  ],
+  "keywords": ["llm", "metacognition", "mcp", "mcp-server", "ai", "cognitive"],
+  "author": "HarmoniaEpic",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HarmoniaEpic/coglog",
+    "directory": "node/coglog-mcp"
+  },
+  "engines": {
+    "node": ">=18"
+  }
+}

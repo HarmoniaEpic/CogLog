@@ -29,9 +29,9 @@ import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
 import { existsSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { homedir } from 'node:os';
 
-const __dirname = dirname(fileURLToPath(import.meta.url));
-const DATA_DIR = join(__dirname, '.metalog');
+const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
@@ -54,9 +54,9 @@ const SCHEMA = {
 };
 
 export class MetaLog {
-  constructor() {
-    this.dataDir = DATA_DIR;
-    this.currentFile = CURRENT_FILE;
+  constructor(dataDir = null) {
+    this.dataDir = dataDir ?? DATA_DIR;
+    this.currentFile = join(this.dataDir, 'current.json');
   }
 
   async _ensureDir() {
@@ -137,8 +137,15 @@ const isMain = process.argv[1] &&
   new URL('file://' + process.argv[1]).pathname;
 
 if (isMain) {
-  const ml = new MetaLog();
-  const [command] = process.argv.slice(2);
+  // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+  let cliArgs = process.argv.slice(2);
+  let coglogDir = null;
+  if (cliArgs[0] === '--coglog-dir' && cliArgs[1]) {
+    coglogDir = cliArgs[1];
+    cliArgs = cliArgs.slice(2);
+  }
+  const ml = new MetaLog(coglogDir);
+  const [command] = cliArgs;
 
   async function main() {
     switch (command) {

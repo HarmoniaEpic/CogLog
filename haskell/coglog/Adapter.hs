@@ -5,12 +5,12 @@ import Data.Char (isSpace, isDigit)
 import Data.List (intercalate, isPrefixOf, isSuffixOf)
 import Data.Time (UTCTime, getCurrentTime, formatTime, defaultTimeLocale)
 import Data.Time.Format (parseTimeM)
-import System.Environment (getArgs)
+import System.Directory (getHomeDirectory, createDirectoryIfMissing,
+                         doesFileExist, removeFile)
+import System.Environment (getArgs, lookupEnv)
+import qualified System.FilePath as FP
 import System.IO (hPutStrLn, hPutStr, hGetContents, stderr, hSetEncoding,
                    stdin, stdout, utf8, withFile, IOMode(..))
-import System.Directory (doesFileExist, createDirectoryIfMissing,
-                         removeFile)
-import System.FilePath (takeDirectory)
 
 -- ═══════════════════════════════════════════════════════════
 -- JSON シリアライズ（手書き）
@@ -293,8 +293,16 @@ parseStdinArgs src = do
 -- ファイル I/O
 -- ═══════════════════════════════════════════════════════════
 
-defaultPath :: FilePath
-defaultPath = ".metalog/current.json"
+-- | デフォルトの coglog パスを返す
+-- 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+defaultCoglogPath :: IO FilePath
+defaultCoglogPath = do
+  envDir <- lookupEnv "COGLOG_DIR"
+  case envDir of
+    Just d  -> return (d FP.</> "current.json")
+    Nothing -> do
+      home <- getHomeDirectory
+      return (home FP.</> ".coglog" FP.</> "current.json")
 
 -- | メタログファイルを読む
 readMetalog :: FilePath -> IO (Maybe Entry)
@@ -314,7 +322,7 @@ readMetalog path = do
 -- | メタログファイルに書く
 writeMetalog :: FilePath -> Entry -> IO ()
 writeMetalog path entry = do
-  createDirectoryIfMissing True (takeDirectory path)
+  createDirectoryIfMissing True (FP.takeDirectory path)
   withFile path WriteMode $ \h -> do
     hSetEncoding h utf8
     hPutStr h (entryToJson entry ++ "\n")
@@ -336,22 +344,26 @@ main :: IO ()
 main = do
   hSetEncoding stdin  utf8
   hSetEncoding stdout utf8
-  args <- getArgs
+  allArgs <- getArgs
+  -- --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+  (coglogPath, args) <- case allArgs of
+    ("--coglog-dir":d:rest) -> return (d FP.</> "current.json", rest)
+    _                       -> do { p <- defaultCoglogPath; return (p, allArgs) }
   case args of
-    ["read"]  -> cmdRead
-    ["write"] -> cmdWrite
-    ["clear"] -> cmdClear
-    _         -> putStrLn "usage: coglog-hs <read|write|clear>"
+    ["read"]  -> cmdRead  coglogPath
+    ["write"] -> cmdWrite coglogPath
+    ["clear"] -> cmdClear coglogPath
+    _         -> putStrLn "usage: coglog-hs [--coglog-dir <path>] <read|write|clear>"
 
-cmdRead :: IO ()
-cmdRead = do
-  me <- readMetalog defaultPath
+cmdRead :: FilePath -> IO ()
+cmdRead path = do
+  me <- readMetalog path
   case me of
     Nothing -> putStrLn "(no metalog found)"
     Just e  -> putStr (entryToJson e)
 
-cmdWrite :: IO ()
-cmdWrite = do
+cmdWrite :: FilePath -> IO ()
+cmdWrite path = do
   input <- getContents
   case parseStdinArgs input of
     Left err -> do
@@ -363,15 +375,15 @@ cmdWrite = do
           hPutStrLn stderr ("metalog error: validation: " ++ err)
           fail ""
         Right wargs -> do
-          prev <- readMetalog defaultPath
+          prev <- readMetalog path
           now <- getCurrentTime
           let entry = advance prev wargs now
-          writeMetalog defaultPath entry
+          writeMetalog path entry
           putStrLn ("metalog: turn " ++ show (eTurnId entry) ++ " written")
 
-cmdClear :: IO ()
-cmdClear = do
-  had <- clearMetalog defaultPath
+cmdClear :: FilePath -> IO ()
+cmdClear path = do
+  had <- clearMetalog path
   if had
     then putStrLn "metalog: cleared"
     else putStrLn "metalog: no existing metalog"
