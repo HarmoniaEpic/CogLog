@@ -16,22 +16,4 @@ and contains the [Cosmopolitan](https://github.com/jart/cosmopolitan) Python run
 - **Author**: Justine Alexandra Roberts Tunney
 - **License**: ISC License
 
-The full license text is available in [LICENSE_Cosmopolitan](./LICENSE_Cosmopolitan).
-
----
-
-## CPython
-
-- **Project**: https://www.python.org/
-- **License**: Python Software Foundation License Version 2
-
-The full license text is available in [LICENSE_CPython](./LICENSE_CPython).
-
----
-
-## cosmofy
-
-- **Project**: https://github.com/metaist/cosmofy
-- **License**: MIT License
-
-The full license text is available in [LICENSE_cosmofy](./LICENSE_cosmofy).
+The full license text is available in [THIRD_PARTY_LICENSE_Cosmopolitan](./LICENSE_Cosmopolitan).
