@@ -22,7 +22,7 @@ jobs:
           VERSION="${GITHUB_REF_NAME:-dev}"
           DIRNAME="coglog-bash-${VERSION}"
           mkdir -p "$DIRNAME"
-          cp bash/coglog-cli.sh "$DIRNAME/"
+          cp bash/coglog/coglog-cli.sh "$DIRNAME/"
           cp README.md "$DIRNAME/"
           zip -r "coglog-bash-${VERSION}.zip" "$DIRNAME/"
           echo "ASSET=coglog-bash-${VERSION}.zip" >> "$GITHUB_ENV"
