@@ -12,12 +12,13 @@
  *
  * Single-file, zero external dependencies.
  * Build with cosmocc for universal binary:
- *   cosmocc -std=c++17 -Os -o coglog coglog-v0.9.1.cpp
+ *   cosmocc -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
+ *           -o coglog-cli coglog-cli.cpp
  *
  * Usage:
- *   ./coglog read
- *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | ./coglog write
- *   ./coglog clear
+ *   ./coglog-cli read
+ *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | ./coglog-cli write
+ *   ./coglog-cli clear
  *
  * License: MIT
  */
@@ -32,6 +33,8 @@
 #include <utility>
 #include <stdexcept>
 #include <sys/stat.h>
+#include <pwd.h>
+#include <unistd.h>
 #include <unistd.h>
 
 // ═══════════════════════════════════════════════════════════════════
@@ -402,31 +405,21 @@ static const Json SCHEMA = make_schema();
 
 // ── Path utilities ──
 
-static std::string get_exe_dir(const char* argv0) {
-    char buf[4096];
-    // Try /proc/self/exe (Linux)
-    ssize_t len = ::readlink("/proc/self/exe", buf, sizeof(buf) - 1);
-    if (len > 0) {
-        buf[len] = '\0';
-        std::string path(buf);
-        auto pos = path.rfind('/');
-        return pos != std::string::npos ? path.substr(0, pos) : ".";
-    }
-    // Fallback: resolve argv[0]
-    if (::realpath(argv0, buf)) {
-        std::string path(buf);
-        auto pos = path.rfind('/');
-        return pos != std::string::npos ? path.substr(0, pos) : ".";
-    }
-    return ".";
+static std::string default_coglog_dir() {
+    // 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+    if (const char* env = std::getenv("COGLOG_DIR")) return env;
+    if (const char* home = std::getenv("HOME"))
+        return std::string(home) + "/.coglog";
+    if (const struct passwd* pw = getpwuid(getuid()))
+        return std::string(pw->pw_dir) + "/.coglog";
+    return ".coglog";
 }
 
 static std::string data_dir;
 static std::string current_file;
 
-static void init_paths(const char* argv0) {
-    std::string dir = get_exe_dir(argv0);
-    data_dir = dir + "/.metalog";
+static void init_paths(const char* coglog_dir_override = nullptr) {
+    data_dir = coglog_dir_override ? coglog_dir_override : default_coglog_dir();
     current_file = data_dir + "/current.json";
 }
 
@@ -556,7 +549,7 @@ static std::string read_stdin() {
 
 static void print_usage() {
     std::fputs(
-        "usage: coglog <read|write|clear>\n"
+        "usage: coglog-cli <read|write|clear>\n"
         "\n"
         "  read    — display the previous turn's metalog\n"
         "  write   — save current turn (reads JSON from stdin)\n"
@@ -580,14 +573,21 @@ static void print_usage() {
 }
 
 int main(int argc, char* argv[]) {
-    metalog::init_paths(argv[0]);
+    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    int arg_offset = 1;
+    if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
+        metalog::init_paths(argv[2]);
+        arg_offset = 3;
+    } else {
+        metalog::init_paths();
+    }
 
-    if (argc < 2) {
+    if (argc <= arg_offset) {
         print_usage();
         return 0;
     }
 
-    const char* command = argv[1];
+    const char* command = argv[arg_offset];
 
     try {
         if (std::strcmp(command, "read") == 0) {
