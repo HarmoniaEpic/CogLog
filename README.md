@@ -2,7 +2,9 @@
 
 CogLog — a meta-cognition log for LLMs.
 
-AIのコンテキストウィンドウに時間の矢とメタ認知を持ち込むための足場がけを志向するツールです。 / A tool oriented toward scaffolding the arrow of time and metacognition into the AI's context window. 
+AIのコンテキストウィンドウに時間の矢とメタ認知を持ち込むための足場がけを志向するツールです。
+
+A tool oriented toward scaffolding the arrow of time and metacognition into the AI's context window. 
 
 ---
 
