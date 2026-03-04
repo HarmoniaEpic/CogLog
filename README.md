@@ -110,7 +110,7 @@ coglog-cli clear
 
 ## 詳細
 
-- [DESIGN-v0.9.1.md](DESIGN-v0.9.1.md) — 設計思想・背景文献
+- [DESIGN-v0.9.1.md](docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献
 - [THIRD_PARTY_LICENSES.md](THIRD_PARTY_LICENSES.md) — サードパーティライセンス
 
 ## ライセンス
