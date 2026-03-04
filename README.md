@@ -1,5 +1,11 @@
 # CogLog v0.9.1：工事中
 
+CogLog — a meta-cognition log for LLMs.
+
+AIのコンテキストウィンドウに時間の矢とメタ認知を持ち込むための足場がけを志向するツールです。 / A tool oriented toward scaffolding the arrow of time and metacognition into the AI's context window. 
+
+---
+
 AIの直前の会話ターンにおける三層構造（ユーザー発話・思考過程・AI発話）を保持し、次ターン開始時に参照可能にする仕組み。
 
 v0.9.1では `_schema` フィールドを導入し、current.jsonを自己記述的なデータとした。データ自身が自分の読み方を携えて移動する。
