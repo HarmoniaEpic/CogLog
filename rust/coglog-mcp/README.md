@@ -1,6 +1,6 @@
-# CogLog MCP Server v0.9.1 (Rust)
+# coglog-mcp v0.9.1 (Rust MCP Server)
 
-CogLog の MCP サーバー。AI エージェントが MCP 経由でメタログを読み書きできる。
+CogLog の MCP サーバー。read / write / clear を JSON-RPC 2.0 over stdio で公開する。
 
 ## インストール
 
@@ -8,11 +8,13 @@ CogLog の MCP サーバー。AI エージェントが MCP 経由でメタログ
 cargo install coglog-mcp
 ```
 
-## 必要環境
+## 使い方
 
-- Rust 1.70+
+```bash
+coglog-mcp
+```
 
-## 設定例
+### MCP クライアント設定
 
 ```json
 {
@@ -24,54 +26,36 @@ cargo install coglog-mcp
 }
 ```
 
-## MCP プロトコル
+### 提供ツール
 
-JSON-RPC 2.0 over stdio (MCP 2024-11-05)。
-
-| ツール | 説明 |
-|--------|------|
+| ツール名 | 説明 |
+|---|---|
 | `metalog_read` | 直前ターンのメタログを読み出す |
-| `metalog_write` | 現ターンのメタログを書き込む |
+| `metalog_write` | 現ターンのメタログを書き込む（前回分を上書き） |
 | `metalog_clear` | メタログをリセットする |
 
-## データ形式
+### プロトコル
 
-```json
-{
-  "_schema": {
-    "version": "0.9.1",
-    "fact_layer": {
-      "user": "non-empty string required",
-      "thinking": "non-empty string required",
-      "assistant": "non-empty string required"
-    },
-    "interpretation_layer": {
-      "current_focus": "string required, empty OK",
-      "theory_of_mind": "string required, empty OK",
-      "self_narrative": "string required, empty OK",
-      "annotation": "string required, empty OK"
-    },
-    "constraints": {
-      "window_size": "1 turn (overwritten each write)",
-      "interpretation_empty": "choosing not to write is itself a metacognitive act"
-    }
-  },
-  "turn_id": 1,
-  "timestamp": "2026-02-26T00:00:00+00:00",
-  "layers": { "user": "...", "thinking": "...", "assistant": "..." },
-  "current_focus": "...",
-  "theory_of_mind": "...",
-  "self_narrative": "...",
-  "annotation": "..."
-}
-```
+- MCP 2024-11-05
+- JSON-RPC 2.0 over stdio
+- 改行区切り JSON
 
+## 環境変数
+
+| 変数 | 説明 | デフォルト |
+|------|------|-----------|
+| `COGLOG_DIR` | データディレクトリ | `~/.coglog` |
+
+## 特徴
+
+- **型安全**: [coglog-core](https://crates.io/crates/coglog-core) の型定義を CLI と共有
+- **小さいバイナリ**: `opt-level="z"`, LTO, `panic="abort"`, strip
+- **完全互換**: 他の全言語実装と同じデータ形式
 
 ## 詳細
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/DESIGN-v0.9.1.md)
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md)
 
 ## ライセンス
 
 MIT
-
