@@ -24,6 +24,8 @@ sbcl --script recurrent-quine.lisp clear
 
 ## 四つ組構造
 
+<br>
+
 ```math
 Q_n = (\text{*state*},\ \text{*advance-source*},\ \text{*affordance*},\ \text{*self-source*})
 ```
