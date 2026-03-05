@@ -1,35 +1,44 @@
-# coglog-core v0.9.1
+# coglog v0.9.1 (Rust CLI)
 
-CogLog のコアライブラリ。データ型、バリデーション、ファイル I/O を提供する。
+CogLog の CLI。直前ターンのメタログを read / write / clear する。
 
-[coglog](https://crates.io/crates/coglog)（CLI）と [coglog-mcp](https://crates.io/crates/coglog-mcp)（MCP サーバー）が依存する。11言語実装の中で Rust のみが純粋核を独立クレートとして分離しており、これは workspace 内で型の同一性を保つための言語上の制約による。
+## インストール
+
+```bash
+cargo install coglog
+```
 
 ## 使い方
 
-```rust
-use coglog_core::{MetaLog, WriteArgs};
-
-let ml = MetaLog::new();
-
-// 読み出し
-let entry = ml.read()?;
-
-// 書き込み
-let entry = ml.write(WriteArgs {
-    user: "Hello".into(),
-    thinking: "User greeted me".into(),
-    assistant: "Hi there!".into(),
-    current_focus: "greeting".into(),
-    theory_of_mind: "friendly".into(),
-    self_narrative: "".into(),
-    annotation: "".into(),
-})?;
-
-// リセット
-let result = ml.clear()?;
+```bash
+coglog-cli read
+echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
+coglog-cli clear
 ```
 
-API の詳細は [docs.rs](https://docs.rs/coglog-core) を参照。
+## 環境変数
+
+| 変数 | 説明 | デフォルト |
+|------|------|-----------|
+| `COGLOG_DIR` | データディレクトリ | `~/.coglog` |
+
+`--coglog-dir <path>` 引数でも指定可能（環境変数より優先）。
+
+## 特徴
+
+- **型安全**: [coglog-core](https://crates.io/crates/coglog-core) の型定義を MCP サーバーと共有
+- **小さいバイナリ**: `opt-level="z"`, LTO, `panic="abort"`, strip
+- **完全互換**: 他の全言語実装と同じ JSON 形式を入出力
+
+## workspace 構成
+
+```
+rust/
+├── Cargo.toml          [workspace]
+├── coglog-core/        コアライブラリ（型 + バリデーション）
+├── coglog/             ← このクレート（CLI）
+└── coglog-mcp/         MCP サーバー
+```
 
 ## 詳細
 
