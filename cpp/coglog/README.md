@@ -25,7 +25,7 @@ unzip cosmocc.zip
 cd ..
 
 # ビルド
-./cosmocc/bin/cosmocc -std=c++17 -Os -o coglog-cli coglog-cli.cpp
+./cosmocc/bin/cosmoc++ -std=c++17 -Os -o coglog-cli coglog-cli.cpp
 ```
 
 生成されるバイナリは Actually Portable Executable (APE) 形式:
@@ -42,7 +42,7 @@ cd ..
 ### 極小バイナリ
 
 ```bash
-./cosmocc/bin/cosmocc -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
+./cosmocc/bin/cosmoc++ -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
   -o coglog-cli coglog-cli.cpp
 ```
 
@@ -87,7 +87,7 @@ JSON ライブラリを内蔵し、外部依存ゼロを実現する。MCP サ�
 
 ## 詳細
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md)
 
 ## ライセンス
 
