@@ -79,7 +79,7 @@ ml.write(user='...', thinking='...', assistant='...', current_focus='...', theor
 
 ## 詳細
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/DESIGN-v0.9.1.md)
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献
 
 ## ライセンス
 
