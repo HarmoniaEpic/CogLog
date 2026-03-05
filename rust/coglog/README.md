@@ -1,16 +1,12 @@
-# CogLog v0.9.1 (Rust CLI)
+# coglog v0.9.1 (Rust CLI)
 
-AIの直前ターンの三層構造を保持し次ターンで参照可能にする仕組み。
+CogLog の CLI。直前ターンのメタログを read / write / clear する。
 
 ## インストール
 
 ```bash
 cargo install coglog
 ```
-
-## 必要環境
-
-- Rust 1.70+
 
 ## 使い方
 
@@ -20,59 +16,34 @@ echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","th
 coglog-cli clear
 ```
 
-## データ形式
+## 環境変数
 
-```json
-{
-  "_schema": {
-    "version": "0.9.1",
-    "fact_layer": {
-      "user": "non-empty string required",
-      "thinking": "non-empty string required",
-      "assistant": "non-empty string required"
-    },
-    "interpretation_layer": {
-      "current_focus": "string required, empty OK",
-      "theory_of_mind": "string required, empty OK",
-      "self_narrative": "string required, empty OK",
-      "annotation": "string required, empty OK"
-    },
-    "constraints": {
-      "window_size": "1 turn (overwritten each write)",
-      "interpretation_empty": "choosing not to write is itself a metacognitive act"
-    }
-  },
-  "turn_id": 1,
-  "timestamp": "2026-02-26T00:00:00+00:00",
-  "layers": { "user": "...", "thinking": "...", "assistant": "..." },
-  "current_focus": "...",
-  "theory_of_mind": "...",
-  "self_narrative": "...",
-  "annotation": "..."
-}
-```
+| 変数 | 説明 | デフォルト |
+|------|------|-----------|
+| `COGLOG_DIR` | データディレクトリ | `~/.coglog` |
 
-## 構造
+`--coglog-dir <path>` 引数でも指定可能（環境変数より優先）。
+
+## 特徴
+
+- **型安全**: [coglog-core](https://crates.io/crates/coglog-core) の型定義を MCP サーバーと共有
+- **小さいバイナリ**: `opt-level="z"`, LTO, `panic="abort"`, strip
+- **完全互換**: 他の全言語実装と同じ JSON 形式を入出力
+
+## workspace 構成
 
 ```
-事実層（layers）   何があったか
-  ├── user         他者の入力
-  ├── thinking     自己の内部
-  └── assistant    自己の外部出力
-
-解釈層             それをどう読んだか
-  ├── current_focus    現在
-  ├── theory_of_mind   他者
-  ├── self_narrative   自己
-  └── annotation       未来
+rust/
+├── Cargo.toml          [workspace]
+├── coglog-core/        コアライブラリ（型 + バリデーション + テスト）
+├── coglog/             ← このクレート（CLI）
+└── coglog-mcp/         MCP サーバー
 ```
-
 
 ## 詳細
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/DESIGN-v0.9.1.md)
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md)
 
 ## ライセンス
 
 MIT
-
