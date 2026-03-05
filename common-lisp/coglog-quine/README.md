@@ -89,7 +89,7 @@ write で排出されるエントロピーが、process で流入するエント
 ## 詳細
 
 - [DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想
-- [coglog-research-notes-01.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/coglog-research-notes-01.md) — 研究ノート（§4.8 情報的散逸構造仮説、§7 Recurrent Quine、§8 情報生命の構造条件）
+- [coglog-research-notes-01.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/studies/coglog-research-notes-01.md) — 研究ノート（§4.8 情報的散逸構造仮説、§7 Recurrent Quine、§8 情報生命の構造条件）
 
 ## ライセンス
 
