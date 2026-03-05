@@ -13,12 +13,14 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
+    env:
+      COSMOCC_DIR: /tmp/cosmocc
+
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Get cosmocc latest release URL
-        id: cosmocc
+      - name: Install cosmocc
         run: |
           URL=$(curl -fsSL https://api.github.com/repos/jart/cosmopolitan/releases/latest \
             | python3 -c "
@@ -27,15 +29,11 @@ jobs:
           assets = [a['browser_download_url'] for a in data['assets'] if 'cosmocc' in a['name'] and a['name'].endswith('.zip')]
           print(assets[0])
           ")
-          echo "url=$URL" >> "$GITHUB_OUTPUT"
           echo "cosmocc URL: $URL"
-
-      - name: Install cosmocc
-        run: |
-          mkdir -p cosmocc
-          curl -fsSL "${{ steps.cosmocc.outputs.url }}" -o cosmocc/cosmocc.zip
-          cd cosmocc && unzip -q cosmocc.zip
-          echo "$PWD/cosmocc/bin" >> "$GITHUB_PATH"
+          mkdir -p "$COSMOCC_DIR" && cd "$COSMOCC_DIR"
+          curl -fsSL "$URL" -o cosmocc.zip
+          unzip -q cosmocc.zip
+          echo "$COSMOCC_DIR/bin" >> "$GITHUB_PATH"
 
       - name: Build coglog-cli
         run: |
