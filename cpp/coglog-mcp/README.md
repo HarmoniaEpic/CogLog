@@ -18,7 +18,7 @@ g++ -std=c++17 -Os -o coglog-mcp coglog-mcp.cpp
 ### Cosmopolitan Libc（ユニバーサルバイナリ）
 
 ```bash
-./cosmocc/bin/cosmocc -std=c++17 -Os -o coglog-mcp coglog-mcp.cpp
+./cosmocc/bin/cosmoc++ -std=c++17 -Os -o coglog-mcp coglog-mcp.cpp
 ```
 
 cosmocc のセットアップは [coglog-cli の README](../coglog/) を参照。APE 形式のバイナリが Linux, macOS, Windows, FreeBSD, OpenBSD, NetBSD で動作する。
@@ -89,7 +89,7 @@ CLI 版（[coglog-cli](../coglog/)）と json::Value および metalog:: を意�
 
 ## 詳細
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md)
 
 ## ライセンス
 
