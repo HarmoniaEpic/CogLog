@@ -42,8 +42,7 @@ cd ..
 ### 極小バイナリ
 
 ```bash
-./cosmocc/bin/cosmoc++ -std=c++17 -Os -mtiny \
-  -o coglog-cli coglog-cli.cpp
+./cosmocc/bin/cosmoc++ -std=c++17 -Os -mtiny -o coglog-cli coglog-cli.cpp
 ```
 
 ## 使い方
