@@ -28,7 +28,7 @@ sbcl --script recurrent-quine.lisp clear
 Q_n = (\text{*state*},\ \text{*advance-source*},\ \text{*affordance*},\ \text{*self-source*})
 ```
 
- 
+<br>
 
 | 成分 | 役割 | 変異頻度 |
 |---|---|---|
