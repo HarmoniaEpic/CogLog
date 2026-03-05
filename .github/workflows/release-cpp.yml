@@ -37,12 +37,12 @@ jobs:
 
       - name: Build coglog-cli
         run: |
-          cosmocc -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
+          cosmoc++ -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
             -o coglog-cli cpp/coglog/coglog-cli.cpp
 
       - name: Build coglog-mcp
         run: |
-          cosmocc -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
+          cosmoc++ -std=c++17 -Os -mtiny -fno-exceptions -fno-rtti \
             -o coglog-mcp cpp/coglog-mcp/coglog-mcp.cpp
 
       - name: Package
