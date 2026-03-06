@@ -20,12 +20,24 @@ jobs:
       - name: Package
         run: |
           VERSION="${GITHUB_REF_NAME:-dev}"
-          # coglog-skill/coglog/ という二重構造を zip 内に保持する
-          zip -r "coglog-skill-${VERSION}.zip" coglog-skill/
-          echo "ASSET=coglog-skill-${VERSION}.zip" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release and upload asset
+          # coglog-skill: coglog-skill/coglog/ → zip 内に coglog-skill/coglog/ を保持
+          mkdir -p _pkg/coglog-skill
+          cp -r coglog-skill/coglog _pkg/coglog-skill/
+          (cd _pkg && zip -r "../coglog-skill-${VERSION}.zip" coglog-skill/)
+
+          # coglog-viz-skill: coglog-skill/coglog-viz/ → zip 内に coglog-viz-skill/coglog-viz/ を保持
+          mkdir -p _pkg-viz/coglog-viz-skill
+          cp -r coglog-skill/coglog-viz _pkg-viz/coglog-viz-skill/
+          (cd _pkg-viz && zip -r "../coglog-viz-skill-${VERSION}.zip" coglog-viz-skill/)
+
+          echo "ASSET_COGLOG=coglog-skill-${VERSION}.zip" >> "$GITHUB_ENV"
+          echo "ASSET_VIZ=coglog-viz-skill-${VERSION}.zip" >> "$GITHUB_ENV"
+
+      - name: Create GitHub Release and upload assets
         uses: softprops/action-gh-release@v2
         with:
-          files: ${{ env.ASSET }}
+          files: |
+            ${{ env.ASSET_COGLOG }}
+            ${{ env.ASSET_VIZ }}
           generate_release_notes: true
