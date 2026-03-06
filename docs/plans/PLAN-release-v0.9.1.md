@@ -83,9 +83,9 @@ Quicklisp リカレントクワイン版: `(ql:quickload :coglog-quine)`
 
 | コマンド | 動作 |
 |---|---|
-| `coglog-cli read` | 直前ターンのメタログを読み出し |
+| `coglog-cli read` | 直前ターンのコグログを読み出し |
 | `coglog-cli write` | stdin から JSON を読んで書き込み |
-| `coglog-cli clear` | メタログをリセット |
+| `coglog-cli clear` | コグログをリセット |
 | `coglog-mcp` | MCP サーバーを起動（stdio） |
 
 ---
