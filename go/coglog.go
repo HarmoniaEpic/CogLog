@@ -174,7 +174,7 @@ type CogLog struct {
 }
 
 // defaultCoglogDir returns the default data directory.
-// 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+// Priority: COGLOG_DIR env > $HOME/.coglog > ./.coglog (final fallback)
 func defaultCoglogDir() string {
 	if d := os.Getenv("COGLOG_DIR"); d != "" {
 		return d
