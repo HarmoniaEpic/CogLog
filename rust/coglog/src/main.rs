@@ -38,7 +38,7 @@ fn print_usage() {
 fn run() -> Result<(), Error> {
     let mut args: Vec<String> = std::env::args().collect();
 
-    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
     let ml = if args.len() >= 3 && args[1] == "--coglog-dir" {
         let dir = PathBuf::from(&args[2]);
         args.remove(1);
