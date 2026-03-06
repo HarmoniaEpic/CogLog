@@ -68,9 +68,25 @@ Confirmed or expected Japanese comment presence, by language:
 | `cpp/coglog-mcp/coglog-mcp.cpp` | Original implementation |
 | `bash/coglog/coglog-cli.sh` | Original implementation |
 
-### Priority 3 — New implementations (Phase C of PLAN-release-v0.9.1)
+### Priority 3 — New implementations (confirmed Japanese comments)
 
-Go, Ruby, Java, C# are new files. Comments should be written in English from the start; this plan applies retroactively only if drafts contain Japanese.
+Go, Ruby, Java, C# were expected to have English-only comments, but audit confirmed that all four contain Japanese comments copied from existing implementations. The pattern is uniform: priority-resolution comments and `--coglog-dir` parsing comments.
+
+| File | Comment volume | Japanese comment pattern |
+|---|---|---|
+| `go/coglog.go` | Low (1 line) | `// 優先順位: COGLOG_DIR env > ...（最終フォールバック）` |
+| `go/cmd/coglog-cli/main.go` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
+| `go/cmd/coglog-mcp/main.go` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
+| `ruby/coglog/lib/coglog.rb` | Low (1 line) | `# --coglog-dir <path> の解析（優先順位: ...）` |
+| `ruby/coglog-mcp/lib/coglog_mcp.rb` | Low (1 line) | `# --coglog-dir <path> の解析（優先順位: ...）` |
+| `java/coglog/.../CogLog.java` | Low (1 line) | `// 優先順位: COGLOG_DIR env > ...（最終フォールバック）` |
+| `java/coglog/.../Main.java` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
+| `java/coglog-mcp/.../CogLog.java` | Low (1 line) | `// 優先順位: COGLOG_DIR env > ...（最終フォールバック）` |
+| `java/coglog-mcp/.../McpServer.java` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
+| `csharp/coglog/CogLog.cs` | Low (1 line) | `// 優先順位: COGLOG_DIR env > ...（最終フォールバック）` |
+| `csharp/coglog/Program.cs` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
+| `csharp/coglog-mcp/CogLog.cs` | Low (1 line) | `// 優先順位: COGLOG_DIR env > ...（最終フォールバック）` |
+| `csharp/coglog-mcp/Program.cs` | Low (1 line) | `// --coglog-dir <path> の解析（優先順位: ...）` |
 
 ---
 
@@ -98,24 +114,37 @@ Run `grep -rn '[^\x00-\x7F]' <file>` on each source file to enumerate all non-AS
 Files to audit in order:
 
 ```
-1. rust/coglog-core/src/lib.rs
-2. rust/coglog/src/main.rs
-3. rust/coglog-mcp/src/main.rs
-4. python/coglog/src/coglog/__init__.py
-5. python/coglog-mcp/src/coglog_mcp/__init__.py
-6. node/coglog/index.mjs
-7. node/coglog-mcp/index.mjs
-8. cpp/coglog/coglog-cli.cpp
-9. cpp/coglog-mcp/coglog-mcp.cpp
+1.  rust/coglog-core/src/lib.rs
+2.  rust/coglog/src/main.rs
+3.  rust/coglog-mcp/src/main.rs
+4.  python/coglog/src/coglog/__init__.py
+5.  python/coglog-mcp/src/coglog_mcp/__init__.py
+6.  node/coglog/index.mjs
+7.  node/coglog-mcp/index.mjs
+8.  cpp/coglog/coglog-cli.cpp
+9.  cpp/coglog-mcp/coglog-mcp.cpp
 10. bash/coglog/coglog-cli.sh
-11. haskell/coglog/Adapter.hs
-12. haskell/coglog/CogLog.lhs          ← Literate Haskell
-13. haskell/coglog-mcp/McpServer.hs
-14. haskell/coglog-mcp/CogLog.lhs      ← Literate Haskell (copy)
-15. common-lisp/coglog/coglog.lisp
-16. common-lisp/coglog/adapter.lisp
-17. common-lisp/coglog-mcp/mcp-server.lisp
-18. common-lisp/coglog-quine/recurrent-quine.lisp
+11. go/coglog.go
+12. go/cmd/coglog-cli/main.go
+13. go/cmd/coglog-mcp/main.go
+14. ruby/coglog/lib/coglog.rb
+15. ruby/coglog-mcp/lib/coglog_mcp.rb
+16. java/coglog/src/main/java/.../CogLog.java
+17. java/coglog/src/main/java/.../Main.java
+18. java/coglog-mcp/src/main/java/.../CogLog.java
+19. java/coglog-mcp/src/main/java/.../McpServer.java
+20. csharp/coglog/CogLog.cs
+21. csharp/coglog/Program.cs
+22. csharp/coglog-mcp/CogLog.cs
+23. csharp/coglog-mcp/Program.cs
+24. haskell/coglog/Adapter.hs
+25. haskell/coglog/CogLog.lhs          ← Literate Haskell
+26. haskell/coglog-mcp/McpServer.hs
+27. haskell/coglog-mcp/CogLog.lhs      ← Literate Haskell (copy)
+28. common-lisp/coglog/coglog.lisp
+29. common-lisp/coglog/adapter.lisp
+30. common-lisp/coglog-mcp/mcp-server.lisp
+31. common-lisp/coglog-quine/recurrent-quine.lisp
 ```
 
 ### Pass 2: Translation
@@ -123,14 +152,18 @@ Files to audit in order:
 Edit files in the same order as Pass 1. Commit per language group to keep diffs reviewable:
 
 ```
-commit 1: rust/ (all three files)
-commit 2: python/ (both files)
-commit 3: node/ (both files)
-commit 4: cpp/ (both files)
-commit 5: bash/
-commit 6: haskell/Adapter.hs + McpServer.hs
-commit 7: haskell/CogLog.lhs (both copies) ← Literate Haskell, larger change
-commit 8: common-lisp/ (all four files)
+commit 1:  rust/ (all three files)
+commit 2:  python/ (both files)
+commit 3:  node/ (both files)
+commit 4:  cpp/ (both files)
+commit 5:  bash/
+commit 6:  go/ (coglog.go, cmd/coglog-cli/main.go, cmd/coglog-mcp/main.go)
+commit 7:  ruby/ (coglog.rb, coglog_mcp.rb)
+commit 8:  java/ (CogLog.java x2, Main.java, McpServer.java)
+commit 9:  csharp/ (CogLog.cs x2, Program.cs x2)
+commit 10: haskell/Adapter.hs + McpServer.hs
+commit 11: haskell/CogLog.lhs (both copies) ← Literate Haskell, larger change
+commit 12: common-lisp/ (all four files)
 ```
 
 ---
@@ -195,7 +228,7 @@ After each commit, confirm no Japanese remains in the edited files:
 grep -Pn '[^\x00-\x7F]' <file>
 ```
 
-Expected output: empty (no matches).
+Remaining non-ASCII hits are acceptable if they are only box-drawing characters (`═══`) or em dashes (`—`) used in section separators and English CLI help text. Only Japanese text (CJK Unified Ideographs, Hiragana, Katakana) should be absent.
 
 Additionally, after the Haskell and Common Lisp commits, verify that the packages still build:
 
