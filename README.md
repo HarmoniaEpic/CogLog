@@ -61,14 +61,14 @@ coglog-cli clear
 ```json
 {
   "mcpServers": {
-    "metalog": {
+    "coglog": {
       "command": "coglog-mcp"
     }
   }
 }
 ```
 
-3ツール: `metalog_read`, `metalog_write`, `metalog_clear`
+3ツール: `coglog_read`, `coglog_write`, `coglog_clear`
 
 ## 言語一覧
 

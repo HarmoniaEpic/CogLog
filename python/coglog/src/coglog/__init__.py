@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-MetaLog v0.9.1 — Minimal cognitive continuity for LLMs.
+CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
 
 A single-window (size 1) log that holds the previous turn's three-layer
 structure (user utterance, thinking process, assistant output) plus a
@@ -12,13 +12,13 @@ Each entry includes a _schema field that makes the data self-documenting:
 the JSON file itself describes how to read and write it.
 
 Usage as CLI:
-    python3 metalog-v0.9.1.py read
-    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python3 metalog-v0.9.1.py write
-    python3 metalog-v0.9.1.py clear
+    python3 coglog-v0.9.1.py read
+    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python3 coglog-v0.9.1.py write
+    python3 coglog-v0.9.1.py clear
 
 Usage as module:
-    from metalog import MetaLog
-    ml = MetaLog(data_dir=coglog_dir)
+    from coglog import CogLog
+    ml = CogLog(data_dir=coglog_dir)
     ml.write(user=..., thinking=..., assistant=..., current_focus=..., theory_of_mind=..., self_narrative=..., annotation=...)
     prev = ml.read()
     ml.clear()
@@ -54,8 +54,8 @@ SCHEMA = {
 }
 
 
-class MetaLog:
-    """Single-window metalog: records one turn, overwrites on next write.
+class CogLog:
+    """Single-window coglog: records one turn, overwrites on next write.
 
     Data structure:
         _schema:                 Self-documenting schema (auto-generated).
@@ -83,7 +83,7 @@ class MetaLog:
 
 
     def read(self):
-        """Read the previous turn's metalog. Returns dict or None."""
+        """Read the previous turn's coglog. Returns dict or None."""
         try:
             with open(self.current_file, "r", encoding="utf-8") as f:
                 return json.load(f)
@@ -91,7 +91,7 @@ class MetaLog:
             return None
 
     def write(self, *, user, thinking, assistant, current_focus, theory_of_mind, self_narrative, annotation):
-        """Write the current turn's metalog, overwriting the previous one.
+        """Write the current turn's coglog, overwriting the previous one.
 
         All parameters are keyword-only.
 
@@ -147,12 +147,12 @@ class MetaLog:
 
 
     def clear(self):
-        """Clear the metalog. Returns dict with 'cleared' key."""
+        """Clear the coglog. Returns dict with 'cleared' key."""
         try:
             os.remove(self.current_file)
             return {"cleared": True}
         except FileNotFoundError:
-            return {"cleared": False, "reason": "no existing metalog"}
+            return {"cleared": False, "reason": "no existing coglog"}
 
 
 # ── CLI ──────────────────────────────────────────────────────────
@@ -164,12 +164,12 @@ def main():
         coglog_dir = args[1]
         args = args[2:]
     command = args[0] if args else None
-    ml = MetaLog(data_dir=coglog_dir)
+    ml = CogLog(data_dir=coglog_dir)
 
     if command == "read":
         entry = ml.read()
         if entry is None:
-            print("(no metalog found)")
+            print("(no coglog found)")
         else:
             print(json.dumps(entry, ensure_ascii=False, indent=2))
 
@@ -185,24 +185,24 @@ def main():
                 self_narrative=data.get("self_narrative"),
                 annotation=data.get("annotation"),
             )
-            print(f"metalog: turn {entry['turn_id']} written")
+            print(f"coglog: turn {entry['turn_id']} written")
         except (ValueError, TypeError) as e:
-            print(f"metalog error: {e}", file=sys.stderr)
+            print(f"coglog error: {e}", file=sys.stderr)
             sys.exit(1)
 
     elif command == "clear":
         result = ml.clear()
         if result["cleared"]:
-            print("metalog: cleared")
+            print("coglog: cleared")
         else:
-            print(f"metalog: {result['reason']}")
+            print(f"coglog: {result['reason']}")
 
     else:
-        print("""usage: metalog-v0.9.1.py <read|write|clear>
+        print("""usage: coglog-v0.9.1.py <read|write|clear>
 
-  read    — display the previous turn's metalog
+  read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)
-  clear   — reset metalog
+  clear   — reset coglog
 
 write expects JSON on stdin (all fields required):
   {

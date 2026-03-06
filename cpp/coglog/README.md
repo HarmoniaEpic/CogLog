@@ -78,11 +78,11 @@ echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","th
 ```
 coglog-cli.cpp
 ├── json::Value          ミニ JSON ライブラリ（再帰下降パーサー + シリアライザー）
-├── metalog::            CogLog コア（read / write / clear）
+├── coglog::            CogLog コア（read / write / clear）
 └── main()               CLI ディスパッチ
 ```
 
-JSON ライブラリを内蔵し、外部依存ゼロを実現する。MCP サーバー版（[coglog-mcp](../coglog-mcp/)）とは json::Value および metalog:: を意図的に複製しており、各ファイルが単体で完結するシングルファイル原則を優先している。
+JSON ライブラリを内蔵し、外部依存ゼロを実現する。MCP サーバー版（[coglog-mcp](../coglog-mcp/)）とは json::Value および coglog:: を意図的に複製しており、各ファイルが単体で完結するシングルファイル原則を優先している。
 
 ## 詳細
 

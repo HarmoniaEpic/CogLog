@@ -167,7 +167,7 @@ func Advance(prev *Entry, args WriteArgs, now time.Time) Entry {
 // CogLog — file I/O layer
 // ═══════════════════════════════════════════════════════════════════
 
-// CogLog manages a single-window metalog stored as current.json.
+// CogLog manages a single-window coglog stored as current.json.
 type CogLog struct {
 	DataDir     string
 	CurrentFile string
@@ -247,7 +247,7 @@ func (c *CogLog) Write(args WriteArgs) (*Entry, error) {
 func (c *CogLog) Clear() ClearResult {
 	if err := os.Remove(c.CurrentFile); err != nil {
 		if os.IsNotExist(err) {
-			return ClearResult{Cleared: false, Reason: "no existing metalog"}
+			return ClearResult{Cleared: false, Reason: "no existing coglog"}
 		}
 		return ClearResult{Cleared: false, Reason: err.Error()}
 	}

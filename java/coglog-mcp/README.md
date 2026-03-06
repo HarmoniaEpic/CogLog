@@ -17,7 +17,7 @@ mvn dependency:get -Dartifact=io.github.harmoniaepic:coglog-mcp:0.9.1
 ```json
 {
   "mcpServers": {
-    "metalog": {
+    "coglog": {
       "command": "java",
       "args": ["-jar", "/path/to/coglog-mcp-0.9.1.jar"]
     }
@@ -31,9 +31,9 @@ JSON-RPC 2.0 over stdio (MCP 2024-11-05)。
 
 | ツール | 説明 |
 |--------|------|
-| `metalog_read` | 直前ターンのメタログを読み出す |
-| `metalog_write` | 現ターンのメタログを書き込む |
-| `metalog_clear` | メタログをリセットする |
+| `coglog_read` | 直前ターンのメタログを読み出す |
+| `coglog_write` | 現ターンのメタログを書き込む |
+| `coglog_clear` | メタログをリセットする |
 
 ## データ形式
 

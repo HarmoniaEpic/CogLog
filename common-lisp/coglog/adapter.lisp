@@ -250,7 +250,7 @@
 ;;;; ファイル I/O
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-(defun read-metalog ()
+(defun read-coglog ()
   "current.json を読み出し、alist として返す。ファイルがなければ NIL。"
   (when (probe-file *current-file*)
     (let ((content (with-open-file (in *current-file*
@@ -261,12 +261,12 @@
                        buf))))
       (parse-json content))))
 
-(defun write-metalog (args-plist)
+(defun write-coglog (args-plist)
   "ARGS-PLIST（plist）をバリデーションし、current.json に書き込む。
    書き込まれたエントリ（alist）を返す。"
   (validate-args args-plist)
   (ensure-directories-exist *current-file*)
-  (let* ((prev (read-metalog))
+  (let* ((prev (read-coglog))
          (timestamp (utc-timestamp))
          (entry (advance prev args-plist timestamp))
          (json (entry-to-json entry)))
@@ -277,7 +277,7 @@
       (write-string json out))
     entry))
 
-(defun clear-metalog ()
+(defun clear-coglog ()
   "current.json を削除する。結果を alist で返す。"
   (cond
     ((probe-file *current-file*)
@@ -285,7 +285,7 @@
      '((:cleared . t)))
     (t
      '((:cleared . nil)
-       (:reason . "no existing metalog")))))
+       (:reason . "no existing coglog")))))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
@@ -309,9 +309,9 @@
 
 (defun usage ()
   (format t "usage: coglog <read|write|clear>~%~%")
-  (format t "  read    — display the previous turn's metalog~%")
+  (format t "  read    — display the previous turn's coglog~%")
   (format t "  write   — save current turn (reads JSON from stdin)~%")
-  (format t "  clear   — reset metalog~%"))
+  (format t "  clear   — reset coglog~%"))
 
 (defun main ()
   (let* ((all-args #+sbcl sb-ext:*posix-argv*
@@ -329,30 +329,30 @@
           (handler-case
               (cond
                 ((string= cmd "read")
-                 (let ((entry (read-metalog)))
+                 (let ((entry (read-coglog)))
                    (if entry
                        (format t "~a" (entry-to-json entry))
-                       (format t "(no metalog found)~%"))))
+                       (format t "(no coglog found)~%"))))
                 ((string= cmd "write")
                  (let* ((input (read-stdin))
                         (plist (json-to-args-plist input))
-                        (entry (write-metalog plist)))
-                   (format t "metalog: turn ~d written~%"
+                        (entry (write-coglog plist)))
+                   (format t "coglog: turn ~d written~%"
                            (cdr (assoc :turn-id entry)))))
                 ((string= cmd "clear")
-                 (let ((result (clear-metalog)))
+                 (let ((result (clear-coglog)))
                    (if (cdr (assoc :cleared result))
-                       (format t "metalog: cleared~%")
-                       (format t "metalog: ~a~%"
+                       (format t "coglog: cleared~%")
+                       (format t "coglog: ~a~%"
                                (cdr (assoc :reason result))))))
                 (t
                  (usage)
                  (sb-ext:exit :code 1)))
             (validation-error (e)
-              (format *error-output* "metalog error: ~a~%" e)
+              (format *error-output* "coglog error: ~a~%" e)
               (sb-ext:exit :code 1))
             (error (e)
-              (format *error-output* "metalog error: ~a~%" e)
+              (format *error-output* "coglog error: ~a~%" e)
               (sb-ext:exit :code 1)))))))
 
 (main)

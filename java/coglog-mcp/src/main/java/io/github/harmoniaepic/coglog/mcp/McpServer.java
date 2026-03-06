@@ -34,7 +34,7 @@ public class McpServer {
     }
 
     private static void log(String msg) {
-        System.err.println("metalog-mcp: " + msg);
+        System.err.println("coglog-mcp: " + msg);
         System.err.flush();
     }
 
@@ -45,9 +45,9 @@ public class McpServer {
     }
 
     private static final String TOOLS_JSON = "["
-        + "{\"name\":\"metalog_read\",\"description\":\"Read the previous turn's metalog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
-        + "{\"name\":\"metalog_write\",\"description\":\"Write the current turn's metalog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\"},\"thinking\":{\"type\":\"string\"},\"assistant\":{\"type\":\"string\"},\"current_focus\":{\"type\":\"string\"},\"theory_of_mind\":{\"type\":\"string\"},\"self_narrative\":{\"type\":\"string\"},\"annotation\":{\"type\":\"string\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}},"
-        + "{\"name\":\"metalog_clear\",\"description\":\"Clear the metalog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
+        + "{\"name\":\"coglog_read\",\"description\":\"Read the previous turn's coglog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},"
+        + "{\"name\":\"coglog_write\",\"description\":\"Write the current turn's coglog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\"},\"thinking\":{\"type\":\"string\"},\"assistant\":{\"type\":\"string\"},\"current_focus\":{\"type\":\"string\"},\"theory_of_mind\":{\"type\":\"string\"},\"self_narrative\":{\"type\":\"string\"},\"annotation\":{\"type\":\"string\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}},"
+        + "{\"name\":\"coglog_clear\",\"description\":\"Clear the coglog.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
         + "]";
 
     @SuppressWarnings("unchecked")
@@ -56,11 +56,11 @@ public class McpServer {
         Map<String, Object> args = params.containsKey("arguments")
                 ? (Map<String, Object>) params.get("arguments") : Map.of();
         try {
-            if ("metalog_read".equals(name)) {
+            if ("coglog_read".equals(name)) {
                 Map<String, Object> entry = cl.read();
-                if (entry == null) sendToolResult(id, "(no metalog found)", false);
+                if (entry == null) sendToolResult(id, "(no coglog found)", false);
                 else sendToolResult(id, CogLog.toJson(entry, 0), false);
-            } else if ("metalog_write".equals(name)) {
+            } else if ("coglog_write".equals(name)) {
                 Map<String, String> wa = new LinkedHashMap<>();
                 for (String key : new String[]{"user", "thinking", "assistant",
                         "current_focus", "theory_of_mind", "self_narrative", "annotation"}) {
@@ -69,7 +69,7 @@ public class McpServer {
                 }
                 Map<String, Object> entry = cl.write(wa);
                 sendToolResult(id, CogLog.toJson(entry, 0), false);
-            } else if ("metalog_clear".equals(name)) {
+            } else if ("coglog_clear".equals(name)) {
                 Map<String, Object> result = cl.clear();
                 sendToolResult(id, CogLog.toCompactJson(result), false);
             } else {
@@ -109,7 +109,7 @@ public class McpServer {
                     continue;
                 }
                 if ("initialize".equals(method)) {
-                    sendResult(id, "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"metalog\",\"version\":\"0.9.1\"}}");
+                    sendResult(id, "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}");
                 } else if ("tools/list".equals(method)) {
                     sendResult(id, "{\"tools\":" + TOOLS_JSON + "}");
                 } else if ("tools/call".equals(method)) {

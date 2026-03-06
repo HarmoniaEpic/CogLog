@@ -263,8 +263,8 @@ defaultCoglogPath = do
       home <- getHomeDirectory
       return (home FP.</> ".coglog" FP.</> "current.json")
 
-readMetalog :: FilePath -> IO (Maybe Entry)
-readMetalog path = do
+readCoglog :: FilePath -> IO (Maybe Entry)
+readCoglog path = do
   exists <- doesFileExist path
   if not exists
     then return Nothing
@@ -277,15 +277,15 @@ readMetalog path = do
         Right e -> return (Just e)
         Left _  -> return Nothing
 
-writeMetalog :: FilePath -> Entry -> IO ()
-writeMetalog path entry = do
+writeCoglog :: FilePath -> Entry -> IO ()
+writeCoglog path entry = do
   createDirectoryIfMissing True (FP.takeDirectory path)
   withFile path WriteMode $ \h -> do
     hSetEncoding h utf8
     hPutStr h (entryToJson entry ++ "\n")
 
-clearMetalog :: FilePath -> IO Bool
-clearMetalog path = do
+clearCoglog :: FilePath -> IO Bool
+clearCoglog path = do
   exists <- doesFileExist path
   if exists
     then removeFile path >> return True
@@ -299,9 +299,9 @@ clearMetalog path = do
 toolDefinitions :: String
 toolDefinitions = "[" ++ intercalate "," [readTool, writeTool, clearTool] ++ "]"
   where
-    readTool = "{\"name\":\"metalog_read\",\"description\":\"Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
-    writeTool = "{\"name\":\"metalog_write\",\"description\":\"Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \\u2014 choosing not to write is itself a metacognitive act.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\",\"description\":\"User's original utterance (non-empty)\"},\"thinking\":{\"type\":\"string\",\"description\":\"AI's full thinking process (non-empty)\"},\"assistant\":{\"type\":\"string\",\"description\":\"AI's original output (non-empty)\"},\"current_focus\":{\"type\":\"string\",\"description\":\"Present direction: what am I working on?\"},\"theory_of_mind\":{\"type\":\"string\",\"description\":\"Other direction: what is the user's state?\"},\"self_narrative\":{\"type\":\"string\",\"description\":\"Self direction: who am I in this moment?\"},\"annotation\":{\"type\":\"string\",\"description\":\"Future direction: what should I do next?\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}}"
-    clearTool = "{\"name\":\"metalog_clear\",\"description\":\"Clear the metalog, removing the stored turn data. Returns whether the clear was successful.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
+    readTool = "{\"name\":\"coglog_read\",\"description\":\"Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
+    writeTool = "{\"name\":\"coglog_write\",\"description\":\"Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \\u2014 choosing not to write is itself a metacognitive act.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\",\"description\":\"User's original utterance (non-empty)\"},\"thinking\":{\"type\":\"string\",\"description\":\"AI's full thinking process (non-empty)\"},\"assistant\":{\"type\":\"string\",\"description\":\"AI's original output (non-empty)\"},\"current_focus\":{\"type\":\"string\",\"description\":\"Present direction: what am I working on?\"},\"theory_of_mind\":{\"type\":\"string\",\"description\":\"Other direction: what is the user's state?\"},\"self_narrative\":{\"type\":\"string\",\"description\":\"Self direction: who am I in this moment?\"},\"annotation\":{\"type\":\"string\",\"description\":\"Future direction: what should I do next?\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}}"
+    clearTool = "{\"name\":\"coglog_clear\",\"description\":\"Clear the coglog, removing the stored turn data. Returns whether the clear was successful.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}"
 
 
 -- ═══════════════════════════════════════════════════════════
@@ -331,7 +331,7 @@ sendToolResult msgId text isErr =
   in sendResult msgId result
 
 logMsg :: String -> IO ()
-logMsg msg = hPutStrLn stderr ("metalog-mcp: " ++ msg)
+logMsg msg = hPutStrLn stderr ("coglog-mcp: " ++ msg)
 
 -- Extract the raw JSON string for an "id" field (preserves type: number or string)
 extractId :: [(String, JValue)] -> String
@@ -349,7 +349,7 @@ extractId kvs = case lookup "id" kvs of
 
 handleInitialize :: String -> IO ()
 handleInitialize msgId =
-  sendResult msgId $ "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"metalog\",\"version\":\"0.9.1\"}}"
+  sendResult msgId $ "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"
 
 handleToolsList :: String -> IO ()
 handleToolsList msgId =
@@ -364,16 +364,16 @@ handleToolsCall coglogPath msgId params = do
                Just (JObject o) -> o
                _                -> []
   case name of
-    "metalog_read"  -> handleRead  coglogPath msgId
-    "metalog_write" -> handleWrite coglogPath msgId args
-    "metalog_clear" -> handleClear coglogPath msgId
+    "coglog_read"  -> handleRead  coglogPath msgId
+    "coglog_write" -> handleWrite coglogPath msgId args
+    "coglog_clear" -> handleClear coglogPath msgId
     _               -> sendToolResult msgId ("Error: unknown tool: " ++ name) True
 
 handleRead :: FilePath -> String -> IO ()
 handleRead coglogPath msgId = do
-  me <- readMetalog coglogPath
+  me <- readCoglog coglogPath
   case me of
-    Nothing -> sendToolResult msgId "(no metalog found)" False
+    Nothing -> sendToolResult msgId "(no coglog found)" False
     Just e  -> sendToolResult msgId (entryToJson e) False
 
 handleWrite :: FilePath -> String -> [(String, JValue)] -> IO ()
@@ -396,10 +396,10 @@ handleWrite coglogPath msgId args = do
     Right raw -> case validateArgs raw of
       Left (ValidationError err) -> sendToolResult msgId ("Error: " ++ err) True
       Right wargs -> do
-        prev <- readMetalog coglogPath
+        prev <- readCoglog coglogPath
         now <- getCurrentTime
         let entry = advance prev wargs now
-        writeMetalog coglogPath entry
+        writeCoglog coglogPath entry
         sendToolResult msgId (entryToJson entry) False
   where
     orEmpty k kvs = case jStr k kvs of
@@ -408,10 +408,10 @@ handleWrite coglogPath msgId args = do
 
 handleClear :: FilePath -> String -> IO ()
 handleClear coglogPath msgId = do
-  had <- clearMetalog coglogPath
+  had <- clearCoglog coglogPath
   if had
     then sendToolResult msgId (clearResultToJson True "") False
-    else sendToolResult msgId (clearResultToJson False "no existing metalog") False
+    else sendToolResult msgId (clearResultToJson False "no existing coglog") False
 
 handlePing :: String -> IO ()
 handlePing msgId = sendResult msgId "{}"
