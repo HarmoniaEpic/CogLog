@@ -25,7 +25,7 @@ namespace CogLogNS
 
         private static string DefaultCoglogDir()
         {
-            // 優先順位: COGLOG_DIR env > UserProfile/.coglog > ./.coglog（最終フォールバック）
+            // Priority: COGLOG_DIR env > UserProfile/.coglog > ./.coglog (final fallback)
             var env = Environment.GetEnvironmentVariable("COGLOG_DIR");
             if (!string.IsNullOrEmpty(env)) return env;
             return Path.Combine(
