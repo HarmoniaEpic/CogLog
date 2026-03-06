@@ -20,7 +20,7 @@ In v0.9.1, the `_schema` field was introduced, making current.json self-descript
 
 ```
 原型（なぜ）      DESIGN-v0.9.1.md
-Why                    │
+Why                   │
          ┌────────────┼────────────┼────────────┐
          ▼            ▼            ▼            ▼
 分析（何が）    Common Lisp      Haskell         Bash
