@@ -2,17 +2,19 @@
 
 AIの直前ターンの三層構造を保持し次ターンで参照可能にする仕組み。
 
-## インストール
+A mechanism that retains the three-layer structure of the AI's previous turn and makes it available for reference in the next turn.
+
+## インストール / Installation
 
 ```bash
 npm install -g coglog
 ```
 
-## 必要環境
+## 必要環境 / Requirements
 
 - Node.js 18+
 
-## 使い方
+## 使い方 / Usage
 
 ```bash
 coglog-cli read
@@ -24,7 +26,9 @@ coglog-cli clear
 
 型定義 `index.d.mts` 同梱。`CogLog`, `Entry`, `Schema` 等の型が利用可能。
 
-## データ形式
+Type definitions bundled in `index.d.mts`. Types such as `CogLog`, `Entry`, and `Schema` are available.
+
+## データ形式 / Data Format
 
 ```json
 {
@@ -56,27 +60,25 @@ coglog-cli clear
 }
 ```
 
-## 構造
+## 構造 / Structure
 
 ```
-事実層（layers）   何があったか
-  ├── user         他者の入力
-  ├── thinking     自己の内部
-  └── assistant    自己の外部出力
+事実層（layers）   何があったか / What happened
+  ├── user         他者の入力 / Other's input
+  ├── thinking     自己の内部 / Self's internal
+  └── assistant    自己の外部出力 / Self's external output
 
-解釈層             それをどう読んだか
-  ├── current_focus    現在
-  ├── theory_of_mind   他者
-  ├── self_narrative   自己
-  └── annotation       未来
+解釈層             それをどう読んだか / How it was interpreted
+  ├── current_focus    現在 / Present
+  ├── theory_of_mind   他者 / Other
+  ├── self_narrative   自己 / Self
+  └── annotation       未来 / Future
 ```
 
+## 詳細 / Details
 
-## 詳細
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献 / Design philosophy and references
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md) — 設計思想・背景文献
-
-## ライセンス
+## ライセンス / License
 
 MIT
-
