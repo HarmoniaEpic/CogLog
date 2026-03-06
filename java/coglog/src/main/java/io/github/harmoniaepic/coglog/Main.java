@@ -41,7 +41,7 @@ public class Main {
 
     public static void main(String[] args) {
         try {
-            // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+            // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
             int argOffset = 0;
             CogLog cl;
             if (args.length >= 2 && args[0].equals("--coglog-dir")) {
