@@ -1,6 +1,6 @@
 # CogLog MCP Server v0.9.1 (Java)
 
-CogLog の MCP サーバー。AI エージェントが MCP 経由でメタログを読み書きできる。
+CogLog の MCP サーバー。AI エージェントが MCP 経由でコグログを読み書きできる。
 
 ## インストール
 
@@ -31,9 +31,9 @@ JSON-RPC 2.0 over stdio (MCP 2024-11-05)。
 
 | ツール | 説明 |
 |--------|------|
-| `coglog_read` | 直前ターンのメタログを読み出す |
-| `coglog_write` | 現ターンのメタログを書き込む |
-| `coglog_clear` | メタログをリセットする |
+| `coglog_read` | 直前ターンのコグログを読み出す |
+| `coglog_write` | 現ターンのコグログを書き込む |
+| `coglog_clear` | コグログをリセットする |
 
 ## データ形式
 

@@ -304,7 +304,7 @@ defaultCoglogPath = do
       home <- getHomeDirectory
       return (home FP.</> ".coglog" FP.</> "current.json")
 
--- | メタログファイルを読む
+-- | コグログファイルを読む
 readCoglog :: FilePath -> IO (Maybe Entry)
 readCoglog path = do
   exists <- doesFileExist path
@@ -319,7 +319,7 @@ readCoglog path = do
         Right e -> return (Just e)
         Left _  -> return Nothing
 
--- | メタログファイルに書く
+-- | コグログファイルに書く
 writeCoglog :: FilePath -> Entry -> IO ()
 writeCoglog path entry = do
   createDirectoryIfMissing True (FP.takeDirectory path)
@@ -327,7 +327,7 @@ writeCoglog path entry = do
     hSetEncoding h utf8
     hPutStr h (entryToJson entry ++ "\n")
 
--- | メタログファイルをクリアする
+-- | コグログファイルをクリアする
 clearCoglog :: FilePath -> IO Bool
 clearCoglog path = do
   exists <- doesFileExist path

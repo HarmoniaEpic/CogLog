@@ -1,6 +1,6 @@
 # coglog v0.9.1 (Rust CLI)
 
-CogLog の CLI。直前ターンのメタログを read / write / clear する。
+CogLog の CLI。直前ターンのコグログを read / write / clear する。
 
 ## インストール
 
