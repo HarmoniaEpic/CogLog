@@ -12,7 +12,7 @@ var prettyOptions = new JsonSerializerOptions
     Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
 };
 
-// --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+// Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
 var cmdArgs = args;
 CogLog cl;
 if (cmdArgs.Length >= 2 && cmdArgs[0] == "--coglog-dir")
