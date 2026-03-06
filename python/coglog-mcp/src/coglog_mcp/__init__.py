@@ -1,10 +1,10 @@
 #!/usr/bin/env python3
 """
-MetaLog MCP Server v0.9.1
+CogLog MCP Server v0.9.1
 
-Exposes MetaLog read/write/clear as MCP tools over stdio transport.
+Exposes CogLog read/write/clear as MCP tools over stdio transport.
 Single-file, zero external dependencies. Contains a complete copy of
-the MetaLog class for standalone operation.
+the CogLog class for standalone operation.
 
 Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
 Transport: stdio (newline-delimited JSON)
@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════
-# MetaLog class (copied from metalog-v0.9.1.py)
+# CogLog class (copied from coglog-v0.9.1.py)
 # ═══════════════════════════════════════════════════════════════
 
 DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
@@ -44,7 +44,7 @@ SCHEMA = {
 }
 
 
-class MetaLog:
+class CogLog:
     def __init__(self, data_dir=None):
         self.data_dir = Path(data_dir) if data_dir else DATA_DIR
         self.current_file = self.data_dir / "current.json"
@@ -86,7 +86,7 @@ class MetaLog:
             os.remove(self.current_file)
             return {"cleared": True}
         except FileNotFoundError:
-            return {"cleared": False, "reason": "no existing metalog"}
+            return {"cleared": False, "reason": "no existing coglog"}
 
 
 # ═══════════════════════════════════════════════════════════════
@@ -95,8 +95,8 @@ class MetaLog:
 
 TOOLS = [
     {
-        "name": "metalog_read",
-        "description": "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+        "name": "coglog_read",
+        "description": "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -104,8 +104,8 @@ TOOLS = [
         },
     },
     {
-        "name": "metalog_write",
-        "description": "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
+        "name": "coglog_write",
+        "description": "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
         "inputSchema": {
             "type": "object",
             "properties": {
@@ -122,8 +122,8 @@ TOOLS = [
         },
     },
     {
-        "name": "metalog_clear",
-        "description": "Clear the metalog, removing the stored turn data. Returns whether the clear was successful.",
+        "name": "coglog_clear",
+        "description": "Clear the coglog, removing the stored turn data. Returns whether the clear was successful.",
         "inputSchema": {
             "type": "object",
             "properties": {},
@@ -160,7 +160,7 @@ def send_tool_result(msg_id, text, is_error=False):
 
 def log(msg):
     """Write to stderr (never contaminates stdout)."""
-    sys.stderr.write(f"metalog-mcp: {msg}\n")
+    sys.stderr.write(f"coglog-mcp: {msg}\n")
     sys.stderr.flush()
 
 
@@ -169,7 +169,7 @@ def log(msg):
 # ═══════════════════════════════════════════════════════════════
 
 SERVER_INFO = {
-    "name": "metalog",
+    "name": "coglog",
     "version": "0.9.1",
 }
 
@@ -190,14 +190,14 @@ def handle_tools_call(msg_id, params, ml):
     name = params.get("name")
     args = params.get("arguments", {})
 
-    if name == "metalog_read":
+    if name == "coglog_read":
         entry = ml.read()
         if entry is None:
-            send_tool_result(msg_id, "(no metalog found)")
+            send_tool_result(msg_id, "(no coglog found)")
         else:
             send_tool_result(msg_id, json.dumps(entry, ensure_ascii=False, indent=2))
 
-    elif name == "metalog_write":
+    elif name == "coglog_write":
         try:
             entry = ml.write(
                 user=args.get("user"),
@@ -212,7 +212,7 @@ def handle_tools_call(msg_id, params, ml):
         except (ValueError, TypeError) as e:
             send_tool_result(msg_id, f"Error: {e}", is_error=True)
 
-    elif name == "metalog_clear":
+    elif name == "coglog_clear":
         result = ml.clear()
         send_tool_result(msg_id, json.dumps(result, ensure_ascii=False))
 
@@ -229,7 +229,7 @@ def handle_ping(msg_id):
 # ═══════════════════════════════════════════════════════════════
 
 def main():
-    ml = MetaLog(data_dir=coglog_dir)
+    ml = CogLog(data_dir=coglog_dir)
     log("server started")
 
     for line in sys.stdin:

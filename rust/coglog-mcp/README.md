@@ -19,7 +19,7 @@ coglog-mcp
 ```json
 {
   "mcpServers": {
-    "metalog": {
+    "coglog": {
       "command": "coglog-mcp"
     }
   }
@@ -30,9 +30,9 @@ coglog-mcp
 
 | ツール名 | 説明 |
 |---|---|
-| `metalog_read` | 直前ターンのメタログを読み出す |
-| `metalog_write` | 現ターンのメタログを書き込む（前回分を上書き） |
-| `metalog_clear` | メタログをリセットする |
+| `coglog_read` | 直前ターンのメタログを読み出す |
+| `coglog_write` | 現ターンのメタログを書き込む（前回分を上書き） |
+| `coglog_clear` | メタログをリセットする |
 
 ### プロトコル
 

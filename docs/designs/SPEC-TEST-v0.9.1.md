@@ -101,7 +101,7 @@ DESIGN-v0.9.1.md および SPEC-path-resolution-v0.9.1.md から導出。実装�
 
 ## 8. clear
 
-**根拠**: 「窓サイズ1の設計意図を保全する」+ CLI の「clear — reset metalog」
+**根拠**: 「窓サイズ1の設計意図を保全する」+ CLI の「clear — reset coglog」
 
 | # | テストケース | 期待結果 |
 |---|---|---|
@@ -164,7 +164,7 @@ DESIGN-v0.9.1.md および SPEC-path-resolution-v0.9.1.md から導出。実装�
 
 | # | テストケース | 期待結果 |
 |---|---|---|
-| 11.10 | `coglog-mcp --coglog-dir /tmp/test` 起動 → metalog_write → metalog_read | /tmp/test/current.json に書き込まれる |
+| 11.10 | `coglog-mcp --coglog-dir /tmp/test` 起動 → coglog_write → coglog_read | /tmp/test/current.json に書き込まれる |
 
 ### 11d. Bash 固有
 
@@ -238,11 +238,11 @@ C++ write     → Bash read
 | # | テストケース | 期待結果 |
 |---|---|---|
 | 13.1 | initialize ハンドシェイク | protocolVersion, capabilities.tools, serverInfo を含む応答 |
-| 13.2 | tools/list | metalog_read, metalog_write, metalog_clear の3ツールが列挙される |
-| 13.3 | tools/call metalog_read（初期状態） | "(no metalog found)" |
-| 13.4 | tools/call metalog_write → metalog_read | write した内容が read で返る |
-| 13.5 | tools/call metalog_clear → metalog_read | "(no metalog found)" |
-| 13.6 | tools/call metalog_write に不正な引数 | isError: true を含む応答 |
+| 13.2 | tools/list | coglog_read, coglog_write, coglog_clear の3ツールが列挙される |
+| 13.3 | tools/call coglog_read（初期状態） | "(no coglog found)" |
+| 13.4 | tools/call coglog_write → coglog_read | write した内容が read で返る |
+| 13.5 | tools/call coglog_clear → coglog_read | "(no coglog found)" |
+| 13.6 | tools/call coglog_write に不正な引数 | isError: true を含む応答 |
 
 ---
 
@@ -252,10 +252,10 @@ C++ write     → Bash read
 
 | # | テストケース | 期待結果 |
 |---|---|---|
-| 14.1 | `coglog-cli read`（初期状態） | "(no metalog found)" を stdout に出力 |
-| 14.2 | JSON を stdin に渡して `coglog-cli write` | "metalog: turn N written" を stdout に出力 |
+| 14.1 | `coglog-cli read`（初期状態） | "(no coglog found)" を stdout に出力 |
+| 14.2 | JSON を stdin に渡して `coglog-cli write` | "coglog: turn N written" を stdout に出力 |
 | 14.3 | write 後に `coglog-cli read` | JSON が stdout に出力される |
-| 14.4 | `coglog-cli clear` | "metalog: cleared" を stdout に出力 |
+| 14.4 | `coglog-cli clear` | "coglog: cleared" を stdout に出力 |
 | 14.5 | 不正な JSON を stdin に渡して `coglog-cli write` | エラーメッセージを stderr に出力。終了コード非 0 |
 | 14.6 | 引数なしで `coglog-cli` | usage を出力 |
 

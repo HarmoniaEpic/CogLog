@@ -38,7 +38,7 @@ stdin から JSON-RPC 2.0 メッセージを受信し、stdout に応答する�
 ```json
 {
   "mcpServers": {
-    "metalog": {
+    "coglog": {
       "command": "/path/to/coglog-mcp"
     }
   }
@@ -49,9 +49,9 @@ stdin から JSON-RPC 2.0 メッセージを受信し、stdout に応答する�
 
 | ツール名 | 説明 |
 |---|---|
-| `metalog_read` | 直前ターンのメタログを読み出す |
-| `metalog_write` | 現ターンのメタログを書き込む（前回分を上書き） |
-| `metalog_clear` | メタログをリセットする |
+| `coglog_read` | 直前ターンのメタログを読み出す |
+| `coglog_write` | 現ターンのメタログを書き込む（前回分を上書き） |
+| `coglog_clear` | メタログをリセットする |
 
 ### プロトコル
 
@@ -76,7 +76,7 @@ stdin から JSON-RPC 2.0 メッセージを受信し、stdout に応答する�
 ```
 coglog-mcp.cpp
 ├── json::Value          ミニ JSON ライブラリ（再帰下降パーサー + シリアライザー）
-├── metalog::            CogLog コア（read / write / clear）
+├── coglog::            CogLog コア（read / write / clear）
 ├── mcp::                MCP プロトコル層
 │   ├── TOOLS            ツール定義（JSON-Schema）
 │   ├── send/recv        JSON-RPC 2.0 ヘルパー
@@ -85,7 +85,7 @@ coglog-mcp.cpp
 └── main()               エントリポイント
 ```
 
-CLI 版（[coglog-cli](../coglog/)）と json::Value および metalog:: を意図的に複製しており、シングルファイル原則を優先している。
+CLI 版（[coglog-cli](../coglog/)）と json::Value および coglog:: を意図的に複製しており、シングルファイル原則を優先している。
 
 ## 詳細
 

@@ -361,10 +361,10 @@ public:
 } // namespace json
 
 // ═══════════════════════════════════════════════════════════════════
-// MetaLog core
+// CogLog core
 // ═══════════════════════════════════════════════════════════════════
 
-namespace metalog {
+namespace coglog {
 
 using Json = json::Value;
 
@@ -527,12 +527,12 @@ static Json clear() {
         result.set("cleared", true);
     } else {
         result.set("cleared", false);
-        result.set("reason", "no existing metalog");
+        result.set("reason", "no existing coglog");
     }
     return result;
 }
 
-} // namespace metalog
+} // namespace coglog
 
 // ═══════════════════════════════════════════════════════════════════
 // CLI
@@ -551,9 +551,9 @@ static void print_usage() {
     std::fputs(
         "usage: coglog-cli <read|write|clear>\n"
         "\n"
-        "  read    — display the previous turn's metalog\n"
+        "  read    — display the previous turn's coglog\n"
         "  write   — save current turn (reads JSON from stdin)\n"
-        "  clear   — reset metalog\n"
+        "  clear   — reset coglog\n"
         "\n"
         "write expects JSON on stdin (all fields required):\n"
         "  {\n"
@@ -576,10 +576,10 @@ int main(int argc, char* argv[]) {
     // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
     int arg_offset = 1;
     if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
-        metalog::init_paths(argv[2]);
+        coglog::init_paths(argv[2]);
         arg_offset = 3;
     } else {
-        metalog::init_paths();
+        coglog::init_paths();
     }
 
     if (argc <= arg_offset) {
@@ -591,9 +591,9 @@ int main(int argc, char* argv[]) {
 
     try {
         if (std::strcmp(command, "read") == 0) {
-            auto entry = metalog::read();
+            auto entry = coglog::read();
             if (entry.is_null()) {
-                std::puts("(no metalog found)");
+                std::puts("(no coglog found)");
             } else {
                 std::puts(entry.dump(2).c_str());
             }
@@ -601,7 +601,7 @@ int main(int argc, char* argv[]) {
         } else if (std::strcmp(command, "write") == 0) {
             std::string input = read_stdin();
             auto data = json::Value::parse(input);
-            metalog::WriteArgs args;
+            coglog::WriteArgs args;
             args.user           = data.get_str("user");
             args.thinking       = data.get_str("thinking");
             args.assistant      = data.get_str("assistant");
@@ -609,16 +609,16 @@ int main(int argc, char* argv[]) {
             args.theory_of_mind = data.get_str("theory_of_mind");
             args.self_narrative = data.get_str("self_narrative");
             args.annotation     = data.get_str("annotation");
-            auto entry = metalog::write(args);
-            std::fprintf(stdout, "metalog: turn %d written\n",
+            auto entry = coglog::write(args);
+            std::fprintf(stdout, "coglog: turn %d written\n",
                          entry.get("turn_id").to_int());
 
         } else if (std::strcmp(command, "clear") == 0) {
-            auto result = metalog::clear();
+            auto result = coglog::clear();
             if (result.get("cleared").to_bool()) {
-                std::puts("metalog: cleared");
+                std::puts("coglog: cleared");
             } else {
-                std::fprintf(stdout, "metalog: %s\n",
+                std::fprintf(stdout, "coglog: %s\n",
                              result.get_str("reason").c_str());
             }
 
@@ -627,7 +627,7 @@ int main(int argc, char* argv[]) {
             return 1;
         }
     } catch (const std::exception& e) {
-        std::fprintf(stderr, "metalog error: %s\n", e.what());
+        std::fprintf(stderr, "coglog error: %s\n", e.what());
         return 1;
     }
 

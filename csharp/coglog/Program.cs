@@ -38,7 +38,7 @@ try
         case "read":
             var entry = cl.Read();
             if (entry == null)
-                Console.WriteLine("(no metalog found)");
+                Console.WriteLine("(no coglog found)");
             else
                 Console.WriteLine(entry.ToJsonString(prettyOptions));
             break;
@@ -53,15 +53,15 @@ try
                 writeArgs[key] = data[key]?.GetValue<string>() ?? "";
             }
             var written = cl.Write(writeArgs);
-            Console.WriteLine($"metalog: turn {written["turn_id"]} written");
+            Console.WriteLine($"coglog: turn {written["turn_id"]} written");
             break;
 
         case "clear":
             var result = cl.Clear();
             if (result["cleared"]!.GetValue<bool>())
-                Console.WriteLine("metalog: cleared");
+                Console.WriteLine("coglog: cleared");
             else
-                Console.WriteLine($"metalog: {result["reason"]}");
+                Console.WriteLine($"coglog: {result["reason"]}");
             break;
 
         default:
@@ -72,12 +72,12 @@ try
 }
 catch (ArgumentException e)
 {
-    Console.Error.WriteLine($"metalog error: {e.Message}");
+    Console.Error.WriteLine($"coglog error: {e.Message}");
     Environment.Exit(1);
 }
 catch (Exception e)
 {
-    Console.Error.WriteLine($"metalog error: {e.Message}");
+    Console.Error.WriteLine($"coglog error: {e.Message}");
     Environment.Exit(1);
 }
 
@@ -86,9 +86,9 @@ static void PrintUsage()
     Console.Write("""
         usage: coglog-cli <read|write|clear>
 
-          read    — display the previous turn's metalog
+          read    — display the previous turn's coglog
           write   — save current turn (reads JSON from stdin)
-          clear   — reset metalog
+          clear   — reset coglog
 
         write expects JSON on stdin (all fields required):
           {

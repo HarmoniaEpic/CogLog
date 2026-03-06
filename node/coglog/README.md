@@ -22,7 +22,7 @@ coglog-cli clear
 
 ## TypeScript
 
-型定義 `index.d.mts` 同梱。`MetaLog`, `Entry`, `Schema` 等の型が利用可能。
+型定義 `index.d.mts` 同梱。`CogLog`, `Entry`, `Schema` 等の型が利用可能。
 
 ## データ形式
 

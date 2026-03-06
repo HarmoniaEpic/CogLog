@@ -206,19 +206,19 @@ pub fn default_coglog_dir() -> PathBuf {
 }
 
 // ═══════════════════════════════════════════════════════════════════
-// MetaLog
+// CogLog
 // ═══════════════════════════════════════════════════════════════════
 
-pub struct MetaLog {
+pub struct CogLog {
     pub data_dir: PathBuf,
     pub current_file: PathBuf,
 }
 
-impl MetaLog {
+impl CogLog {
     pub fn new() -> Self {
         let data_dir = default_coglog_dir();
         let current_file = data_dir.join("current.json");
-        MetaLog {
+        CogLog {
             data_dir,
             current_file,
         }
@@ -226,7 +226,7 @@ impl MetaLog {
 
     pub fn with_dir(dir: PathBuf) -> Self {
         let current_file = dir.join("current.json");
-        MetaLog {
+        CogLog {
             data_dir: dir,
             current_file,
         }
@@ -280,7 +280,7 @@ impl MetaLog {
             }),
             Err(e) if e.kind() == std::io::ErrorKind::NotFound => Ok(ClearResult {
                 cleared: false,
-                reason: Some("no existing metalog".into()),
+                reason: Some("no existing coglog".into()),
             }),
             Err(e) => Err(Error::Io(e)),
         }
