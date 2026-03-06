@@ -214,7 +214,6 @@ Build failures here indicate that a translation accidentally altered code rather
 
 ## What This Plan Does Not Cover
 
-- **README.md files** — each package has a README; these are already in English per PLAN-release-v0.9.1.
+- **README.md files** — [PLAN-i18n-readme.md](docs/plans/PLAN-i18n-readme.md)'s scope.
 - **Documentation files** (`docs/`) — out of scope; separate decision required.
-- **SKILL.md** — out of scope.
-- **New language implementations** (Go, Ruby, Java, C#) — comments should be written in English from the start; no retroactive work expected.
+- **SKILL.md and CogLog for ClaudeSkills**(`coglog-skill/`) — out of scope.
