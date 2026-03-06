@@ -125,7 +125,7 @@ module CogLog
   TEXT
 
   def self.cli(args = ARGV)
-    # --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    # Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
     args = args.dup
     coglog_dir = nil
     if args[0] == '--coglog-dir' && args[1]
