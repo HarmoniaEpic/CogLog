@@ -19,9 +19,9 @@ import (
 func printUsage() {
 	fmt.Print(`usage: coglog-cli <read|write|clear>
 
-  read    — display the previous turn's metalog
+  read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)
-  clear   — reset metalog
+  clear   — reset coglog
 
 write expects JSON on stdin (all fields required):
   {
@@ -63,7 +63,7 @@ func run() error {
 			return err
 		}
 		if entry == nil {
-			fmt.Println("(no metalog found)")
+			fmt.Println("(no coglog found)")
 			return nil
 		}
 		data, err := json.MarshalIndent(entry, "", "  ")
@@ -85,14 +85,14 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		fmt.Printf("metalog: turn %d written\n", entry.TurnID)
+		fmt.Printf("coglog: turn %d written\n", entry.TurnID)
 
 	case "clear":
 		result := cl.Clear()
 		if result.Cleared {
-			fmt.Println("metalog: cleared")
+			fmt.Println("coglog: cleared")
 		} else {
-			fmt.Printf("metalog: %s\n", result.Reason)
+			fmt.Printf("coglog: %s\n", result.Reason)
 		}
 
 	default:
@@ -105,7 +105,7 @@ func run() error {
 
 func main() {
 	if err := run(); err != nil {
-		fmt.Fprintf(os.Stderr, "metalog error: %v\n", err)
+		fmt.Fprintf(os.Stderr, "coglog error: %v\n", err)
 		os.Exit(1)
 	}
 }

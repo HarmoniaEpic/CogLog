@@ -37,7 +37,7 @@ module CogLogMCP
 
   class ValidationError < StandardError; end
 
-  class MetaLog
+  class CogLog
     def initialize(data_dir: nil)
       @data_dir = data_dir || (ENV['COGLOG_DIR'] || File.join(Dir.home, '.coglog'))
       @current_file = File.join(@data_dir, 'current.json')
@@ -78,7 +78,7 @@ module CogLogMCP
         File.delete(@current_file)
         { 'cleared' => true }
       else
-        { 'cleared' => false, 'reason' => 'no existing metalog' }
+        { 'cleared' => false, 'reason' => 'no existing coglog' }
       end
     end
   end
@@ -89,13 +89,13 @@ module CogLogMCP
 
   TOOLS = [
     {
-      'name' => 'metalog_read',
-      'description' => "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+      'name' => 'coglog_read',
+      'description' => "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
       'inputSchema' => { 'type' => 'object', 'properties' => {}, 'additionalProperties' => false }
     },
     {
-      'name' => 'metalog_write',
-      'description' => "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u2014 choosing not to write is itself a metacognitive act.",
+      'name' => 'coglog_write',
+      'description' => "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u2014 choosing not to write is itself a metacognitive act.",
       'inputSchema' => {
         'type' => 'object',
         'properties' => {
@@ -112,8 +112,8 @@ module CogLogMCP
       }
     },
     {
-      'name' => 'metalog_clear',
-      'description' => 'Clear the metalog, removing the stored turn data. Returns whether the clear was successful.',
+      'name' => 'coglog_clear',
+      'description' => 'Clear the coglog, removing the stored turn data. Returns whether the clear was successful.',
       'inputSchema' => { 'type' => 'object', 'properties' => {}, 'additionalProperties' => false }
     }
   ].freeze
@@ -142,7 +142,7 @@ module CogLogMCP
   end
 
   def self.log(msg)
-    $stderr.puts("metalog-mcp: #{msg}")
+    $stderr.puts("coglog-mcp: #{msg}")
     $stderr.flush
   end
 
@@ -154,7 +154,7 @@ module CogLogMCP
     send_result(msg_id, {
       'protocolVersion' => '2024-11-05',
       'capabilities' => { 'tools' => {} },
-      'serverInfo' => { 'name' => 'metalog', 'version' => VERSION }
+      'serverInfo' => { 'name' => 'coglog', 'version' => VERSION }
     })
   end
 
@@ -167,15 +167,15 @@ module CogLogMCP
     args = params['arguments'] || {}
 
     case name
-    when 'metalog_read'
+    when 'coglog_read'
       entry = ml.read
       if entry.nil?
-        send_tool_result(msg_id, '(no metalog found)')
+        send_tool_result(msg_id, '(no coglog found)')
       else
         send_tool_result(msg_id, JSON.pretty_generate(entry))
       end
 
-    when 'metalog_write'
+    when 'coglog_write'
       begin
         entry = ml.write(
           user:          args['user'],
@@ -191,7 +191,7 @@ module CogLogMCP
         send_tool_result(msg_id, "Error: #{e.message}", is_error: true)
       end
 
-    when 'metalog_clear'
+    when 'coglog_clear'
       result = ml.clear
       send_tool_result(msg_id, JSON.generate(result))
 
@@ -216,7 +216,7 @@ module CogLogMCP
       coglog_dir = args[1]
       args.shift(2)
     end
-    ml = MetaLog.new(data_dir: coglog_dir)
+    ml = CogLog.new(data_dir: coglog_dir)
     log('server started')
 
     $stdin.each_line do |line|

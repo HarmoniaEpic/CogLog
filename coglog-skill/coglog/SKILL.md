@@ -1,6 +1,6 @@
 ---
 name: coglog
-description: "Provide cognitive continuity across conversation turns using a single-window log. Use this skill whenever maintaining context between turns matters: multi-turn creative collaboration, character roleplay, TRPG sessions, coding with iterative refinement, tutoring, or any conversation where the AI should remember what it was thinking (not just what it said) in the previous turn. Also use when the user mentions 'coglog', 'cog-log', 'metalog', 'meta-log', 'self-narrative', 'current_focus', 'turn memory', or asks the AI to reflect on its own reasoning process across turns."
+description: "Provide cognitive continuity across conversation turns using a single-window log. Use this skill whenever maintaining context between turns matters: multi-turn creative collaboration, character roleplay, TRPG sessions, coding with iterative refinement, tutoring, or any conversation where the AI should remember what it was thinking (not just what it said) in the previous turn. Also use when the user mentions 'coglog', 'cog-log', 'coglog', 'meta-log', 'self-narrative', 'current_focus', 'turn memory', or asks the AI to reflect on its own reasoning process across turns."
 ---
 
 # CogLog v0.9.1

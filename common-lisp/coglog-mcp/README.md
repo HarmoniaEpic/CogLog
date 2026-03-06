@@ -17,7 +17,7 @@ CogLog の MCP サーバー。AI エージェントが MCP 経由でメタログ
 ```json
 {
   "mcpServers": {
-    "metalog": {
+    "coglog": {
       "command": "sbcl",
       "args": ["--script", "/path/to/mcp-server.lisp"]
     }
@@ -31,9 +31,9 @@ JSON-RPC 2.0 over stdio (MCP 2024-11-05)。
 
 | ツール | 説明 |
 |--------|------|
-| `metalog_read` | 直前ターンのメタログを読み出す |
-| `metalog_write` | 現ターンのメタログを書き込む |
-| `metalog_clear` | メタログをリセットする |
+| `coglog_read` | 直前ターンのメタログを読み出す |
+| `coglog_write` | 現ターンのメタログを書き込む |
+| `coglog_clear` | メタログをリセットする |
 
 ## データ形式
 

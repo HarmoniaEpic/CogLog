@@ -305,8 +305,8 @@ defaultCoglogPath = do
       return (home FP.</> ".coglog" FP.</> "current.json")
 
 -- | メタログファイルを読む
-readMetalog :: FilePath -> IO (Maybe Entry)
-readMetalog path = do
+readCoglog :: FilePath -> IO (Maybe Entry)
+readCoglog path = do
   exists <- doesFileExist path
   if not exists
     then return Nothing
@@ -320,16 +320,16 @@ readMetalog path = do
         Left _  -> return Nothing
 
 -- | メタログファイルに書く
-writeMetalog :: FilePath -> Entry -> IO ()
-writeMetalog path entry = do
+writeCoglog :: FilePath -> Entry -> IO ()
+writeCoglog path entry = do
   createDirectoryIfMissing True (FP.takeDirectory path)
   withFile path WriteMode $ \h -> do
     hSetEncoding h utf8
     hPutStr h (entryToJson entry ++ "\n")
 
 -- | メタログファイルをクリアする
-clearMetalog :: FilePath -> IO Bool
-clearMetalog path = do
+clearCoglog :: FilePath -> IO Bool
+clearCoglog path = do
   exists <- doesFileExist path
   if exists
     then removeFile path >> return True
@@ -357,9 +357,9 @@ main = do
 
 cmdRead :: FilePath -> IO ()
 cmdRead path = do
-  me <- readMetalog path
+  me <- readCoglog path
   case me of
-    Nothing -> putStrLn "(no metalog found)"
+    Nothing -> putStrLn "(no coglog found)"
     Just e  -> putStr (entryToJson e)
 
 cmdWrite :: FilePath -> IO ()
@@ -367,23 +367,23 @@ cmdWrite path = do
   input <- getContents
   case parseStdinArgs input of
     Left err -> do
-      hPutStrLn stderr ("metalog error: parse: " ++ err)
+      hPutStrLn stderr ("coglog error: parse: " ++ err)
       fail ""
     Right raw ->
       case validateArgs raw of
         Left (ValidationError err) -> do
-          hPutStrLn stderr ("metalog error: validation: " ++ err)
+          hPutStrLn stderr ("coglog error: validation: " ++ err)
           fail ""
         Right wargs -> do
-          prev <- readMetalog path
+          prev <- readCoglog path
           now <- getCurrentTime
           let entry = advance prev wargs now
-          writeMetalog path entry
-          putStrLn ("metalog: turn " ++ show (eTurnId entry) ++ " written")
+          writeCoglog path entry
+          putStrLn ("coglog: turn " ++ show (eTurnId entry) ++ " written")
 
 cmdClear :: FilePath -> IO ()
 cmdClear path = do
-  had <- clearMetalog path
+  had <- clearCoglog path
   if had
-    then putStrLn "metalog: cleared"
-    else putStrLn "metalog: no existing metalog"
+    then putStrLn "coglog: cleared"
+    else putStrLn "coglog: no existing coglog"

@@ -39,7 +39,7 @@ module CogLog
 
   class ValidationError < StandardError; end
 
-  class MetaLog
+  class CogLog
     attr_reader :data_dir, :current_file
 
     def initialize(data_dir: nil)
@@ -94,7 +94,7 @@ module CogLog
         File.delete(@current_file)
         { 'cleared' => true }
       else
-        { 'cleared' => false, 'reason' => 'no existing metalog' }
+        { 'cleared' => false, 'reason' => 'no existing coglog' }
       end
     end
   end
@@ -104,9 +104,9 @@ module CogLog
   USAGE = <<~TEXT
     usage: coglog-cli <read|write|clear>
 
-      read    — display the previous turn's metalog
+      read    — display the previous turn's coglog
       write   — save current turn (reads JSON from stdin)
-      clear   — reset metalog
+      clear   — reset coglog
 
     write expects JSON on stdin (all fields required):
       {
@@ -132,14 +132,14 @@ module CogLog
       coglog_dir = args[1]
       args.shift(2)
     end
-    ml = MetaLog.new(data_dir: coglog_dir)
+    ml = CogLog.new(data_dir: coglog_dir)
     command = args[0]
 
     case command
     when 'read'
       entry = ml.read
       if entry.nil?
-        puts '(no metalog found)'
+        puts '(no coglog found)'
       else
         puts JSON.pretty_generate(entry)
       end
@@ -155,14 +155,14 @@ module CogLog
         self_narrative: data['self_narrative'],
         annotation:    data['annotation']
       )
-      puts "metalog: turn #{entry['turn_id']} written"
+      puts "coglog: turn #{entry['turn_id']} written"
 
     when 'clear'
       result = ml.clear
       if result['cleared']
-        puts 'metalog: cleared'
+        puts 'coglog: cleared'
       else
-        puts "metalog: #{result['reason']}"
+        puts "coglog: #{result['reason']}"
       end
 
     else
@@ -170,13 +170,13 @@ module CogLog
       exit(command ? 1 : 0)
     end
   rescue ValidationError => e
-    warn "metalog error: #{e.message}"
+    warn "coglog error: #{e.message}"
     exit 1
   rescue JSON::ParserError => e
-    warn "metalog error: invalid JSON: #{e.message}"
+    warn "coglog error: invalid JSON: #{e.message}"
     exit 1
   rescue StandardError => e
-    warn "metalog error: #{e.message}"
+    warn "coglog error: #{e.message}"
     exit 1
   end
 end

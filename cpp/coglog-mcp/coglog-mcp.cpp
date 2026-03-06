@@ -1,9 +1,9 @@
 /*
  * CogLog MCP Server v0.9.1 — Minimal cognitive continuity for LLMs (C++)
  *
- * Exposes MetaLog read/write/clear as MCP tools over stdio transport.
+ * Exposes CogLog read/write/clear as MCP tools over stdio transport.
  * Single-file, zero external dependencies. Contains a complete copy of
- * the MetaLog core and mini JSON library for standalone operation.
+ * the CogLog core and mini JSON library for standalone operation.
  *
  * Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
  * Transport: stdio (newline-delimited JSON)
@@ -351,10 +351,10 @@ public:
 } // namespace json
 
 // ═══════════════════════════════════════════════════════════════════
-// MetaLog core (shared with coglog-cli.cpp)
+// CogLog core (shared with coglog-cli.cpp)
 // ═══════════════════════════════════════════════════════════════════
 
-namespace metalog {
+namespace coglog {
 
 using Json = json::Value;
 
@@ -513,12 +513,12 @@ static Json clear() {
         result.set("cleared", true);
     } else {
         result.set("cleared", false);
-        result.set("reason", "no existing metalog");
+        result.set("reason", "no existing coglog");
     }
     return result;
 }
 
-} // namespace metalog
+} // namespace coglog
 
 // ═══════════════════════════════════════════════════════════════════
 // MCP tool definitions
@@ -575,19 +575,19 @@ static Json make_tools() {
     Json tools = Json::array();
 
     Json read_tool = Json::object();
-    read_tool.set("name", "metalog_read");
+    read_tool.set("name", "coglog_read");
     read_tool.set("description",
-        "Read the previous turn's metalog. Returns the three-layer structure "
+        "Read the previous turn's coglog. Returns the three-layer structure "
         "(user/thinking/assistant) plus four-axis interpretation layer "
         "(current_focus/theory_of_mind/self_narrative/annotation). "
-        "Returns null if no metalog exists.");
+        "Returns null if no coglog exists.");
     read_tool.set("inputSchema", make_input_schema_empty());
     tools.push(std::move(read_tool));
 
     Json write_tool = Json::object();
-    write_tool.set("name", "metalog_write");
+    write_tool.set("name", "coglog_write");
     write_tool.set("description",
-        "Write the current turn's metalog, overwriting the previous one. "
+        "Write the current turn's coglog, overwriting the previous one. "
         "Fact layer fields (user, thinking, assistant) require non-empty strings. "
         "Interpretation layer fields (current_focus, theory_of_mind, "
         "self_narrative, annotation) require strings but accept empty strings "
@@ -596,9 +596,9 @@ static Json make_tools() {
     tools.push(std::move(write_tool));
 
     Json clear_tool = Json::object();
-    clear_tool.set("name", "metalog_clear");
+    clear_tool.set("name", "coglog_clear");
     clear_tool.set("description",
-        "Clear the metalog, removing the stored turn data. "
+        "Clear the coglog, removing the stored turn data. "
         "Returns whether the clear was successful.");
     clear_tool.set("inputSchema", make_input_schema_empty());
     tools.push(std::move(clear_tool));
@@ -652,7 +652,7 @@ static void send_tool_result(const Json& msg_id, const std::string& text,
 }
 
 static void log(const std::string& msg) {
-    std::fprintf(stderr, "metalog-mcp: %s\n", msg.c_str());
+    std::fprintf(stderr, "coglog-mcp: %s\n", msg.c_str());
     std::fflush(stderr);
 }
 
@@ -660,7 +660,7 @@ static void log(const std::string& msg) {
 
 static void handle_initialize(const Json& msg_id) {
     Json server_info = Json::object();
-    server_info.set("name", "metalog");
+    server_info.set("name", "coglog");
     server_info.set("version", "0.9.1");
 
     Json caps = Json::object();
@@ -684,17 +684,17 @@ static void handle_tools_call(const Json& msg_id, const Json& params) {
     std::string name = params.get_str("name");
     auto& args = params.get("arguments");
 
-    if (name == "metalog_read") {
-        auto entry = metalog::read();
+    if (name == "coglog_read") {
+        auto entry = coglog::read();
         if (entry.is_null()) {
-            send_tool_result(msg_id, "(no metalog found)");
+            send_tool_result(msg_id, "(no coglog found)");
         } else {
             send_tool_result(msg_id, entry.dump(2));
         }
 
-    } else if (name == "metalog_write") {
+    } else if (name == "coglog_write") {
         try {
-            metalog::WriteArgs wa;
+            coglog::WriteArgs wa;
             wa.user           = args.get_str("user");
             wa.thinking       = args.get_str("thinking");
             wa.assistant      = args.get_str("assistant");
@@ -702,14 +702,14 @@ static void handle_tools_call(const Json& msg_id, const Json& params) {
             wa.theory_of_mind = args.get_str("theory_of_mind");
             wa.self_narrative = args.get_str("self_narrative");
             wa.annotation     = args.get_str("annotation");
-            auto entry = metalog::write(wa);
+            auto entry = coglog::write(wa);
             send_tool_result(msg_id, entry.dump(2));
         } catch (const std::exception& e) {
             send_tool_result(msg_id, std::string("Error: ") + e.what(), true);
         }
 
-    } else if (name == "metalog_clear") {
-        auto result = metalog::clear();
+    } else if (name == "coglog_clear") {
+        auto result = coglog::clear();
         send_tool_result(msg_id, result.dump());
 
     } else {
@@ -789,15 +789,15 @@ int main(int argc, char* argv[]) {
     (void)argc;
     // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
     if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
-        metalog::init_paths(argv[2]);
+        coglog::init_paths(argv[2]);
     } else {
-        metalog::init_paths();
+        coglog::init_paths();
     }
 
     try {
         mcp::run();
     } catch (const std::exception& e) {
-        std::fprintf(stderr, "metalog-mcp: fatal: %s\n", e.what());
+        std::fprintf(stderr, "coglog-mcp: fatal: %s\n", e.what());
         return 1;
     }
 

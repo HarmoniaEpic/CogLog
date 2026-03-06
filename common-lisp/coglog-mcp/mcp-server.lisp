@@ -255,7 +255,7 @@
 ;;;; File I/O
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-(defun mcp-read-metalog ()
+(defun mcp-read-coglog ()
   (when (probe-file *mcp-current-file*)
     (let ((content (with-open-file (in *mcp-current-file*
                                     :direction :input
@@ -265,10 +265,10 @@
                        buf))))
       (mcp-parse-json content))))
 
-(defun mcp-write-metalog (args-plist)
+(defun mcp-write-coglog (args-plist)
   (validate-args args-plist)
   (ensure-directories-exist *mcp-current-file*)
-  (let* ((prev (mcp-read-metalog))
+  (let* ((prev (mcp-read-coglog))
          (timestamp (mcp-utc-timestamp))
          (entry (advance prev args-plist timestamp))
          (json (mcp-entry-to-json entry)))
@@ -279,14 +279,14 @@
       (write-string json out))
     entry))
 
-(defun mcp-clear-metalog ()
+(defun mcp-clear-coglog ()
   (cond
     ((probe-file *mcp-current-file*)
      (delete-file *mcp-current-file*)
      '((:cleared . t)))
     (t
      '((:cleared . nil)
-       (:reason . "no existing metalog")))))
+       (:reason . "no existing coglog")))))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
@@ -313,7 +313,7 @@
               (mcp-json-escape text) err-field))))
 
 (defun mcp-log (msg)
-  (format *error-output* "metalog-mcp: ~a~%" msg)
+  (format *error-output* "coglog-mcp: ~a~%" msg)
   (force-output *error-output*))
 
 (defun format-id (id-value)
@@ -329,7 +329,7 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defvar *tool-definitions*
-  "[{\"name\":\"metalog_read\",\"description\":\"Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"metalog_write\",\"description\":\"Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \\u2014 choosing not to write is itself a metacognitive act.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\",\"description\":\"User's original utterance (non-empty)\"},\"thinking\":{\"type\":\"string\",\"description\":\"AI's full thinking process (non-empty)\"},\"assistant\":{\"type\":\"string\",\"description\":\"AI's original output (non-empty)\"},\"current_focus\":{\"type\":\"string\",\"description\":\"Present direction: what am I working on?\"},\"theory_of_mind\":{\"type\":\"string\",\"description\":\"Other direction: what is the user's state?\"},\"self_narrative\":{\"type\":\"string\",\"description\":\"Self direction: who am I in this moment?\"},\"annotation\":{\"type\":\"string\",\"description\":\"Future direction: what should I do next?\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}},{\"name\":\"metalog_clear\",\"description\":\"Clear the metalog, removing the stored turn data. Returns whether the clear was successful.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}]")
+  "[{\"name\":\"coglog_read\",\"description\":\"Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}},{\"name\":\"coglog_write\",\"description\":\"Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \\u2014 choosing not to write is itself a metacognitive act.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{\"user\":{\"type\":\"string\",\"description\":\"User's original utterance (non-empty)\"},\"thinking\":{\"type\":\"string\",\"description\":\"AI's full thinking process (non-empty)\"},\"assistant\":{\"type\":\"string\",\"description\":\"AI's original output (non-empty)\"},\"current_focus\":{\"type\":\"string\",\"description\":\"Present direction: what am I working on?\"},\"theory_of_mind\":{\"type\":\"string\",\"description\":\"Other direction: what is the user's state?\"},\"self_narrative\":{\"type\":\"string\",\"description\":\"Self direction: who am I in this moment?\"},\"annotation\":{\"type\":\"string\",\"description\":\"Future direction: what should I do next?\"}},\"required\":[\"user\",\"thinking\",\"assistant\",\"current_focus\",\"theory_of_mind\",\"self_narrative\",\"annotation\"],\"additionalProperties\":false}},{\"name\":\"coglog_clear\",\"description\":\"Clear the coglog, removing the stored turn data. Returns whether the clear was successful.\",\"inputSchema\":{\"type\":\"object\",\"properties\":{},\"additionalProperties\":false}}]")
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
@@ -338,7 +338,7 @@
 
 (defun mcp-handle-initialize (msg-id)
   (mcp-send-result msg-id
-    "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"metalog\",\"version\":\"0.9.1\"}}"))
+    "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"))
 
 (defun mcp-handle-tools-list (msg-id)
   (mcp-send-result msg-id
@@ -348,21 +348,21 @@
   (let* ((name (cdr (assoc :name params)))
          (args (cdr (assoc :arguments params))))
     (cond
-      ((string= name "metalog_read")
-       (let ((entry (mcp-read-metalog)))
+      ((string= name "coglog_read")
+       (let ((entry (mcp-read-coglog)))
          (if entry
              (mcp-send-tool-result msg-id (mcp-entry-to-json entry))
-             (mcp-send-tool-result msg-id "(no metalog found)"))))
-      ((string= name "metalog_write")
+             (mcp-send-tool-result msg-id "(no coglog found)"))))
+      ((string= name "coglog_write")
        (handler-case
            (let* ((plist (loop for (key . val) in (if (consp args) args nil)
                                collect key collect val))
-                  (entry (mcp-write-metalog plist)))
+                  (entry (mcp-write-coglog plist)))
              (mcp-send-tool-result msg-id (mcp-entry-to-json entry)))
          (error (e)
            (mcp-send-tool-result msg-id (format nil "Error: ~a" e) t))))
-      ((string= name "metalog_clear")
-       (let ((result (mcp-clear-metalog)))
+      ((string= name "coglog_clear")
+       (let ((result (mcp-clear-coglog)))
          (mcp-send-tool-result msg-id (mcp-compact-json result))))
       (t
        (mcp-send-tool-result msg-id (format nil "Error: unknown tool: ~a" name) t)))))

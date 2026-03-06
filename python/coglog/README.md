@@ -23,8 +23,8 @@ coglog-cli clear
 ## モジュールとして使用
 
 ```python
-from coglog import MetaLog
-ml = MetaLog()
+from coglog import CogLog
+ml = CogLog()
 prev = ml.read()  # dict | None
 ml.write(user='...', thinking='...', assistant='...', current_focus='...', theory_of_mind='...', self_narrative='...', annotation='...')
 ```

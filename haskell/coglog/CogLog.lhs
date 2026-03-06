@@ -19,7 +19,7 @@ Python 版や Node.js 版では、この f とファイル I/O が
 一つの write() 関数に混在している。
 Haskell では型システムがその混在を許さない。
 
-advance は Entry を構築する。writeMetalog は Entry をファイルに書く。
+advance は Entry を構築する。writeCoglog は Entry をファイルに書く。
 両者は型によって分離され、混合はコンパイルエラーになる。
 この分離は設計者の規律ではなく、型の強制である。
 
@@ -250,8 +250,8 @@ import するのは Data.Time から UTCTime 型ただ一つ。
 ファイルに何も書かない。ネットワークに何も送らない。
 
 Adapter.hs で初めて IO が登場する。
-readMetalog :: IO (Maybe Entry)
-writeMetalog :: Entry -> IO ()
+readCoglog :: IO (Maybe Entry)
+writeCoglog :: Entry -> IO ()
 
 この分離は CogLog のアーキテクチャ全体に通底する。
 Python 版の write() が advance + ファイル書き込みを兼ねているのに対し、
