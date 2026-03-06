@@ -21,15 +21,15 @@ In v0.9.1, the `_schema` field was introduced, making current.json self-descript
 ```
 原型（なぜ）      DESIGN-v0.9.1.md
 Why                    │
-         ┌────────────┼────────────┐
-         ▼            ▼            ▼
+         ┌────────────┼────────────┼────────────┐
+         ▼            ▼            ▼            ▼
 分析（何が）    Common Lisp      Haskell         Bash
 What        データ=コード    純粋/不純の分離   POSIX還元
             data=code     pure/impure sep.  POSIX reduction
             _schemaの必然性   advance/writeの分離
                       │
-  ┌────┬────┬─────────┼─────────┬────┬────┬────┐
-  ▼    ▼    ▼         ▼         ▼    ▼    ▼    ▼
+  ┌────┬────┬─────────┼─────────┬────┬────┬────┬────┐
+  ▼    ▼    ▼         ▼         ▼    ▼    ▼    ▼    ▼
 実用  Py  Node.js    C++      Rust   Go  Ruby  Java  C#
 Practical
 ```
