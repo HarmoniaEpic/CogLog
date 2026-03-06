@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 
 /**
- * MetaLog MCP Server v0.9.1
+ * CogLog MCP Server v0.9.1
  *
- * Exposes MetaLog read/write/clear as MCP tools over stdio transport.
+ * Exposes CogLog read/write/clear as MCP tools over stdio transport.
  * Single-file, zero external dependencies. Contains a complete copy of
- * the MetaLog class for standalone operation.
+ * the CogLog class for standalone operation.
  *
  * Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
  * Transport: stdio (newline-delimited JSON)
@@ -19,7 +19,7 @@ import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 
 // ═══════════════════════════════════════════════════════════════
-// MetaLog class (copied from coglog/index.mjs)
+// CogLog class (copied from coglog/index.mjs)
 // ═══════════════════════════════════════════════════════════════
 
 const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
@@ -44,7 +44,7 @@ const SCHEMA = {
   }
 };
 
-class MetaLog {
+class CogLog {
   constructor(dataDir = null) {
     this.dataDir = dataDir ?? DATA_DIR;
     this.currentFile = join(this.dataDir, 'current.json');
@@ -99,7 +99,7 @@ class MetaLog {
       await rm(this.currentFile);
       return { cleared: true };
     } catch (e) {
-      if (e.code === 'ENOENT') return { cleared: false, reason: 'no existing metalog' };
+      if (e.code === 'ENOENT') return { cleared: false, reason: 'no existing coglog' };
       throw e;
     }
   }
@@ -111,8 +111,8 @@ class MetaLog {
 
 const TOOLS = [
   {
-    name: "metalog_read",
-    description: "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+    name: "coglog_read",
+    description: "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -120,8 +120,8 @@ const TOOLS = [
     },
   },
   {
-    name: "metalog_write",
-    description: "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
+    name: "coglog_write",
+    description: "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
     inputSchema: {
       type: "object",
       properties: {
@@ -138,8 +138,8 @@ const TOOLS = [
     },
   },
   {
-    name: "metalog_clear",
-    description: "Clear the metalog, removing the stored turn data. Returns whether the clear was successful.",
+    name: "coglog_clear",
+    description: "Clear the coglog, removing the stored turn data. Returns whether the clear was successful.",
     inputSchema: {
       type: "object",
       properties: {},
@@ -171,14 +171,14 @@ function sendToolResult(msgId, text, isError = false) {
 }
 
 function log(msg) {
-  process.stderr.write(`metalog-mcp: ${msg}\n`);
+  process.stderr.write(`coglog-mcp: ${msg}\n`);
 }
 
 // ═══════════════════════════════════════════════════════════════
 // MCP handlers
 // ═══════════════════════════════════════════════════════════════
 
-const SERVER_INFO = { name: "metalog", version: "0.9.1" };
+const SERVER_INFO = { name: "coglog", version: "0.9.1" };
 
 function handleInitialize(msgId, params) {
   sendResult(msgId, {
@@ -196,15 +196,15 @@ async function handleToolsCall(msgId, params, ml) {
   const name = params?.name;
   const args = params?.arguments || {};
 
-  if (name === "metalog_read") {
+  if (name === "coglog_read") {
     const entry = await ml.read();
     if (entry === null) {
-      sendToolResult(msgId, "(no metalog found)");
+      sendToolResult(msgId, "(no coglog found)");
     } else {
       sendToolResult(msgId, JSON.stringify(entry, null, 2));
     }
 
-  } else if (name === "metalog_write") {
+  } else if (name === "coglog_write") {
     try {
       const entry = await ml.write({
         user: args.user,
@@ -220,7 +220,7 @@ async function handleToolsCall(msgId, params, ml) {
       sendToolResult(msgId, `Error: ${e.message}`, true);
     }
 
-  } else if (name === "metalog_clear") {
+  } else if (name === "coglog_clear") {
     const result = await ml.clear();
     sendToolResult(msgId, JSON.stringify(result));
 
@@ -244,7 +244,7 @@ function handlePing(msgId) {
     process.env.COGLOG_DIR = argv[1];
   }
 }
-const ml = new MetaLog(process.env.COGLOG_DIR ?? null);
+const ml = new CogLog(process.env.COGLOG_DIR ?? null);
 const rl = createInterface({ input: process.stdin, terminal: false });
 
 // Queue + drain loop to serialize async handlers.

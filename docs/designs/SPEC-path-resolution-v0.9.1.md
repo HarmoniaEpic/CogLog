@@ -73,7 +73,7 @@ write 時にデータディレクトリが存在しない場合、自動的に�
 
 | 言語 | 明示的指定 | ホームディレクトリ取得 | フォールバック |
 |---|---|---|---|
-| Rust | `--coglog-dir` / `MetaLog::with_dir()` | `std::env::var("HOME")` | `./.coglog` |
+| Rust | `--coglog-dir` / `CogLog::with_dir()` | `std::env::var("HOME")` | `./.coglog` |
 | Go | `--coglog-dir` / `NewWithDir()` | `os.UserHomeDir()` | `./.coglog` |
 | C++ | `--coglog-dir` / `init_paths()` | `$HOME` → `getpwuid()` | `./.coglog` |
 | Node.js | `--coglog-dir` / コンストラクタ | `os.homedir()` | `./.coglog` |

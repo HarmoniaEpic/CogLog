@@ -111,7 +111,7 @@ public class CogLog {
             result.put("cleared", true);
         } else {
             result.put("cleared", false);
-            result.put("reason", "no existing metalog");
+            result.put("reason", "no existing coglog");
         }
         return result;
     }

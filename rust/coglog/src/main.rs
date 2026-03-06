@@ -5,7 +5,7 @@
 //!   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
 //!   coglog-cli clear
 
-use coglog_core::{default_coglog_dir, Error, MetaLog, WriteArgs};
+use coglog_core::{default_coglog_dir, Error, CogLog, WriteArgs};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process;
@@ -14,9 +14,9 @@ fn print_usage() {
     print!(
         "usage: coglog-cli <read|write|clear>\n\
          \n\
-         \x20 read    — display the previous turn's metalog\n\
+         \x20 read    — display the previous turn's coglog\n\
          \x20 write   — save current turn (reads JSON from stdin)\n\
-         \x20 clear   — reset metalog\n\
+         \x20 clear   — reset coglog\n\
          \n\
          write expects JSON on stdin (all fields required):\n\
          \x20 {{\n\
@@ -43,9 +43,9 @@ fn run() -> Result<(), Error> {
         let dir = PathBuf::from(&args[2]);
         args.remove(1);
         args.remove(1);
-        MetaLog::with_dir(dir)
+        CogLog::with_dir(dir)
     } else {
-        MetaLog::new()
+        CogLog::new()
     };
 
     if args.len() < 2 {
@@ -61,7 +61,7 @@ fn run() -> Result<(), Error> {
                     println!("{}", json);
                 }
                 None => {
-                    println!("(no metalog found)");
+                    println!("(no coglog found)");
                 }
             }
         }
@@ -70,14 +70,14 @@ fn run() -> Result<(), Error> {
             std::io::stdin().read_to_string(&mut input)?;
             let write_args: WriteArgs = serde_json::from_str(&input)?;
             let entry = ml.write(write_args)?;
-            println!("metalog: turn {} written", entry.turn_id);
+            println!("coglog: turn {} written", entry.turn_id);
         }
         "clear" => {
             let result = ml.clear()?;
             if result.cleared {
-                println!("metalog: cleared");
+                println!("coglog: cleared");
             } else if let Some(reason) = &result.reason {
-                println!("metalog: {}", reason);
+                println!("coglog: {}", reason);
             }
         }
         _ => {
@@ -91,7 +91,7 @@ fn run() -> Result<(), Error> {
 
 fn main() {
     if let Err(e) = run() {
-        eprintln!("metalog error: {}", e);
+        eprintln!("coglog error: {}", e);
         process::exit(1);
     }
 }

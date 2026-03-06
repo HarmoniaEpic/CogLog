@@ -73,7 +73,7 @@ func sendToolResult(id *json.RawMessage, text string, isError bool) {
 }
 
 func log(msg string) {
-	fmt.Fprintf(os.Stderr, "metalog-mcp: %s\n", msg)
+	fmt.Fprintf(os.Stderr, "coglog-mcp: %s\n", msg)
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -82,8 +82,8 @@ func log(msg string) {
 
 var toolDefinitions = []map[string]interface{}{
 	{
-		"name":        "metalog_read",
-		"description": "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+		"name":        "coglog_read",
+		"description": "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
 		"inputSchema": map[string]interface{}{
 			"type":                 "object",
 			"properties":           map[string]interface{}{},
@@ -91,8 +91,8 @@ var toolDefinitions = []map[string]interface{}{
 		},
 	},
 	{
-		"name":        "metalog_write",
-		"description": "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u2014 choosing not to write is itself a metacognitive act.",
+		"name":        "coglog_write",
+		"description": "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u2014 choosing not to write is itself a metacognitive act.",
 		"inputSchema": map[string]interface{}{
 			"type": "object",
 			"properties": map[string]interface{}{
@@ -109,8 +109,8 @@ var toolDefinitions = []map[string]interface{}{
 		},
 	},
 	{
-		"name":        "metalog_clear",
-		"description": "Clear the metalog, removing the stored turn data. Returns whether the clear was successful.",
+		"name":        "coglog_clear",
+		"description": "Clear the coglog, removing the stored turn data. Returns whether the clear was successful.",
 		"inputSchema": map[string]interface{}{
 			"type":                 "object",
 			"properties":           map[string]interface{}{},
@@ -127,7 +127,7 @@ func handleInitialize(id *json.RawMessage) {
 	sendResult(id, map[string]interface{}{
 		"protocolVersion": "2024-11-05",
 		"capabilities":    map[string]interface{}{"tools": map[string]interface{}{}},
-		"serverInfo":      map[string]interface{}{"name": "metalog", "version": "0.9.1"},
+		"serverInfo":      map[string]interface{}{"name": "coglog", "version": "0.9.1"},
 	})
 }
 
@@ -143,20 +143,20 @@ func handleToolsCall(id *json.RawMessage, params json.RawMessage, cl *coglog.Cog
 	}
 
 	switch p.Name {
-	case "metalog_read":
+	case "coglog_read":
 		entry, err := cl.Read()
 		if err != nil {
 			sendToolResult(id, fmt.Sprintf("Error: %v", err), true)
 			return
 		}
 		if entry == nil {
-			sendToolResult(id, "(no metalog found)", false)
+			sendToolResult(id, "(no coglog found)", false)
 			return
 		}
 		data, _ := json.MarshalIndent(entry, "", "  ")
 		sendToolResult(id, string(data), false)
 
-	case "metalog_write":
+	case "coglog_write":
 		var args coglog.WriteArgs
 		if err := json.Unmarshal(p.Arguments, &args); err != nil {
 			sendToolResult(id, fmt.Sprintf("Error: %v", err), true)
@@ -170,7 +170,7 @@ func handleToolsCall(id *json.RawMessage, params json.RawMessage, cl *coglog.Cog
 		data, _ := json.MarshalIndent(entry, "", "  ")
 		sendToolResult(id, string(data), false)
 
-	case "metalog_clear":
+	case "coglog_clear":
 		result := cl.Clear()
 		data, _ := json.Marshal(result)
 		sendToolResult(id, string(data), false)

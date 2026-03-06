@@ -1,11 +1,11 @@
 //! CogLog MCP Server v0.9.1
 //!
-//! Exposes MetaLog read/write/clear as MCP tools over stdio transport.
+//! Exposes CogLog read/write/clear as MCP tools over stdio transport.
 //!
 //! Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
 //! Transport: stdio (newline-delimited JSON)
 
-use coglog_core::{MetaLog, WriteArgs};
+use coglog_core::{CogLog, WriteArgs};
 use serde_json::{json, Value};
 use std::io::{self, BufRead, Write};
 
@@ -16,8 +16,8 @@ use std::io::{self, BufRead, Write};
 fn tool_definitions() -> Value {
     json!([
         {
-            "name": "metalog_read",
-            "description": "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+            "name": "coglog_read",
+            "description": "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
             "inputSchema": {
                 "type": "object",
                 "properties": {},
@@ -25,8 +25,8 @@ fn tool_definitions() -> Value {
             }
         },
         {
-            "name": "metalog_write",
-            "description": "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u{2014} choosing not to write is itself a metacognitive act.",
+            "name": "coglog_write",
+            "description": "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings \u{2014} choosing not to write is itself a metacognitive act.",
             "inputSchema": {
                 "type": "object",
                 "properties": {
@@ -43,8 +43,8 @@ fn tool_definitions() -> Value {
             }
         },
         {
-            "name": "metalog_clear",
-            "description": "Clear the metalog, removing the stored turn data. Returns whether the clear was successful.",
+            "name": "coglog_clear",
+            "description": "Clear the coglog, removing the stored turn data. Returns whether the clear was successful.",
             "inputSchema": {
                 "type": "object",
                 "properties": {},
@@ -93,7 +93,7 @@ fn send_tool_result(id: &Value, text: &str, is_error: bool) {
 }
 
 fn log(msg: &str) {
-    eprintln!("metalog-mcp: {}", msg);
+    eprintln!("coglog-mcp: {}", msg);
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -106,7 +106,7 @@ fn handle_initialize(id: &Value) {
         json!({
             "protocolVersion": "2024-11-05",
             "capabilities": { "tools": {} },
-            "serverInfo": { "name": "metalog", "version": "0.9.1" }
+            "serverInfo": { "name": "coglog", "version": "0.9.1" }
         }),
     );
 }
@@ -115,24 +115,24 @@ fn handle_tools_list(id: &Value) {
     send_result(id, json!({ "tools": tool_definitions() }));
 }
 
-fn handle_tools_call(id: &Value, params: &Value, ml: &MetaLog) {
+fn handle_tools_call(id: &Value, params: &Value, ml: &CogLog) {
     let name = params["name"].as_str().unwrap_or("");
     let args = &params["arguments"];
 
     match name {
-        "metalog_read" => match ml.read() {
+        "coglog_read" => match ml.read() {
             Ok(Some(entry)) => {
                 let text = serde_json::to_string_pretty(&entry).unwrap_or_default();
                 send_tool_result(id, &text, false);
             }
             Ok(None) => {
-                send_tool_result(id, "(no metalog found)", false);
+                send_tool_result(id, "(no coglog found)", false);
             }
             Err(e) => {
                 send_tool_result(id, &format!("Error: {}", e), true);
             }
         },
-        "metalog_write" => {
+        "coglog_write" => {
             let write_args: Result<WriteArgs, _> = serde_json::from_value(args.clone());
             match write_args {
                 Ok(wa) => match ml.write(wa) {
@@ -149,7 +149,7 @@ fn handle_tools_call(id: &Value, params: &Value, ml: &MetaLog) {
                 }
             }
         }
-        "metalog_clear" => match ml.clear() {
+        "coglog_clear" => match ml.clear() {
             Ok(result) => {
                 let text = serde_json::to_string(&result).unwrap_or_default();
                 send_tool_result(id, &text, false);
@@ -176,9 +176,9 @@ fn main() {
     // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
     let argv: Vec<String> = std::env::args().collect();
     let ml = if argv.len() >= 3 && argv[1] == "--coglog-dir" {
-        MetaLog::with_dir(std::path::PathBuf::from(&argv[2]))
+        CogLog::with_dir(std::path::PathBuf::from(&argv[2]))
     } else {
-        MetaLog::new()
+        CogLog::new()
     };
     log("server started");
 

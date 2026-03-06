@@ -146,7 +146,7 @@ namespace CogLogNS
                 File.Delete(CurrentFile);
                 return new JsonObject { ["cleared"] = true };
             }
-            return new JsonObject { ["cleared"] = false, ["reason"] = "no existing metalog" };
+            return new JsonObject { ["cleared"] = false, ["reason"] = "no existing coglog" };
         }
     }
 }

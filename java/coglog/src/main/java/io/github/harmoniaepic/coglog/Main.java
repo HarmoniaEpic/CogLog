@@ -18,9 +18,9 @@ public class Main {
         System.out.print("""
             usage: coglog-cli <read|write|clear>
 
-              read    — display the previous turn's metalog
+              read    — display the previous turn's coglog
               write   — save current turn (reads JSON from stdin)
-              clear   — reset metalog
+              clear   — reset coglog
 
             write expects JSON on stdin (all fields required):
               {
@@ -61,7 +61,7 @@ public class Main {
                 case "read" -> {
                     Map<String, Object> entry = cl.read();
                     if (entry == null) {
-                        System.out.println("(no metalog found)");
+                        System.out.println("(no coglog found)");
                     } else {
                         System.out.println(CogLog.toJson(entry, 0));
                     }
@@ -76,14 +76,14 @@ public class Main {
                         writeArgs.put(key, val != null ? val.toString() : null);
                     }
                     Map<String, Object> entry = cl.write(writeArgs);
-                    System.out.printf("metalog: turn %d written%n", ((Number) entry.get("turn_id")).intValue());
+                    System.out.printf("coglog: turn %d written%n", ((Number) entry.get("turn_id")).intValue());
                 }
                 case "clear" -> {
                     Map<String, Object> result = cl.clear();
                     if (Boolean.TRUE.equals(result.get("cleared"))) {
-                        System.out.println("metalog: cleared");
+                        System.out.println("coglog: cleared");
                     } else {
-                        System.out.printf("metalog: %s%n", result.get("reason"));
+                        System.out.printf("coglog: %s%n", result.get("reason"));
                     }
                 }
                 default -> {
@@ -92,10 +92,10 @@ public class Main {
                 }
             }
         } catch (IllegalArgumentException e) {
-            System.err.printf("metalog error: %s%n", e.getMessage());
+            System.err.printf("coglog error: %s%n", e.getMessage());
             System.exit(1);
         } catch (Exception e) {
-            System.err.printf("metalog error: %s%n", e.getMessage());
+            System.err.printf("coglog error: %s%n", e.getMessage());
             System.exit(1);
         }
     }

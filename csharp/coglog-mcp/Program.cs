@@ -81,7 +81,7 @@ void SendToolResult(JsonNode? id, string text, bool isError = false)
 
 void Log(string msg)
 {
-    Console.Error.WriteLine($"metalog-mcp: {msg}");
+    Console.Error.WriteLine($"coglog-mcp: {msg}");
 }
 
 // ═══════════════════════════════════════════════════════════════════
@@ -93,8 +93,8 @@ JsonNode ToolDefinitions()
     return JsonNode.Parse("""
     [
       {
-        "name": "metalog_read",
-        "description": "Read the previous turn's metalog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no metalog exists.",
+        "name": "coglog_read",
+        "description": "Read the previous turn's coglog. Returns the three-layer structure (user/thinking/assistant) plus four-axis interpretation layer (current_focus/theory_of_mind/self_narrative/annotation). Returns null if no coglog exists.",
         "inputSchema": {
           "type": "object",
           "properties": {},
@@ -102,8 +102,8 @@ JsonNode ToolDefinitions()
         }
       },
       {
-        "name": "metalog_write",
-        "description": "Write the current turn's metalog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
+        "name": "coglog_write",
+        "description": "Write the current turn's coglog, overwriting the previous one. Fact layer fields (user, thinking, assistant) require non-empty strings. Interpretation layer fields (current_focus, theory_of_mind, self_narrative, annotation) require strings but accept empty strings — choosing not to write is itself a metacognitive act.",
         "inputSchema": {
           "type": "object",
           "properties": {
@@ -120,8 +120,8 @@ JsonNode ToolDefinitions()
         }
       },
       {
-        "name": "metalog_clear",
-        "description": "Clear the metalog, removing the stored turn data. Returns whether the clear was successful.",
+        "name": "coglog_clear",
+        "description": "Clear the coglog, removing the stored turn data. Returns whether the clear was successful.",
         "inputSchema": {
           "type": "object",
           "properties": {},
@@ -147,7 +147,7 @@ void HandleInitialize(JsonNode? id)
         },
         ["serverInfo"] = new JsonObject
         {
-            ["name"] = "metalog",
+            ["name"] = "coglog",
             ["version"] = "0.9.1"
         }
     };
@@ -178,11 +178,11 @@ void HandleToolsCall(JsonNode? id, JsonObject? prms)
     {
         switch (toolName)
         {
-            case "metalog_read":
+            case "coglog_read":
             {
                 var entry = cl.Read();
                 if (entry == null)
-                    SendToolResult(id, "(no metalog found)");
+                    SendToolResult(id, "(no coglog found)");
                 else
                     SendToolResult(id, entry.ToJsonString(new JsonSerializerOptions
                     {
@@ -191,7 +191,7 @@ void HandleToolsCall(JsonNode? id, JsonObject? prms)
                     }));
                 break;
             }
-            case "metalog_write":
+            case "coglog_write":
             {
                 if (arguments == null)
                 {
@@ -205,16 +205,16 @@ void HandleToolsCall(JsonNode? id, JsonObject? prms)
                     writeArgs[key] = arguments[key]?.GetValue<string>() ?? "";
                 }
                 var written = cl.Write(writeArgs);
-                SendToolResult(id, $"metalog: turn {written["turn_id"]} written");
+                SendToolResult(id, $"coglog: turn {written["turn_id"]} written");
                 break;
             }
-            case "metalog_clear":
+            case "coglog_clear":
             {
                 var result = cl.Clear();
                 if (result["cleared"]!.GetValue<bool>())
-                    SendToolResult(id, "metalog: cleared");
+                    SendToolResult(id, "coglog: cleared");
                 else
-                    SendToolResult(id, $"metalog: {result["reason"]}");
+                    SendToolResult(id, $"coglog: {result["reason"]}");
                 break;
             }
             default:

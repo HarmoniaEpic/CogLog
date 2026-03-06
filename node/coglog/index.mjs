@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * MetaLog v0.9.1 — Minimal cognitive continuity for LLMs.
+ * CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
  *
  * A single-window (size 1) log that holds the previous turn's three-layer
  * structure (user utterance, thinking process, assistant output) plus a
@@ -13,13 +13,13 @@
  * the JSON file itself describes how to read and write it.
  *
  * Usage as CLI:
- *   node metalog-v0.9.1.mjs read
- *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | node metalog-v0.9.1.mjs write
- *   node metalog-v0.9.1.mjs clear
+ *   node coglog-v0.9.1.mjs read
+ *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | node coglog-v0.9.1.mjs write
+ *   node coglog-v0.9.1.mjs clear
  *
  * Usage as module:
- *   import { MetaLog } from './metalog-v0.9.1.mjs';
- *   const ml = new MetaLog();
+ *   import { CogLog } from './coglog-v0.9.1.mjs';
+ *   const ml = new CogLog();
  *   await ml.write({ user, thinking, assistant, current_focus, theory_of_mind, self_narrative, annotation });
  *   const prev = await ml.read();
  *   await ml.clear();
@@ -53,7 +53,7 @@ const SCHEMA = {
   }
 };
 
-export class MetaLog {
+export class CogLog {
   constructor(dataDir = null) {
     this.dataDir = dataDir ?? DATA_DIR;
     this.currentFile = join(this.dataDir, 'current.json');
@@ -124,7 +124,7 @@ export class MetaLog {
       return { cleared: true };
     } catch (e) {
       if (e.code === 'ENOENT') {
-        return { cleared: false, reason: 'no existing metalog' };
+        return { cleared: false, reason: 'no existing coglog' };
       }
       throw e;
     }
@@ -144,7 +144,7 @@ if (isMain) {
     coglogDir = cliArgs[1];
     cliArgs = cliArgs.slice(2);
   }
-  const ml = new MetaLog(coglogDir);
+  const ml = new CogLog(coglogDir);
   const [command] = cliArgs;
 
   async function main() {
@@ -152,7 +152,7 @@ if (isMain) {
       case 'read': {
         const entry = await ml.read();
         if (!entry) {
-          console.log('(no metalog found)');
+          console.log('(no coglog found)');
           process.exit(0);
         }
         console.log(JSON.stringify(entry, null, 2));
@@ -166,22 +166,22 @@ if (isMain) {
         }
         const input = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
         const entry = await ml.write(input);
-        console.log(`metalog: turn ${entry.turn_id} written`);
+        console.log(`coglog: turn ${entry.turn_id} written`);
         break;
       }
 
       case 'clear': {
         const result = await ml.clear();
-        console.log(result.cleared ? 'metalog: cleared' : `metalog: ${result.reason}`);
+        console.log(result.cleared ? 'coglog: cleared' : `coglog: ${result.reason}`);
         break;
       }
 
       default:
-        console.log(`usage: metalog-v0.9.1.mjs <read|write|clear>
+        console.log(`usage: coglog-v0.9.1.mjs <read|write|clear>
 
-  read    — display the previous turn's metalog
+  read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)
-  clear   — reset metalog
+  clear   — reset coglog
 
 write expects JSON on stdin (all fields required):
   {
@@ -202,7 +202,7 @@ write expects JSON on stdin (all fields required):
   }
 
   main().catch(e => {
-    console.error('metalog error:', e.message);
+    console.error('coglog error:', e.message);
     process.exit(1);
   });
 }

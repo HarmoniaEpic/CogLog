@@ -206,7 +206,7 @@
                    (format t ";;; state~%")
                    (write *state* :stream *standard-output*)
                    (terpri))
-                  (format t ";;; (no metalog found)~%"))
+                  (format t ";;; (no coglog found)~%"))
               (format t "~%;;; affordance~%")
               (write *affordance* :stream *standard-output*)
               (terpri)))
@@ -217,15 +217,15 @@
                    (opt-aff (getf plist :opt-affordance))
                    (opt-slf (getf plist :opt-self))
                    (entry (write-self plist opt-adv opt-aff opt-slf)))
-              (format t "metalog: turn ~d written~%"
+              (format t "coglog: turn ~d written~%"
                       (cdr (assoc :turn-id entry)))))
            ((string= cmd "clear")
             (if (clear-self)
-                (format t "metalog: cleared~%")
-                (format t "metalog: no existing metalog~%")))
+                (format t "coglog: cleared~%")
+                (format t "coglog: no existing coglog~%")))
            (t (format t "usage: recurrent-quine <read|write|clear>~%")
             (exit :code 1)))
-          (error (e) (format *error-output* "metalog error: ~a~%" e)
+          (error (e) (format *error-output* "coglog error: ~a~%" e)
                  (exit :code 1)))
          (exit :code 0))))))
 

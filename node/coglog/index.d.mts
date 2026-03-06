@@ -59,7 +59,7 @@ export interface ClearResult {
   reason?: string;
 }
 
-export declare class MetaLog {
+export declare class CogLog {
   readonly dataDir: string;
   readonly currentFile: string;
   constructor();
