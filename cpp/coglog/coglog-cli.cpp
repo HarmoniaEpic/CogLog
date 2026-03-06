@@ -406,7 +406,7 @@ static const Json SCHEMA = make_schema();
 // ── Path utilities ──
 
 static std::string default_coglog_dir() {
-    // 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+    // Priority: COGLOG_DIR env > $HOME/.coglog > ./.coglog (final fallback)
     if (const char* env = std::getenv("COGLOG_DIR")) return env;
     if (const char* home = std::getenv("HOME"))
         return std::string(home) + "/.coglog";
@@ -573,7 +573,7 @@ static void print_usage() {
 }
 
 int main(int argc, char* argv[]) {
-    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
     int arg_offset = 1;
     if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
         coglog::init_paths(argv[2]);
