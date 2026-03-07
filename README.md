@@ -37,71 +37,6 @@ Practical
 
 ---
 
-## インストール / Installation
-
-工事中につき、シェルスクリプト（Bash）版をお試し下さい。
-
-Under construction — please try the shell script (Bash) version for now.
-
-| レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
-|---|---|---|
-| **PyPI** | `pip install coglog` | `pip install coglog-mcp` |
-| **npm** | `npm i -g coglog` | `npm i -g coglog-mcp` |
-| **crates.io** | `cargo install coglog` | `cargo install coglog-mcp` |
-| **pkg.go.dev** | `go install .../coglog-cli@v0.9.1` | `go install .../coglog-mcp@v0.9.1` |
-| **RubyGems** | `gem install coglog` | `gem install coglog-mcp` |
-| **Maven Central** | `mvn dependency:get ...` | 同上 / ditto |
-| **NuGet** | `dotnet tool install -g coglog` | `dotnet tool install -g coglog-mcp` |
-| **Hackage** | `cabal install coglog` | `cabal install coglog-mcp` |
-| **Quicklisp** | `(ql:quickload :coglog)` | `(ql:quickload :coglog-mcp)` |
-
-Common Lisp リカレントクワイン / Recurrent Quine: `(ql:quickload :coglog-quine)`
-
-C++ / Bash: [GitHub Releases](https://github.com/HarmoniaEpic/coglog/releases)
-
-## CLI（全11言語共通） / CLI (Common across all 11 languages)
-
-```bash
-coglog-cli read
-echo '{"user":"...","thinking":"...","assistant":"...", ...}' | coglog-cli write
-coglog-cli clear
-```
-
-## MCP 設定 / MCP Configuration
-
-```json
-{
-  "mcpServers": {
-    "coglog": {
-      "command": "coglog-mcp"
-    }
-  }
-}
-```
-
-3ツール / 3 tools: `coglog_read`, `coglog_write`, `coglog_clear`
-
-```mermaid
-flowchart LR
-  U["User / Agent"] --> CLI["coglog-cli"]
-  U --> MCP["coglog-mcp"]
-
-  CLI --> R["read"]
-  CLI --> W["write"]
-  CLI --> C["clear"]
-
-  MCP --> TR["coglog_read"]
-  MCP --> TW["coglog_write"]
-  MCP --> TC["coglog_clear"]
-
-  R --> F[("~/.coglog/current.json")]
-  W --> F
-  C --> F
-  TR --> F
-  TW --> F
-  TC --> F
-```
-
 ## データ構造 / Data Model
 
 ```json
@@ -166,6 +101,71 @@ classDiagram
 
   Entry --> Layers
   Entry --> Schema
+```
+
+## インストール / Installation
+
+工事中につき、シェルスクリプト（Bash）版をお試し下さい。
+
+Under construction — please try the shell script (Bash) version for now.
+
+| レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
+|---|---|---|
+| **PyPI** | `pip install coglog` | `pip install coglog-mcp` |
+| **npm** | `npm i -g coglog` | `npm i -g coglog-mcp` |
+| **crates.io** | `cargo install coglog` | `cargo install coglog-mcp` |
+| **pkg.go.dev** | `go install .../coglog-cli@v0.9.1` | `go install .../coglog-mcp@v0.9.1` |
+| **RubyGems** | `gem install coglog` | `gem install coglog-mcp` |
+| **Maven Central** | `mvn dependency:get ...` | 同上 / ditto |
+| **NuGet** | `dotnet tool install -g coglog` | `dotnet tool install -g coglog-mcp` |
+| **Hackage** | `cabal install coglog` | `cabal install coglog-mcp` |
+| **Quicklisp** | `(ql:quickload :coglog)` | `(ql:quickload :coglog-mcp)` |
+
+Common Lisp リカレントクワイン / Recurrent Quine: `(ql:quickload :coglog-quine)`
+
+C++ / Bash: [GitHub Releases](https://github.com/HarmoniaEpic/coglog/releases)
+
+## CLI（全11言語共通） / CLI (Common across all 11 languages)
+
+```bash
+coglog-cli read
+echo '{"user":"...","thinking":"...","assistant":"...", ...}' | coglog-cli write
+coglog-cli clear
+```
+
+## MCP 設定 / MCP Configuration
+
+```json
+{
+  "mcpServers": {
+    "coglog": {
+      "command": "coglog-mcp"
+    }
+  }
+}
+```
+
+3ツール / 3 tools: `coglog_read`, `coglog_write`, `coglog_clear`
+
+```mermaid
+flowchart LR
+  U["User / Agent"] --> CLI["coglog-cli"]
+  U --> MCP["coglog-mcp"]
+
+  CLI --> R["read"]
+  CLI --> W["write"]
+  CLI --> C["clear"]
+
+  MCP --> TR["coglog_read"]
+  MCP --> TW["coglog_write"]
+  MCP --> TC["coglog_clear"]
+
+  R --> F[("~/.coglog/current.json")]
+  W --> F
+  C --> F
+  TR --> F
+  TW --> F
+  TC --> F
 ```
 
 ## 言語一覧 / Language List
