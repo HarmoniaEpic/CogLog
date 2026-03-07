@@ -41,7 +41,7 @@ write expects JSON on stdin (all fields required):
 }
 
 func run() error {
-	// --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+	// Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
 	args := os.Args[1:]
 	var cl *coglog.CogLog
 	if len(args) >= 2 && args[0] == "--coglog-dir" {

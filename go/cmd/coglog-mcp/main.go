@@ -189,7 +189,7 @@ func handlePing(id *json.RawMessage) {
 // ═══════════════════════════════════════════════════════════════════
 
 func main() {
-	// --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+	// Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
 	var cl *coglog.CogLog
 	if len(os.Args) >= 3 && os.Args[1] == "--coglog-dir" {
 		cl = coglog.NewWithDir(os.Args[2])

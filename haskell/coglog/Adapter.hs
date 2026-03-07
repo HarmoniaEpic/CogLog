@@ -13,10 +13,10 @@ import System.IO (hPutStrLn, hPutStr, hGetContents, stderr, hSetEncoding,
                    stdin, stdout, utf8, withFile, IOMode(..))
 
 -- ═══════════════════════════════════════════════════════════
--- JSON シリアライズ（手書き）
+-- JSON serialization (hand-written)
 -- ═══════════════════════════════════════════════════════════
 
--- | JSON 文字列のエスケープ
+-- | Escape a string for JSON serialization.
 escapeJson :: String -> String
 escapeJson = concatMap esc
   where
@@ -26,15 +26,15 @@ escapeJson = concatMap esc
     esc '\t' = "\\t"
     esc c    = [c]
 
--- | インデント付き JSON 文字列
+-- | Wrap a string as a JSON string literal.
 jsonStr :: String -> String
 jsonStr s = "\"" ++ escapeJson s ++ "\""
 
--- | インデント用
+-- | Generate indentation spaces.
 indent :: Int -> String
 indent n = replicate (n * 2) ' '
 
--- | Schema を JSON 文字列に変換
+-- | Convert a Schema to a JSON string.
 schemaToJson :: Int -> Schema -> String
 schemaToJson n s = unlines' $
   [ indent n ++ "\"_schema\": {"
@@ -55,17 +55,17 @@ schemaToJson n s = unlines' $
       let formatted = map (\(k,v) -> indent d ++ jsonStr k ++ ": " ++ jsonStr v) kvs
       in  addCommas formatted
 
--- | 末尾カンマの付与（最後の要素以外）
+-- | Append commas to all elements except the last.
 addCommas :: [String] -> [String]
 addCommas []     = []
 addCommas [x]    = [x]
 addCommas (x:xs) = (x ++ ",") : addCommas xs
 
--- | unlines の末尾改行なし版
+-- | Like 'unlines' but without a trailing newline.
 unlines' :: [String] -> String
 unlines' = intercalate "\n"
 
--- | Layers を JSON に変換
+-- | Convert Layers to JSON.
 layersToJson :: Int -> Layers -> String
 layersToJson n l = unlines'
   [ indent n ++ "\"layers\": {"
@@ -75,7 +75,7 @@ layersToJson n l = unlines'
   , indent n ++ "}"
   ]
 
--- | Entry を JSON 文字列に変換
+-- | Convert an Entry to a JSON string.
 entryToJson :: Entry -> String
 entryToJson e = unlines'
   [ "{"
@@ -94,10 +94,10 @@ entryToJson e = unlines'
 
 
 -- ═══════════════════════════════════════════════════════════
--- JSON パース（手書き、再帰下降）
+-- JSON parsing (hand-written, recursive descent)
 -- ═══════════════════════════════════════════════════════════
 
--- | 簡易 JSON 値
+-- | Simple JSON value type.
 data JValue
   = JString String
   | JNumber Int
@@ -107,17 +107,17 @@ data JValue
 
 type Parser a = String -> Either String (a, String)
 
--- | 空白を読み飛ばす
+-- | Skip whitespace.
 skipWS :: String -> String
 skipWS = dropWhile isSpace
 
--- | 期待する文字を消費
+-- | Consume an expected character.
 expect :: Char -> Parser ()
 expect c s = case skipWS s of
   (x:xs) | x == c -> Right ((), xs)
   rest -> Left $ "expected '" ++ [c] ++ "' but got: " ++ take 20 rest
   
--- | JSON 文字列をパース
+-- | Parse a JSON string.
 parseJString :: Parser String
 parseJString s0 = case skipWS s0 of
   ('"':rest) -> go rest ""
@@ -139,7 +139,7 @@ parseJString s0 = case skipWS s0 of
          then go rest' (toEnum (read ("0x" ++ hex)) : acc)
          else Left "invalid unicode escape"
 
--- | JSON 数値をパース
+-- | Parse a JSON number (integer).
 parseJNumber :: Parser Int
 parseJNumber s0 =
   let s = skipWS s0
@@ -149,7 +149,7 @@ parseJNumber s0 =
      then Left $ "expected number but got: " ++ take 20 s
      else Right ((if neg then negate else id) (read digits), rest)
 
--- | JSON 値をパース
+-- | Parse a JSON value.
 parseJValue :: Parser JValue
 parseJValue s0 = case skipWS s0 of
   ('"':_)  -> do (v, r) <- parseJString s0; Right (JString v, r)
@@ -157,7 +157,7 @@ parseJValue s0 = case skipWS s0 of
   ('n':'u':'l':'l':r) -> Right (JNull, r)
   _ -> do (v, r) <- parseJNumber s0; Right (JNumber v, r)
 
--- | JSON オブジェクトをパース
+-- | Parse a JSON object.
 parseJObject :: Parser [(String, JValue)]
 parseJObject s0 = do
   (_, s1) <- expect '{' s0
@@ -176,13 +176,13 @@ parseJObject s0 = do
         ('}':rest) -> Right ([(k,v)], rest)
         other -> Left $ "expected ',' or '}' but got: " ++ take 20 other
 
--- | JValue からフィールドを取得
+-- | Look up a field in a JValue object.
 jLookup :: String -> [(String, JValue)] -> Either String JValue
 jLookup k kvs = case lookup k kvs of
   Just v  -> Right v
   Nothing -> Left $ "missing field: " ++ k
 
--- | JValue から String を取得
+-- | Extract a String from a JValue.
 jStr :: String -> [(String, JValue)] -> Either String String
 jStr k kvs = do
   v <- jLookup k kvs
@@ -190,7 +190,7 @@ jStr k kvs = do
     JString s -> Right s
     _         -> Left $ k ++ " is not a string"
 
--- | JValue から Int を取得
+-- | Extract an Int from a JValue.
 jInt :: String -> [(String, JValue)] -> Either String Int
 jInt k kvs = do
   v <- jLookup k kvs
@@ -198,7 +198,7 @@ jInt k kvs = do
     JNumber n -> Right n
     _         -> Left $ k ++ " is not a number"
 
--- | JValue から Object を取得
+-- | Extract an Object from a JValue.
 jObj :: String -> [(String, JValue)] -> Either String [(String, JValue)]
 jObj k kvs = do
   v <- jLookup k kvs
@@ -206,15 +206,15 @@ jObj k kvs = do
     JObject o -> Right o
     _         -> Left $ k ++ " is not an object"
 
--- | タイムスタンプを複数の形式で試行パース
+-- | Parse a timestamp, trying multiple formats.
 parseTimestamp :: String -> Either String UTCTime
 parseTimestamp s = tryFormats formats
   where
-    -- +00:00 を Z に正規化
+    -- Normalize +00:00 to Z
     normalized
       | "+00:00" `isSuffixOf` s = take (length s - 6) s ++ "Z"
       | otherwise = s
-    -- マイクロ秒の除去（.123456Z → Z）
+    -- Strip microseconds (.123456Z -> Z)
     stripped = case break (== '.') normalized of
       (pre, '.':rest) -> pre ++ dropWhile (\c -> isDigit c) rest
       _               -> normalized
@@ -229,7 +229,7 @@ parseTimestamp s = tryFormats formats
         Just t  -> Right t
         Nothing -> tryFormats rest
 
--- | JSON 文字列から Entry をパース
+-- | Parse an Entry from a JSON string.
 parseEntry :: String -> Either String Entry
 parseEntry src = do
   (top, _) <- parseJObject src
@@ -267,7 +267,7 @@ parseEntry src = do
     , eAnnotation    = an
     }
 
--- | stdin の plist 風入力を RawArgs にパース
+-- | Parse JSON input from stdin into RawArgs.
 parseStdinArgs :: String -> Either String RawArgs
 parseStdinArgs src = do
   (top, _) <- parseJObject src
@@ -290,11 +290,11 @@ parseStdinArgs src = do
 
 
 -- ═══════════════════════════════════════════════════════════
--- ファイル I/O
+-- File I/O
 -- ═══════════════════════════════════════════════════════════
 
--- | デフォルトの coglog パスを返す
--- 優先順位: COGLOG_DIR env > $HOME/.coglog > ./.coglog（最終フォールバック）
+-- | Return the default coglog file path.
+-- Priority: COGLOG_DIR env > $HOME/.coglog > ./.coglog (final fallback)
 defaultCoglogPath :: IO FilePath
 defaultCoglogPath = do
   envDir <- lookupEnv "COGLOG_DIR"
@@ -304,7 +304,7 @@ defaultCoglogPath = do
       home <- getHomeDirectory
       return (home FP.</> ".coglog" FP.</> "current.json")
 
--- | コグログファイルを読む
+-- | Read the coglog file.
 readCoglog :: FilePath -> IO (Maybe Entry)
 readCoglog path = do
   exists <- doesFileExist path
@@ -319,7 +319,7 @@ readCoglog path = do
         Right e -> return (Just e)
         Left _  -> return Nothing
 
--- | コグログファイルに書く
+-- | Write an entry to the coglog file.
 writeCoglog :: FilePath -> Entry -> IO ()
 writeCoglog path entry = do
   createDirectoryIfMissing True (FP.takeDirectory path)
@@ -327,7 +327,7 @@ writeCoglog path entry = do
     hSetEncoding h utf8
     hPutStr h (entryToJson entry ++ "\n")
 
--- | コグログファイルをクリアする
+-- | Clear (delete) the coglog file.
 clearCoglog :: FilePath -> IO Bool
 clearCoglog path = do
   exists <- doesFileExist path
@@ -345,7 +345,7 @@ main = do
   hSetEncoding stdin  utf8
   hSetEncoding stdout utf8
   allArgs <- getArgs
-  -- --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+  -- Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
   (coglogPath, args) <- case allArgs of
     ("--coglog-dir":d:rest) -> return (d FP.</> "current.json", rest)
     _                       -> do { p <- defaultCoglogPath; return (p, allArgs) }

@@ -1,36 +1,36 @@
-CogLog v0.9.1 — Haskell 純粋核
+CogLog v0.9.1 — Haskell Pure Core
 
-DESIGN-v0.9.1.md の純粋/不純の分離からの注釈。
-このファイルは GHC が直接コンパイルできる Literate Haskell である。
-「>」で始まる行がコード。それ以外は散文。
-散文が論旨を述べ、コードがそれを証明する。
+Annotations from the pure/impure separation in DESIGN-v0.9.1.md.
+This file is Literate Haskell that GHC can compile directly.
+Lines beginning with ">" are code. Everything else is prose.
+The prose states the argument; the code proves it.
 
 
 ═══════════════════════════════════════════════════════════════
-第1章: 漸化式
+Chapter 1: The Recurrence Relation
 ═══════════════════════════════════════════════════════════════
 
-CogLog の核は漸化式 a_{n+1} = f(a_n, x_n) である。
+The core of CogLog is the recurrence relation a_{n+1} = f(a_n, x_n).
 
-f は「前のエントリ」と「今の入力」と「現在時刻」を受け取り、
-「新しいエントリ」を返す。
+f takes "the previous entry," "the current input," and "the current time,"
+and returns "a new entry."
 
-Python 版や Node.js 版では、この f とファイル I/O が
-一つの write() 関数に混在している。
-Haskell では型システムがその混在を許さない。
+In the Python and Node.js versions, this f and file I/O
+are conflated in a single write() function.
+In Haskell, the type system does not permit that conflation.
 
-advance は Entry を構築する。writeCoglog は Entry をファイルに書く。
-両者は型によって分離され、混合はコンパイルエラーになる。
-この分離は設計者の規律ではなく、型の強制である。
+advance constructs an Entry. writeCoglog writes an Entry to a file.
+The two are separated by types; mixing them is a compile error.
+This separation is not the designer's discipline — it is type enforcement.
 
 > module CogLog (
->     -- 型
+>     -- Types
 >     NonEmptyText, unNonEmptyText,
 >     Schema(..), Layers(..), Entry(..), WriteArgs(..), RawArgs(..),
 >     ValidationError(..),
->     -- 構築
+>     -- Construction
 >     mkNonEmptyText, validateArgs,
->     -- 核
+>     -- Core
 >     advance, coglogSchema, schemaVersion
 >   ) where
 >
@@ -38,24 +38,25 @@ advance は Entry を構築する。writeCoglog は Entry をファイルに書�
 
 
 ═══════════════════════════════════════════════════════════════
-第2章: 型の世界
+Chapter 2: The World of Types
 ═══════════════════════════════════════════════════════════════
 
-CogLog のデータ構造は三つの層で構成される。
+CogLog's data structure is composed of three layers.
 
-  メタデータ層 (_schema) — このデータの読み方
-  事実層 (layers)        — 何があったか
-  解釈層 (4フィールド)   — それをどう読んだか
+  Metadata layer (_schema) — how to read this data
+  Fact layer (layers)      — what happened
+  Interpretation layer (4 fields) — how it was interpreted
 
-事実層と解釈層はバリデーション規則が異なる。
-  事実層: 非空文字列必須
-  解釈層: 文字列必須、空許容
+The fact layer and interpretation layer have different validation rules.
+  Fact layer: non-empty string required
+  Interpretation layer: string required, empty acceptable
 
-Common Lisp 版では、この区別は validate-args の条件分岐が実行時に担う。
-Haskell 版では、型の区別がコンパイル時に担う。
+In the Common Lisp version, this distinction is enforced at runtime
+by conditional branches in validate-args.
+In the Haskell version, the type distinction enforces it at compile time.
 
-NonEmptyText と String。この型の違いが、
-事実層と解釈層の違いそのものである。
+NonEmptyText and String. The difference between these types
+is the difference between the fact layer and the interpretation layer itself.
 
 > newtype NonEmptyText = NonEmptyText String
 >   deriving (Show, Eq)
@@ -63,10 +64,10 @@ NonEmptyText と String。この型の違いが、
 > unNonEmptyText :: NonEmptyText -> String
 > unNonEmptyText (NonEmptyText s) = s
 
-NonEmptyText のコンストラクタはモジュール外に公開しない。
-外部から NonEmptyText を得る唯一の方法は mkNonEmptyText であり、
-その関数は空文字列を拒否する。
-コンストラクタの非公開が、型によるバリデーションの鍵である。
+The NonEmptyText constructor is not exported outside the module.
+The only way to obtain a NonEmptyText from outside is mkNonEmptyText,
+and that function rejects empty strings.
+Non-export of the constructor is the key to type-driven validation.
 
 > data Layers = Layers
 >   { lUser      :: NonEmptyText
@@ -92,10 +93,10 @@ NonEmptyText のコンストラクタはモジュール外に公開しない。
 >   , eAnnotation    :: String
 >   } deriving (Show, Eq)
 
-WriteArgs は「バリデーション済みの入力」を表す。
-事実層のフィールドは NonEmptyText——
-構築時点で非空であることが型によって保証されている。
-解釈層のフィールドは String——空を許容する。
+WriteArgs represents "validated input."
+The fact layer fields are NonEmptyText —
+their non-emptiness is guaranteed by the type at construction time.
+The interpretation layer fields are String — empty is acceptable.
 
 > data WriteArgs = WriteArgs
 >   { wUser          :: NonEmptyText
@@ -107,9 +108,9 @@ WriteArgs は「バリデーション済みの入力」を表す。
 >   , wAnnotation    :: String
 >   } deriving (Show, Eq)
 
-RawArgs は「未検証の入力」を表す。全フィールドが String。
-validateArgs が RawArgs から WriteArgs への変換を試みる。
-この変換の成否が、バリデーションの結果そのものである。
+RawArgs represents "unvalidated input." All fields are String.
+validateArgs attempts the conversion from RawArgs to WriteArgs.
+The success or failure of this conversion is the validation result itself.
 
 > data RawArgs = RawArgs
 >   { rawUser          :: String
@@ -126,26 +127,26 @@ validateArgs が RawArgs から WriteArgs への変換を試みる。
 
 
 ═══════════════════════════════════════════════════════════════
-第3章: validate — 制約の宣言
+Chapter 3: validate — Declaring Constraints
 ═══════════════════════════════════════════════════════════════
 
-mkNonEmptyText はゲートキーパーである。
-空文字列を Left として拒否し、非空文字列を Right として通す。
-この関数を通過した値は NonEmptyText に包まれ、
-以後のコードは非空性を再検査する必要がない。
+mkNonEmptyText is the gatekeeper.
+It rejects empty strings as Left and passes non-empty strings as Right.
+Values that pass through this function are wrapped in NonEmptyText,
+and subsequent code never needs to re-check for non-emptiness.
 
-型がバリデーション結果を記憶する。これが Haskell の保証の形。
+The type remembers the validation result. This is how Haskell guarantees.
 
 > mkNonEmptyText :: String -> Either ValidationError NonEmptyText
 > mkNonEmptyText "" = Left (ValidationError "non-empty string required")
 > mkNonEmptyText s  = Right (NonEmptyText s)
 
-validateArgs は RawArgs から WriteArgs を構築する。
-事実層の3フィールドが mkNonEmptyText を通過し、
-解釈層の4フィールドは String のまま受け入れる。
+validateArgs constructs WriteArgs from RawArgs.
+The 3 fact layer fields pass through mkNonEmptyText,
+while the 4 interpretation layer fields are accepted as plain Strings.
 
-Either モナドにより、最初の失敗で処理全体が中断する。
-成功パスのみが WriteArgs の構築に到達する。
+Through the Either monad, the entire computation short-circuits on first failure.
+Only the success path reaches the construction of WriteArgs.
 
 > validateArgs :: RawArgs -> Either ValidationError WriteArgs
 > validateArgs raw = do
@@ -162,19 +163,19 @@ Either モナドにより、最初の失敗で処理全体が中断する。
 
 
 ═══════════════════════════════════════════════════════════════
-第4章: _schema — データの自己記述
+Chapter 4: _schema — Self-Describing Data
 ═══════════════════════════════════════════════════════════════
 
-_schema は JSON に「このデータの読み方」を添付するための構造である。
+_schema is a structure for attaching "how to read this data" to the JSON.
 
-Common Lisp 版では、S式のホモイコニシティにより
-_schema が自明な帰結であることを示した。
+In the Common Lisp version, the homoiconicity of S-expressions
+showed that _schema is a natural consequence.
 
-Haskell 版では別の面を照射する。
-coglogSchema が Schema 型を持つことで、
-「これはメタデータである」という宣言が型レベルで行われる。
-Entry の他のフィールド（String, Int, UTCTime, Layers）とは
-型が異なり、取り違えはコンパイルエラーになる。
+The Haskell version illuminates a different facet.
+Because coglogSchema has the Schema type,
+the declaration "this is metadata" is made at the type level.
+It differs in type from Entry's other fields (String, Int, UTCTime, Layers),
+and any mix-up becomes a compile error.
 
 > schemaVersion :: String
 > schemaVersion = "0.9.1"
@@ -201,29 +202,29 @@ Entry の他のフィールド（String, Int, UTCTime, Layers）とは
 
 
 ═══════════════════════════════════════════════════════════════
-第5章: advance — 純粋な核
+Chapter 5: advance — The Pure Core
 ═══════════════════════════════════════════════════════════════
 
-advance は漸化式の f に対応する。型シグネチャを読む:
+advance corresponds to f in the recurrence relation. Reading the type signature:
 
   advance :: Maybe Entry -> WriteArgs -> UTCTime -> Entry
 
-  Maybe Entry  — 前のエントリ（初回は Nothing）
-  WriteArgs    — 今の入力（バリデーション済み）
-  UTCTime      — 現在時刻（外部から注入される）
-  → Entry      — 新しいエントリ
+  Maybe Entry  — the previous entry (Nothing on the first call)
+  WriteArgs    — the current input (already validated)
+  UTCTime      — the current time (injected from outside)
+  -> Entry     — the new entry
 
-IO はどこにも現れない。advance は純粋関数である。
+IO appears nowhere. advance is a pure function.
 
-これは設計者の意図ではなく、型システムによる証明である。
-もし advance が現在時刻を自ら取得しようとすれば、
-戻り値は IO Entry になり、型シグネチャがそれを暴露する。
-もしファイルに書き込もうとすれば、同様に IO が現れる。
-純粋性は隠せない。不純性も隠せない。型が両方を宣言する。
+This is not the designer's intent — it is a proof by the type system.
+If advance tried to obtain the current time on its own,
+its return type would become IO Entry, and the type signature would expose it.
+If it tried to write to a file, IO would similarly appear.
+Purity cannot be hidden. Impurity cannot be hidden either. Types declare both.
 
-Python 版の advance() も事実上は純粋である。
-しかし「事実上」と「型による保証」の間には、
-テストと証明の間と同じくらいの距離がある。
+The Python version's advance() is also pure in practice.
+However, between "in practice" and "guaranteed by types"
+lies the same distance as between testing and proof.
 
 > advance :: Maybe Entry -> WriteArgs -> UTCTime -> Entry
 > advance prev args now = Entry
@@ -239,22 +240,22 @@ Python 版の advance() も事実上は純粋である。
 
 
 ═══════════════════════════════════════════════════════════════
-補遺: このモジュールに IO がないことの意味
+Appendix: The Significance of No IO in This Module
 ═══════════════════════════════════════════════════════════════
 
-CogLog.lhs のどこにも IO という文字は現れない。
-import するのは Data.Time から UTCTime 型ただ一つ。
+The letters "IO" appear nowhere in CogLog.lhs.
+The only import is the UTCTime type from Data.Time.
 
-このことは、CogLog.lhs のすべての関数が参照透過であることを意味する。
-同じ引数で呼べば、何度呼んでも同じ結果が返る。
-ファイルに何も書かない。ネットワークに何も送らない。
+This means that every function in CogLog.lhs is referentially transparent.
+Call it with the same arguments, and it returns the same result every time.
+It writes nothing to files. It sends nothing over the network.
 
-Adapter.hs で初めて IO が登場する。
+IO first appears in Adapter.hs.
 readCoglog :: IO (Maybe Entry)
 writeCoglog :: Entry -> IO ()
 
-この分離は CogLog のアーキテクチャ全体に通底する。
-Python 版の write() が advance + ファイル書き込みを兼ねているのに対し、
-Haskell 版ではその兼任がコンパイラによって禁止されている。
+This separation runs through CogLog's entire architecture.
+While the Python version's write() combines advance + file writing,
+in the Haskell version that combination is forbidden by the compiler.
 
-分離は選択ではない。必然である。
+Separation is not a choice. It is a necessity.

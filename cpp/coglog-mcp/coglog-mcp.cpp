@@ -787,7 +787,7 @@ static void run() {
 
 int main(int argc, char* argv[]) {
     (void)argc;
-    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
     if (argc >= 3 && std::strcmp(argv[1], "--coglog-dir") == 0) {
         coglog::init_paths(argv[2]);
     } else {

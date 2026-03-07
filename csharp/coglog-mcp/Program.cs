@@ -17,7 +17,7 @@ using CogLogNS;
 // Setup
 // ═══════════════════════════════════════════════════════════════════
 
-// --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+// Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
 CogLog cl = args.Length >= 2 && args[0] == "--coglog-dir"
     ? new CogLog(args[1])
     : new CogLog();

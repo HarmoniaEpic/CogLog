@@ -26,7 +26,7 @@ public class CogLog {
     }
 
     private static Path defaultCoglogDir() {
-        // 優先順位: COGLOG_DIR env > user.home/.coglog > ./.coglog（最終フォールバック）
+        // Priority: COGLOG_DIR env > user.home/.coglog > ./.coglog (final fallback)
         String env = System.getenv("COGLOG_DIR");
         if (env != null && !env.isEmpty()) return Path.of(env);
         return Path.of(System.getProperty("user.home", ".")).resolve(".coglog");

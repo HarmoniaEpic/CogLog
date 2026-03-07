@@ -78,16 +78,16 @@ export class CogLog {
   }
 
   async write({ user, thinking, assistant, current_focus, theory_of_mind, self_narrative, annotation }) {
-    // 事実層: 必須・非空
+    // Fact layer: required, non-empty
     for (const [key, val] of Object.entries({ user, thinking, assistant })) {
       if (typeof val !== 'string' || val.length === 0) {
         throw new Error(`missing required field: ${key}`);
       }
     }
 
-    // 解釈層: 必須・空文字列許容
-    // 何を書くかの判断自体がメタ認知的行為であり、
-    // 意図的に空にする判断も一つの判断である。
+    // Interpretation layer: required, empty string acceptable
+    // The decision of what to write is itself a metacognitive act;
+    // choosing to leave a field empty is a valid decision.
     for (const [key, val] of Object.entries({ current_focus, theory_of_mind, self_narrative, annotation })) {
       if (typeof val !== 'string') {
         throw new Error(`missing required field: ${key} (empty string is acceptable)`);
@@ -137,7 +137,7 @@ const isMain = process.argv[1] &&
   new URL('file://' + process.argv[1]).pathname;
 
 if (isMain) {
-  // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+  // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
   let cliArgs = process.argv.slice(2);
   let coglogDir = null;
   if (cliArgs[0] === '--coglog-dir' && cliArgs[1]) {
