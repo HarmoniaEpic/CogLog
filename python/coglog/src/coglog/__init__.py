@@ -174,8 +174,11 @@ def main():
             print(json.dumps(entry, ensure_ascii=False, indent=2))
 
     elif command == "write":
-        data = json.loads(sys.stdin.read())
         try:
+            raw_input = sys.stdin.read()
+            if raw_input == "":
+                raise json.JSONDecodeError("empty input", raw_input, 0)
+            data = json.loads(raw_input)
             entry = ml.write(
                 user=data.get("user"),
                 thinking=data.get("thinking"),
@@ -186,6 +189,9 @@ def main():
                 annotation=data.get("annotation"),
             )
             print(f"coglog: turn {entry['turn_id']} written")
+        except json.JSONDecodeError as e:
+            print(f"coglog error: invalid JSON: {e.msg}", file=sys.stderr)
+            sys.exit(1)
         except (ValueError, TypeError) as e:
             print(f"coglog error: {e}", file=sys.stderr)
             sys.exit(1)
@@ -219,6 +225,5 @@ write expects JSON on stdin (all fields required):
   interpretation layer (current_focus, theory_of_mind, self_narrative, annotation):
     string required, empty string acceptable""")
         sys.exit(1 if command else 0)
-
 
 
