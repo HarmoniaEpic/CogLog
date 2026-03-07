@@ -17,7 +17,7 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun mcp-default-coglog-dir ()
-  "COGLOG_DIR 環境変数 > $HOME/.coglog/ の順で解決する。"
+  "Resolve in order: COGLOG_DIR env var > $HOME/.coglog/"
   (let ((env (sb-ext:posix-getenv "COGLOG_DIR")))
     (if env
         (parse-namestring (concatenate 'string env "/"))
@@ -29,7 +29,7 @@
   (merge-pathnames "current.json" *mcp-data-dir*))
 
 (defun mcp-set-coglog-dir (dir)
-  "データディレクトリを動的に変更する。"
+  "Dynamically change the data directory."
   (setf *mcp-data-dir*    (parse-namestring (concatenate 'string dir "/")))
   (setf *mcp-current-file* (merge-pathnames "current.json" *mcp-data-dir*)))
 
@@ -376,7 +376,7 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun mcp-main ()
-  ;; --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+  ;; Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
   (let ((argv #+sbcl sb-ext:*posix-argv* #-sbcl nil))
     (let ((pos (position "--coglog-dir" argv :test #'string=)))
       (when (and pos (< (1+ pos) (length argv)))
