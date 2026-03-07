@@ -39,6 +39,18 @@ Practical
 
 ## データ構造 / Data Model
 
+CogLog のエントリは二つの層から成る。
+**事実層**（layers）は前ターンに起きたことをそのまま記録する——ユーザー発話・思考過程・AI発話の三つ組。
+**解釈層**（current_focus / theory_of_mind / self_narrative / annotation）は、その事実をAIがどう読んだかを四軸で記述する自由記述欄であり、空文字列が許容される——書かないという選択自体がメタ認知的行為である。
+
+`_schema` フィールドによりエントリは自己記述的となる。外部のドキュメントやコードを参照せずとも、JSONファイル単体で自分の読み書き規約を伝達できる。
+
+A CogLog entry consists of two layers.
+The **fact layer** (layers) records what happened in the previous turn verbatim — a triple of user utterance, thinking process, and assistant output.
+The **interpretation layer** (current_focus / theory_of_mind / self_narrative / annotation) describes how the AI read those facts along four axes; empty strings are acceptable — choosing not to write is itself a metacognitive act.
+
+The `_schema` field makes each entry self-descriptive. A single JSON file can communicate its own read/write contract without reference to external documentation or code.
+
 ```json
 {
   "_schema": {
