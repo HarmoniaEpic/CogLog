@@ -432,19 +432,6 @@ MCP サーバー (`coglog-mcp`) は stdio JSON-RPC が必要なためスモー�
 | 変更起因の破損（文字列閉じ忘れ、Haddock マーカー破損等） | 該当ソースを修正し、失敗ステップを再実行 |
 | 環境起因（ツールチェイン不在等） | 記録してスキップ。CI または別環境で再検証 |
 
-##### オプション: 機能テスト
-
-ビルド検証で十分だが、より厳密な検証が必要な場合は以下の機能テストを追加実行できる。
-
-```bash
-cd python/coglog && python -m pytest
-cd rust && cargo test
-cd java/coglog && mvn test
-cd go && go test ./...
-cd haskell/coglog && cabal test
-cd csharp/coglog && dotnet test
-```
-
 #### Step 4: マーカー・残存バージョンの検証
 
 ```bash
