@@ -14,11 +14,15 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun default-coglog-dir ()
-  "Resolve in order: COGLOG_DIR env var > $HOME/.coglog/"
+  "Resolve in order: COGLOG_DIR env var > $HOME/.coglog/ > ./.coglog/"
   (let ((env (sb-ext:posix-getenv "COGLOG_DIR")))
-    (if env
+    (if (and env (plusp (length env)))
         (parse-namestring (concatenate 'string env "/"))
-        (merge-pathnames ".coglog/" (user-homedir-pathname)))))
+        (let ((home (handler-case (user-homedir-pathname)
+                      (error () nil))))
+          (if home
+              (merge-pathnames ".coglog/" home)
+              (merge-pathnames ".coglog/" *default-pathname-defaults*))))))
 
 (defvar *data-dir* (default-coglog-dir))
 

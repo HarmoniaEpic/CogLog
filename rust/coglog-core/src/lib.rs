@@ -197,7 +197,9 @@ pub fn utc_timestamp() -> String {
 pub fn default_coglog_dir() -> PathBuf {
     // Priority: COGLOG_DIR env > $HOME/.coglog > ./.coglog (final fallback)
     if let Ok(d) = std::env::var("COGLOG_DIR") {
-        return PathBuf::from(d);
+        if !d.is_empty() {
+            return PathBuf::from(d);
+        }
     }
     if let Ok(home) = std::env::var("HOME") {
         return PathBuf::from(home).join(".coglog");

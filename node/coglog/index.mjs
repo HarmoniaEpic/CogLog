@@ -31,7 +31,7 @@ import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
 
-const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
+const DATA_DIR = process.env.COGLOG_DIR || join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
