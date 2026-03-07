@@ -67,38 +67,6 @@ echo '{"user":"...","thinking":"...","assistant":"...", ...}' | coglog-cli write
 coglog-cli clear
 ```
 
-## データ構造 / Data Model
-
-```mermaid
-classDiagram
-  class Entry {
-    +_schema
-    +turn_id
-    +timestamp
-    +layers
-    +current_focus
-    +theory_of_mind
-    +self_narrative
-    +annotation
-  }
-
-  class Layers {
-    +user
-    +thinking
-    +assistant
-  }
-
-  class Schema {
-    +version
-    +fact_layer
-    +interpretation_layer
-    +constraints
-  }
-
-  Entry --> Layers
-  Entry --> Schema
-```
-
 ## MCP 設定 / MCP Configuration
 
 ```json
@@ -132,6 +100,38 @@ flowchart LR
   TR --> F
   TW --> F
   TC --> F
+```
+
+## データ構造 / Data Model
+
+```mermaid
+classDiagram
+  class Entry {
+    +_schema
+    +turn_id
+    +timestamp
+    +layers
+    +current_focus
+    +theory_of_mind
+    +self_narrative
+    +annotation
+  }
+
+  class Layers {
+    +user
+    +thinking
+    +assistant
+  }
+
+  class Schema {
+    +version
+    +fact_layer
+    +interpretation_layer
+    +constraints
+  }
+
+  Entry --> Layers
+  Entry --> Schema
 ```
 
 ## 言語一覧 / Language List
@@ -177,7 +177,7 @@ The data format is identical across all 11 languages. Data written with `write` 
 ```mermaid
 flowchart TB
   subgraph Writers["Write (any language)"]
-    W1["Python"] --> J[("current.json\n(common schema)")]
+    W1["Python"] --> J[("current.json<br/>(common schema)")]
     W2["Rust"] --> J
     W3["Go"] --> J
     W4["Node"] --> J
