@@ -37,6 +37,72 @@ Practical
 
 ---
 
+## データ構造 / Data Model
+
+```json
+{
+  "_schema": {
+    "version": "0.9.1",
+    "fact_layer": {
+      "user": "non-empty string required — user's original utterance",
+      "thinking": "non-empty string required — AI's full thinking process",
+      "assistant": "non-empty string required — AI's original output"
+    },
+    "interpretation_layer": {
+      "current_focus": "string required, empty OK — present: what am I working on?",
+      "theory_of_mind": "string required, empty OK — other: what is the user's state?",
+      "self_narrative": "string required, empty OK — self: who am I in this moment?",
+      "annotation": "string required, empty OK — future: what should I do next?"
+    },
+    "constraints": {
+      "window_size": "1 turn (overwritten each write)",
+      "interpretation_empty": "choosing not to write is itself a metacognitive act"
+    }
+  },
+  "turn_id": 1,
+  "timestamp": "2026-02-26T00:00:00+00:00",
+  "layers": {
+    "user": "User's utterance (verbatim)",
+    "thinking": "AI's thinking process (full text)",
+    "assistant": "AI's output (verbatim)"
+  },
+  "current_focus": "What I am working on right now",
+  "theory_of_mind": "Inference about the user — who they are right now",
+  "self_narrative": "Improvised self-story — who I am right now",
+  "annotation": "Note to future self — what to do next"
+}
+```
+
+```mermaid
+classDiagram
+  class Entry {
+    +_schema
+    +turn_id
+    +timestamp
+    +layers
+    +current_focus
+    +theory_of_mind
+    +self_narrative
+    +annotation
+  }
+
+  class Layers {
+    +user
+    +thinking
+    +assistant
+  }
+
+  class Schema {
+    +version
+    +fact_layer
+    +interpretation_layer
+    +constraints
+  }
+
+  Entry --> Layers
+  Entry --> Schema
+```
+
 ## インストール / Installation
 
 工事中につき、シェルスクリプト（Bash）版をお試し下さい。
@@ -81,6 +147,27 @@ coglog-cli clear
 
 3ツール / 3 tools: `coglog_read`, `coglog_write`, `coglog_clear`
 
+```mermaid
+flowchart LR
+  U["User / Agent"] --> CLI["coglog-cli"]
+  U --> MCP["coglog-mcp"]
+
+  CLI --> R["read"]
+  CLI --> W["write"]
+  CLI --> C["clear"]
+
+  MCP --> TR["coglog_read"]
+  MCP --> TW["coglog_write"]
+  MCP --> TC["coglog_clear"]
+
+  R --> F[("~/.coglog/current.json")]
+  W --> F
+  C --> F
+  TR --> F
+  TW --> F
+  TC --> F
+```
+
 ## 言語一覧 / Language List
 
 ### 実用層 / Practical Layer
@@ -120,6 +207,23 @@ coglog-cli clear
 全11言語のデータ形式は同一。任意の言語で `write` したデータを任意の言語で `read` できる。
 
 The data format is identical across all 11 languages. Data written with `write` in any language can be read with `read` in any other language.
+
+```mermaid
+flowchart TB
+  subgraph Writers["Write (any language)"]
+    W1["Python"] --> J[("current.json<br/>(common schema)")]
+    W2["Rust"] --> J
+    W3["Go"] --> J
+    W4["Node"] --> J
+  end
+
+  subgraph Readers["Read (any language)"]
+    J --> R1["Java"]
+    J --> R2["Ruby"]
+    J --> R3["C#"]
+    J --> R4["Haskell / Lisp / Bash"]
+  end
+```
 
 ## 詳細 / Details
 

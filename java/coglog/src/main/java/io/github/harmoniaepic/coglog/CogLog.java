@@ -234,12 +234,23 @@ public class CogLog {
 
     @SuppressWarnings("unchecked")
     public static Map<String, Object> parseJson(String src) {
-        int[] pos = {0};
-        Object result = parseValue(src, pos);
-        if (result instanceof Map) {
-            return (Map<String, Object>) result;
+        try {
+            int[] pos = {0};
+            Object result = parseValue(src, pos);
+            skipWS(src, pos);
+            if (pos[0] != src.length()) {
+                throw new RuntimeException("invalid JSON: trailing tokens at " + pos[0]);
+            }
+            if (result instanceof Map) {
+                return (Map<String, Object>) result;
+            }
+            throw new RuntimeException("invalid JSON: expected object at top level");
+        } catch (RuntimeException e) {
+            if (e.getMessage() != null && e.getMessage().startsWith("invalid JSON")) {
+                throw e;
+            }
+            throw new RuntimeException("invalid JSON: " + e.getMessage(), e);
         }
-        throw new RuntimeException("Expected JSON object at top level");
     }
 
     private static Object parseValue(String src, int[] pos) {
@@ -250,7 +261,13 @@ public class CogLog {
         if (c == '{') return parseObject(src, pos);
         if (c == '[') return parseArray(src, pos);
         if (c == 't' || c == 'f') return parseBool(src, pos);
-        if (c == 'n') { pos[0] += 4; return null; }
+        if (c == 'n') {
+            if (src.startsWith("null", pos[0])) {
+                pos[0] += 4;
+                return null;
+            }
+            throw new RuntimeException("Expected 'null' at " + pos[0]);
+        }
         if (c == '-' || Character.isDigit(c)) return parseNumber(src, pos);
         throw new RuntimeException("Unexpected char '" + c + "' at " + pos[0]);
     }
@@ -262,6 +279,9 @@ public class CogLog {
             char c = src.charAt(pos[0]++);
             if (c == '"') return sb.toString();
             if (c == '\\') {
+                if (pos[0] >= src.length()) {
+                    throw new RuntimeException("Unterminated escape sequence at " + pos[0]);
+                }
                 char esc = src.charAt(pos[0]++);
                 switch (esc) {
                     case '"': sb.append('"'); break;
@@ -271,7 +291,13 @@ public class CogLog {
                     case 'r': sb.append('\r'); break;
                     case 't': sb.append('\t'); break;
                     case 'u':
+                        if (pos[0] + 4 > src.length()) {
+                            throw new RuntimeException("Invalid Unicode escape at " + pos[0] + ": expected 4 hex digits");
+                        }
                         String hex = src.substring(pos[0], pos[0] + 4);
+                        if (!hex.matches("[0-9a-fA-F]{4}")) {
+                            throw new RuntimeException("Invalid Unicode escape at " + pos[0] + ": expected hexadecimal digits");
+                        }
                         pos[0] += 4;
                         sb.append((char) Integer.parseInt(hex, 16));
                         break;
