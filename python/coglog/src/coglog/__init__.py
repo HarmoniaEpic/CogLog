@@ -11,10 +11,15 @@ next turn.
 Each entry includes a _schema field that makes the data self-documenting:
 the JSON file itself describes how to read and write it.
 
-Usage as CLI:
-    python3 coglog.py read
-    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python3 coglog.py write
-    python3 coglog.py clear
+Usage as module CLI:
+    python -m coglog read
+    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python -m coglog write
+    python -m coglog clear
+
+Usage as script entrypoint:
+    coglog-cli read
+    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
+    coglog-cli clear
 
 Usage as module:
     from coglog import CogLog
@@ -225,5 +230,4 @@ write expects JSON on stdin (all fields required):
   interpretation layer (current_focus, theory_of_mind, self_narrative, annotation):
     string required, empty string acceptable""")
         sys.exit(1 if command else 0)
-
 

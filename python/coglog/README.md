@@ -16,6 +16,16 @@ pip install coglog
 
 ## 使い方 / Usage
 
+### モジュール実行 / Module execution
+
+```bash
+python -m coglog read
+echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python -m coglog write
+python -m coglog clear
+```
+
+### スクリプトエントリポイント / Script entrypoint
+
 ```bash
 coglog-cli read
 echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
