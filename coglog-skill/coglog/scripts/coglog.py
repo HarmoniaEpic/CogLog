@@ -12,9 +12,9 @@ Each entry includes a _schema field that makes the data self-documenting:
 the JSON file itself describes how to read and write it.
 
 Usage as CLI:
-    python3 coglog.py read
-    python3 coglog.py write < input.json
-    python3 coglog.py clear
+    python -m coglog read
+    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python -m coglog write
+    python -m coglog clear
 
 Usage as module:
     from coglog import CogLog
