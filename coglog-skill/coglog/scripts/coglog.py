@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+CogLog — Minimal cognitive continuity for LLMs.
 
 A single-window (size 1) log that holds the previous turn's three-layer
 structure (user utterance, thinking process, assistant output) plus a
@@ -34,7 +34,7 @@ DATA_DIR = Path.home() / ".coglog"
 CURRENT_FILE = DATA_DIR / "current.json"
 
 SCHEMA = {
-    "version": "0.9.1",
+    "version": "0.9.1",  # @coglog-version
     "fact_layer": {
         "user": "non-empty string required — user's original utterance",
         "thinking": "non-empty string required — AI's full thinking process",

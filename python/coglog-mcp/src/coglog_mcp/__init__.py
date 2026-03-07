@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CogLog MCP Server v0.9.1
+CogLog MCP Server
 
 Exposes CogLog read/write/clear as MCP tools over stdio transport.
 Single-file, zero external dependencies. Contains a complete copy of
@@ -17,7 +17,7 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 # ═══════════════════════════════════════════════════════════════
-# CogLog class (copied from coglog-v0.9.1.py)
+# CogLog class (copied from coglog.py)
 # ═══════════════════════════════════════════════════════════════
 
 DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
@@ -25,7 +25,7 @@ DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
 CURRENT_FILE = DATA_DIR / "current.json"
 
 SCHEMA = {
-    "version": "0.9.1",
+    "version": "0.9.1",  # @coglog-version
     "fact_layer": {
         "user": "non-empty string required — user's original utterance",
         "thinking": "non-empty string required — AI's full thinking process",
@@ -170,7 +170,7 @@ def log(msg):
 
 SERVER_INFO = {
     "name": "coglog",
-    "version": "0.9.1",
+    "version": "0.9.1",  # @coglog-version
 }
 
 

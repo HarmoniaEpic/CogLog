@@ -5,7 +5,7 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * CogLog MCP Server v0.9.1
+ * CogLog MCP Server
  *
  * Exposes CogLog read/write/clear as MCP tools over stdio transport.
  * Protocol: JSON-RPC 2.0 over stdio (MCP 2024-11-05)
@@ -109,7 +109,7 @@ public class McpServer {
                     continue;
                 }
                 if ("initialize".equals(method)) {
-                    sendResult(id, "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}");
+                    sendResult(id, "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}");  // @coglog-version
                 } else if ("tools/list".equals(method)) {
                     sendResult(id, "{\"tools\":" + TOOLS_JSON + "}");
                 } else if ("tools/call".equals(method)) {

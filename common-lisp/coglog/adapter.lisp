@@ -1,5 +1,5 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog v0.9.1 — Common Lisp Adapter
+;;;; CogLog — Common Lisp Adapter
 ;;;;
 ;;;; Grounds the pure core from coglog.lisp to current.json.
 ;;;; Provides JSON serialization/parsing, file I/O, and CLI.
