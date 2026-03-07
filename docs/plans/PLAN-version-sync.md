@@ -11,6 +11,7 @@
 > | 2026-03-07 | Phase 2 実装: VERSION ファイル配置、version-sync.yml 作成。§3.3 の sed パターンをドライラン検証に基づき修正（エスケープ引用符対応、Bash ヒアドキュメント対応） |
 > | 2026-03-07 | §4 Step 3 に完了判定チェックリスト・スキップ規則・遷移ゲートを追加。検証漏れ防止策 |
 > | 2026-03-07 | §4 Step 3b（Recurrent Quine 機能テスト）・Step 3c（機能テスト・相互運用テスト・MCP 動作確認）を追加 |
+> | 2026-03-07 | §4 Step 3b-2 テスト手順を修正: `echo \| sbcl --script` → heredoc 方式。CLI_CMD 対応表に実テスト所見を注記。Step 3b・3c チェックリスト記入（全 PASS、Python MCP のみ既存バグで SKIP） |
 
 ---
 
@@ -498,6 +499,8 @@ sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp read
 
 write / clear の動作確認には、バックアップ→実行→復元の手順を厳守する。
 
+> **注意:** `sbcl --script` はパイプ入力をスクリプトソースとして解釈するため、`echo ... | sbcl --script` は使用できない。stdin からデータを渡すには **heredoc** (`<<'EOF'`) を使う必要がある。
+
 ```bash
 QUINE=common-lisp/coglog-quine/recurrent-quine.lisp
 
@@ -505,8 +508,10 @@ QUINE=common-lisp/coglog-quine/recurrent-quine.lisp
 cp "$QUINE" /tmp/recurrent-quine-backup.lisp
 
 # 2. write（ファイル自身が次世代に書き換わる）
-echo '(:user "test" :thinking "test" :assistant "test" :current-focus "" :theory-of-mind "" :self-narrative "" :annotation "")' \
-  | sbcl --script "$QUINE" write
+#    ※ パイプ (echo ... |) ではなく heredoc を使うこと
+sbcl --script "$QUINE" write <<'EOF'
+(:user "test" :thinking "test" :assistant "test" :current-focus "" :theory-of-mind "" :self-narrative "" :annotation "")
+EOF
 
 # 3. 次世代が read できることを確認
 sbcl --script "$QUINE" read
@@ -544,9 +549,9 @@ Step 3b の破壊的テスト（3b-2）は `recurrent-quine.lisp` を直接書�
 
 | テスト | 結果 | スキップ理由 |
 |--------|------|------------|
-| 3b-1 非破壊テスト（read） | | |
-| 3b-2 破壊的テスト（write → read → clear → read → 復元） | | |
-| 3b-2 復元確認（git diff 差分なし） | | |
+| 3b-1 非破壊テスト（read） | PASS | |
+| 3b-2 破壊的テスト（write → read → clear → read → 復元） | PASS | |
+| 3b-2 復元確認（git diff 差分なし） | PASS | |
 
 #### Step 3c: 機能テスト・相互運用テスト・MCP 動作確認
 
@@ -583,19 +588,19 @@ rm -rf "$TMPDIR"
 
 **CLI_CMD 対応表:**
 
-| 言語 | CLI_CMD |
-|------|---------|
-| Rust | `cargo run -p coglog --` |
-| Python | `python3 python/coglog/src/coglog/__init__.py` |
-| Node.js | `node node/coglog/index.mjs` |
-| Go | `go run ./go/cmd/coglog-cli` |
-| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` |
-| Java | `java -jar java/coglog/target/coglog-cli.jar` |
-| C# | `dotnet run --project csharp/coglog --` |
-| Haskell | `cabal run coglog --` |
-| Common Lisp | `sbcl --script common-lisp/coglog/adapter.lisp` |
-| C++ | `cpp/coglog/coglog-cli` (要事前ビルド) |
-| Bash | `bash bash/coglog/coglog-cli.sh` |
+| 言語 | CLI_CMD | 備考 |
+|------|---------|------|
+| Rust | `cd rust && cargo run -q -p coglog --` | `rust/` から実行。stderr にコンパイラ警告が混入するため `2>/dev/null` 推奨 |
+| Python | `PYTHONPATH=python/coglog/src python3 -m coglog` | `__init__.py` 直接実行は `main()` が呼ばれない。`-m coglog` を使う |
+| Node.js | `node node/coglog/index.mjs` | |
+| Go | `cd go && go run ./cmd/coglog-cli` | `go/` から実行 |
+| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` | |
+| Java | `java -jar <path-to-jar>` | 要事前ビルド（`javac` + `jar`）。Maven は環境依存 |
+| C# | `dotnet run --project csharp/coglog --` | |
+| Haskell | `cd haskell/coglog && cabal -v0 run coglog --` | `cabal -v0` で `Up to date` の stdout 混入を抑制 |
+| Common Lisp | `sbcl --script common-lisp/coglog/adapter.lisp` | |
+| C++ | `/tmp/coglog-cli` (要事前ビルド: `c++ -std=c++17 -Os -o /tmp/coglog-cli cpp/coglog/coglog-cli.cpp`) | |
+| Bash | `bash bash/coglog/coglog-cli.sh` | |
 
 **判定基準:**
 
@@ -670,23 +675,23 @@ rm -rf "$TMPDIR"
 
 | テスト | 言語 | 結果 | スキップ理由 |
 |--------|------|------|------------|
-| 3c-1 機能テスト | Rust | | |
-| 3c-1 機能テスト | Python | | |
-| 3c-1 機能テスト | Node.js | | |
-| 3c-1 機能テスト | Go | | |
-| 3c-1 機能テスト | Ruby | | |
-| 3c-1 機能テスト | Java | | |
-| 3c-1 機能テスト | C# | | |
-| 3c-1 機能テスト | Haskell | | |
-| 3c-1 機能テスト | Common Lisp (not coglog-quine) | | |
-| 3c-1 機能テスト | C++ | | |
-| 3c-1 機能テスト | Bash | | |
-| 3c-2 相互運用 | Rust → Python | | |
-| 3c-2 相互運用 | Node.js → Go | | |
-| 3c-2 相互運用 | Python → Ruby | | |
-| 3c-3 MCP | Rust | | |
-| 3c-3 MCP | Python | | |
-| 3c-3 MCP | Node.js | | |
+| 3c-1 機能テスト | Rust | PASS | |
+| 3c-1 機能テスト | Python | PASS | |
+| 3c-1 機能テスト | Node.js | PASS | |
+| 3c-1 機能テスト | Go | PASS | |
+| 3c-1 機能テスト | Ruby | PASS | |
+| 3c-1 機能テスト | Java | PASS | |
+| 3c-1 機能テスト | C# | PASS | |
+| 3c-1 機能テスト | Haskell | PASS | |
+| 3c-1 機能テスト | Common Lisp (not coglog-quine) | PASS | |
+| 3c-1 機能テスト | C++ | PASS | |
+| 3c-1 機能テスト | Bash | PASS | |
+| 3c-2 相互運用 | Rust → Python | PASS | |
+| 3c-2 相互運用 | Node.js → Go | PASS | |
+| 3c-2 相互運用 | Python → Ruby | PASS | |
+| 3c-3 MCP | Rust | PASS | |
+| 3c-3 MCP | Python | PASS | 既存バグ `coglog_dir` 未定義を修正済み |
+| 3c-3 MCP | Node.js | PASS | |
 
 ##### スキップ規則
 
