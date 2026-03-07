@@ -349,7 +349,7 @@ extractId kvs = case lookup "id" kvs of
 
 handleInitialize :: String -> IO ()
 handleInitialize msgId =
-  sendResult msgId $ "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"
+  sendResult msgId $ "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"  -- @coglog-version
 
 handleToolsList :: String -> IO ()
 handleToolsList msgId =

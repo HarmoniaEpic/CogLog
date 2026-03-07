@@ -1,5 +1,5 @@
 /**
- * CogLog v0.9.1 — TypeScript type definitions.
+ * CogLog — TypeScript type definitions.
  */
 
 export interface FactLayerSchema {

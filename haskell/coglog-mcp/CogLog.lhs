@@ -1,4 +1,4 @@
-CogLog v0.9.1 — Haskell Pure Core
+CogLog — Haskell Pure Core
 
 Annotations from the pure/impure separation in DESIGN-v0.9.1.md.
 This file is Literate Haskell that GHC can compile directly.
@@ -178,7 +178,7 @@ It differs in type from Entry's other fields (String, Int, UTCTime, Layers),
 and any mix-up becomes a compile error.
 
 > schemaVersion :: String
-> schemaVersion = "0.9.1"
+> schemaVersion = "0.9.1"  -- @coglog-version
 >
 > coglogSchema :: Schema
 > coglogSchema = Schema

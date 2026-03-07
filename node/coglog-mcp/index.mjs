@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CogLog MCP Server v0.9.1
+ * CogLog MCP Server
  *
  * Exposes CogLog read/write/clear as MCP tools over stdio transport.
  * Single-file, zero external dependencies. Contains a complete copy of
@@ -26,7 +26,7 @@ const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
-  version: "0.9.1",
+  version: "0.9.1",  // @coglog-version
   fact_layer: {
     user: "non-empty string required — user's original utterance",
     thinking: "non-empty string required — AI's full thinking process",
@@ -178,7 +178,7 @@ function log(msg) {
 // MCP handlers
 // ═══════════════════════════════════════════════════════════════
 
-const SERVER_INFO = { name: "coglog", version: "0.9.1" };
+const SERVER_INFO = { name: "coglog", version: "0.9.1" };  // @coglog-version
 
 function handleInitialize(msgId, params) {
   sendResult(msgId, {

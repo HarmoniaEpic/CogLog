@@ -1,4 +1,4 @@
-//! CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+//! CogLog — Minimal cognitive continuity for LLMs.
 //!
 //! A single-window (size 1) log that holds the previous turn's three-layer
 //! structure (user utterance, thinking process, assistant output) plus a
@@ -109,7 +109,7 @@ pub struct ClearResult {
 
 pub fn make_schema() -> Schema {
     Schema {
-        version: "0.9.1".into(),
+        version: "0.9.1".into(),  // @coglog-version
         fact_layer: FactLayerSchema {
             user: "non-empty string required \u{2014} user's original utterance".into(),
             thinking: "non-empty string required \u{2014} AI's full thinking process".into(),
