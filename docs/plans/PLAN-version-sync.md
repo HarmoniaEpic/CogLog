@@ -445,17 +445,17 @@ Step 3 の全検証項目の結果を以下のテーブルに記録する。**�
 
 | 言語 | 構文/ビルド | スモーク | 結果 | スキップ理由 |
 |------|-----------|--------|------|------------|
-| Rust | `cargo build --release` | `--help` | | |
-| C++ | `c++ -std=c++17` | `--help` | | |
-| Go | `go build ./...` | `--help` | | |
-| Java | `mvn compile` / `javac` | `--help` | | |
-| C# | `dotnet build` | `--help` | | |
-| Haskell | `cabal build` | `--help` | | |
-| Common Lisp | `sbcl --eval '(load ...)'` | `read` | | |
-| Python | `py_compile` | `--help` | | |
-| Node.js | `node --check` | `--help` | | |
-| Ruby | `ruby -c` | `--help` | | |
-| Bash | `bash -n` | `--help` | | |
+| Rust | `cargo build --release` | `--help` | PASS | |
+| C++ | `c++ -std=c++17` | `--help` | PASS | |
+| Go | `go build ./...` | `--help` | PASS | |
+| Java | `mvn compile` / `javac` | `--help` | PASS | javac 直接コンパイルで確認（Maven は DNS 解決失敗で使用不可） |
+| C# | `dotnet build` | `--help` | PASS | |
+| Haskell | `cabal build` | `--help` | PASS | |
+| Common Lisp | `sbcl --eval '(load ...)'` | `read` | PASS | STYLE-WARNING は既存の前方参照（変更無関係） |
+| Python | `py_compile` | `--help` | PASS | |
+| Node.js | `node --check` | `--help` | PASS | |
+| Ruby | `ruby -c` | `--help` | PASS | |
+| Bash | `bash -n` | `--help` | PASS | |
 
 ##### スキップ規則
 
@@ -510,11 +510,11 @@ grep -rn '0\.9\.1' \
 
 **確認項目:**
 
-- [ ] `@coglog-version` マーカー行のバージョンが全て更新されている
+- [x] `@coglog-version` マーカー行のバージョンが全て更新されている（ローカルドライラン: 9.9.9 で全34箇所＋Bashヒアドキュメント1箇所を確認）
 - [ ] 全パッケージマニフェスト（§2 対象 18 ファイル）のバージョンが更新されている
 - [ ] pom.xml で `<dependency>` 等の無関係な `<version>` が誤置換されていない
 - [ ] `Cargo.lock` が `cargo generate-lockfile` で正常に再生成されている
-- [ ] 分類 C（`DESIGN-v0.9.1.md`）が変更されていない
+- [x] 分類 C（`DESIGN-v0.9.1.md`）が変更されていない（ローカルドライランで残存確認済み）
 - [ ] `v{VERSION}` タグが正しく作成されている
 - [ ] 既存リリースワークフロー（release-bash / release-cpp / release-coglog-skill）がタグにより正常に発火する
 
