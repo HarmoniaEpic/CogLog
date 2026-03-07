@@ -9,7 +9,7 @@ Gem::Specification.new do |s|
   s.metadata    = { "source_code_uri" => "https://github.com/HarmoniaEpic/coglog/tree/main/ruby/coglog" }
 
   s.required_ruby_version = ">= 3.0"
-  s.files       = ["lib/coglog.rb"]
+  s.files       = ["lib/coglog.rb", "bin/coglog-cli"]
   s.executables = ["coglog-cli"]
   s.require_paths = ["lib"]
 end
