@@ -20,8 +20,8 @@ from pathlib import Path
 # CogLog class (copied from coglog.py)
 # ═══════════════════════════════════════════════════════════════
 
-DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
-           else Path.home() / ".coglog"
+_env = os.environ.get("COGLOG_DIR")
+DATA_DIR = Path(_env) if _env else Path.home() / ".coglog"
 CURRENT_FILE = DATA_DIR / "current.json"
 
 SCHEMA = {
@@ -229,6 +229,11 @@ def handle_ping(msg_id):
 # ═══════════════════════════════════════════════════════════════
 
 def main():
+    global DATA_DIR, CURRENT_FILE
+    # --coglog-dir <path> support (priority: argument > COGLOG_DIR env > default)
+    if len(sys.argv) >= 3 and sys.argv[1] == "--coglog-dir":
+        DATA_DIR = Path(sys.argv[2])
+        CURRENT_FILE = DATA_DIR / "current.json"
     ml = CogLog()
     log("server started")
 

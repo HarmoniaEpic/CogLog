@@ -39,7 +39,9 @@ module CogLogMCP
 
   class CogLog
     def initialize(data_dir: nil)
-      @data_dir = data_dir || (ENV['COGLOG_DIR'] || File.join(Dir.home, '.coglog'))
+      env = ENV['COGLOG_DIR']
+      env = nil if env&.empty?
+      @data_dir = data_dir || env || File.join(Dir.home, '.coglog')
       @current_file = File.join(@data_dir, 'current.json')
     end
 
