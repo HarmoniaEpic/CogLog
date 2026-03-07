@@ -8,6 +8,7 @@
 > | 2026-03-07 | GitHub Actions によるバージョン一元管理計画に拡張。パッケージマニフェスト・ワークフロー設計を追加。対象言語に C#・Haskell・Rust・Node.js・JSX を追加 |
 > | 2026-03-07 | §1 ステータス更新（全言語 ◎）。§4 作業手順を改訂: テスト検証・計画書更新ステップ追加、§2 の明示的参照、ドライラン確認項目追加 |
 > | 2026-03-07 | §4 Step 3 を改訂: 機能テスト中心から PLAN-i18n-build-verify.md 準拠のビルド/構文検証＋スモークテストに変更。機能テストはオプションに格下げ |
+> | 2026-03-07 | Phase 2 実装: VERSION ファイル配置、version-sync.yml 作成。§3.3 の sed パターンをドライラン検証に基づき修正（エスケープ引用符対応、Bash ヒアドキュメント対応） |
 
 ---
 
@@ -247,6 +248,7 @@ VERSION ファイル変更 (push to main)
 NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
 
 # @coglog-version マーカー行のバージョン文字列を一括置換
+# \\? で通常の引用符 ("0.9.1") とエスケープされた引用符 (\"0.9.1\") の両方に対応
 grep -rl '@coglog-version' \
   --include='*.py' --include='*.rb' --include='*.java' \
   --include='*.cpp' --include='*.sh' --include='*.go' \
@@ -254,7 +256,11 @@ grep -rl '@coglog-version' \
   --include='*.lhs' --include='*.rs' --include='*.mjs' \
   --include='*.jsx' . |
   xargs sed -i -E \
-    "s/([\"'])([0-9]+\.[0-9]+\.[0-9]+)\1(.*@coglog-version)/\1${NEW_VERSION}\1\3/g"
+    "s/(\\\\?[\"'])[0-9]+\.[0-9]+\.[0-9]+(\\\\?[\"'].*@coglog-version)/\1${NEW_VERSION}\2/g"
+
+# Bash ヒアドキュメント: マーカーの 2 行後にバージョンがある
+sed -i -E "/@coglog-version.*next line/{n;n; s/[0-9]+\.[0-9]+\.[0-9]+/${NEW_VERSION}/;}" \
+  bash/coglog/coglog-cli.sh
 ```
 
 ### 3.4 パッケージマニフェスト更新
