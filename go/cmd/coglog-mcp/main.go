@@ -1,4 +1,4 @@
-// CogLog MCP Server v0.9.1
+// CogLog MCP Server
 //
 // Exposes CogLog read/write/clear as MCP tools over stdio transport.
 //
@@ -127,7 +127,7 @@ func handleInitialize(id *json.RawMessage) {
 	sendResult(id, map[string]interface{}{
 		"protocolVersion": "2024-11-05",
 		"capabilities":    map[string]interface{}{"tools": map[string]interface{}{}},
-		"serverInfo":      map[string]interface{}{"name": "coglog", "version": "0.9.1"},
+		"serverInfo":      map[string]interface{}{"name": "coglog", "version": "0.9.1"},  // @coglog-version
 	})
 }
 

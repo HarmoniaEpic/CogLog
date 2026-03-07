@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+CogLog — Minimal cognitive continuity for LLMs.
 
 A single-window (size 1) log that holds the previous turn's three-layer
 structure (user utterance, thinking process, assistant output) plus a
@@ -12,9 +12,9 @@ Each entry includes a _schema field that makes the data self-documenting:
 the JSON file itself describes how to read and write it.
 
 Usage as CLI:
-    python3 coglog-v0.9.1.py read
-    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python3 coglog-v0.9.1.py write
-    python3 coglog-v0.9.1.py clear
+    python3 coglog.py read
+    echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | python3 coglog.py write
+    python3 coglog.py clear
 
 Usage as module:
     from coglog import CogLog
@@ -35,7 +35,7 @@ DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
 CURRENT_FILE = DATA_DIR / "current.json"
 
 SCHEMA = {
-    "version": "0.9.1",
+    "version": "0.9.1",  # @coglog-version
     "fact_layer": {
         "user": "non-empty string required — user's original utterance",
         "thinking": "non-empty string required — AI's full thinking process",
@@ -198,7 +198,7 @@ def main():
             print(f"coglog: {result['reason']}")
 
     else:
-        print("""usage: coglog-v0.9.1.py <read|write|clear>
+        print("""usage: coglog.py <read|write|clear>
 
   read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)

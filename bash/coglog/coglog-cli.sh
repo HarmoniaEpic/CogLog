@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # ═══════════════════════════════════════════════════════════════════
-# CogLog CLI v0.9.1 — Shell script edition
+# CogLog CLI — Shell script edition
 #
 # Glue language implementation: bash + jq.
 #
@@ -21,7 +21,7 @@
 
 set -euo pipefail
 
-readonly COGLOG_VERSION="0.9.1"
+readonly COGLOG_VERSION="0.9.1"  # @coglog-version
 readonly COGLOG_DIR="${COGLOG_DIR:-${HOME}/.coglog}"
 readonly COGLOG_FILE="${COGLOG_DIR}/current.json"
 
@@ -64,6 +64,7 @@ require_jq() {
 # consistent — jq speaks JSON natively.
 # ═══════════════════════════════════════════════════════════════════
 
+# @coglog-version (next line: version in jq filter)
 readonly SCHEMA_FILTER='{
   version: "0.9.1",
   fact_layer: {

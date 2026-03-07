@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+# CogLog — Minimal cognitive continuity for LLMs.
 #
 # A single-window (size 1) log that holds the previous turn's three-layer
 # structure (user utterance, thinking process, assistant output) plus a
@@ -13,7 +13,7 @@ require 'time'
 require 'fileutils'
 
 module CogLog
-  VERSION = '0.9.1'
+  VERSION = '0.9.1'  # @coglog-version
 
   SCHEMA = {
     'version' => VERSION,
