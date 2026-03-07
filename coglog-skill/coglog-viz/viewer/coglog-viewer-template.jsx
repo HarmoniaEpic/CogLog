@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // ╔═══════════════════════════════════════════════════════════════╗
-// ║  CogLog Viewer Template v0.9.1                               ║
+// ║  CogLog Viewer Template                                       ║
 // ║                                                               ║
 // ║  Replace COGLOG_DATA below with the output of:                ║
 // ║    python3 metalog.py read                                    ║
@@ -14,7 +14,7 @@ import { useState, useEffect } from "react";
 
 const COGLOG_DATA = {
   "_schema": {
-    "version": "0.9.1",
+    "version": "0.9.1",  // @coglog-version
     "fact_layer": {
       "user": "non-empty string required — user's original utterance",
       "thinking": "non-empty string required — AI's full thinking process",
@@ -370,7 +370,7 @@ export default function CogLogViewer() {
             fontSize: 11, color: p.textMuted,
             fontFamily: mono, letterSpacing: "0.15em", textTransform: "uppercase",
           }}>
-            CogLog v{d._schema?.version || "0.9.1"}
+            CogLog v{d._schema?.version || "0.9.1"}{/* @coglog-version */}
           </div>
           <ThemeToggle preference={preference} setPreference={setPreference} p={p} />
         </div>

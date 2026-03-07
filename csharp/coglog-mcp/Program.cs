@@ -1,4 +1,4 @@
-// CogLog MCP Server v0.9.1
+// CogLog MCP Server
 //
 // Exposes CogLog read/write/clear as MCP tools over stdio transport.
 //
@@ -148,7 +148,7 @@ void HandleInitialize(JsonNode? id)
         ["serverInfo"] = new JsonObject
         {
             ["name"] = "coglog",
-            ["version"] = "0.9.1"
+            ["version"] = "0.9.1"  // @coglog-version
         }
     };
     SendResult(id, result);

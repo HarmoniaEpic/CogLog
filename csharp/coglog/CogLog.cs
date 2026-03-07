@@ -1,4 +1,4 @@
-// CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+// CogLog — Minimal cognitive continuity for LLMs.
 // C# implementation using System.Text.Json (no external dependencies).
 
 using System;
@@ -13,7 +13,7 @@ namespace CogLogNS
 {
     public class CogLog
     {
-        public const string Version = "0.9.1";
+        public const string Version = "0.9.1";  // @coglog-version
         public string DataDir { get; }
         public string CurrentFile { get; }
 
