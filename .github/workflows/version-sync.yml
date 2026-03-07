@@ -1,0 +1,131 @@
+name: Version Sync
+
+on:
+  push:
+    branches: [main]
+    paths: [VERSION]
+  workflow_dispatch:
+
+permissions:
+  contents: write
+
+jobs:
+  sync:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Read VERSION
+        id: version
+        run: |
+          V=$(cat VERSION | tr -d '[:space:]')
+          echo "version=$V" >> "$GITHUB_OUTPUT"
+          echo "tag=v$V" >> "$GITHUB_OUTPUT"
+
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "refs/tags/${{ steps.version.outputs.tag }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Update @coglog-version marker lines
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          # Replace version in marker lines (handles both "0.9.1" and \"0.9.1\")
+          grep -rl '@coglog-version' \
+            --include='*.py' --include='*.rb' --include='*.java' \
+            --include='*.cpp' --include='*.sh' --include='*.go' \
+            --include='*.lisp' --include='*.cs' --include='*.hs' \
+            --include='*.lhs' --include='*.rs' --include='*.mjs' \
+            --include='*.jsx' . |
+            xargs sed -i -E \
+              "s/(\\\\?[\"'])[0-9]+\.[0-9]+\.[0-9]+(\\\\?[\"'].*@coglog-version)/\1${V}\2/g"
+          # Bash heredoc: marker is 2 lines before version line
+          sed -i -E "/@coglog-version.*next line/{n;n; s/[0-9]+\.[0-9]+\.[0-9]+/${V}/;}" \
+            bash/coglog/coglog-cli.sh
+
+      - name: Update package.json (jq)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          for f in node/coglog/package.json node/coglog-mcp/package.json; do
+            jq --arg v "$V" '.version = $v' "$f" > tmp.$$ && mv tmp.$$ "$f"
+          done
+
+      - name: Update pyproject.toml
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s/^version = \".*\"/version = \"${V}\"/" \
+            python/coglog/pyproject.toml \
+            python/coglog-mcp/pyproject.toml
+
+      - name: Update Cargo.toml (workspace + dependency refs)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s/^version = \".*\"/version = \"${V}\"/" rust/Cargo.toml
+          sed -i -E "s/(coglog-core = \{[^}]*version = \")([0-9]+\.[0-9]+\.[0-9]+)(\")/\1${V}\3/" \
+            rust/coglog/Cargo.toml rust/coglog-mcp/Cargo.toml
+
+      - name: Update pom.xml (project version — line 9)
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i "9s|<version>.*</version>|<version>${V}</version>|" \
+            java/coglog/pom.xml java/coglog-mcp/pom.xml
+
+      - name: Update gemspec
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s/(s\.version[[:space:]]*=[[:space:]]*)\".*\"/\1\"${V}\"/" \
+            ruby/coglog/coglog.gemspec ruby/coglog-mcp/coglog-mcp.gemspec
+
+      - name: Update csproj
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s|<Version>.*</Version>|<Version>${V}</Version>|" \
+            csharp/coglog/coglog.csproj csharp/coglog-mcp/coglog-mcp.csproj
+
+      - name: Update cabal
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s/^version:[[:space:]]+.*/version:       ${V}/" \
+            haskell/coglog/coglog.cabal haskell/coglog-mcp/coglog-mcp.cabal
+
+      - name: Update asd
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          sed -i -E "s/:version \".*\"/:version \"${V}\"/" \
+            common-lisp/coglog/coglog.asd \
+            common-lisp/coglog-mcp/coglog-mcp.asd \
+            common-lisp/coglog-quine/coglog-quine.asd
+
+      - name: Regenerate Cargo.lock
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          cd rust && cargo generate-lockfile
+
+      - name: Commit and tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          V="${{ steps.version.outputs.version }}"
+          TAG="${{ steps.version.outputs.tag }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add -A
+          if git diff --cached --quiet; then
+            echo "No changes to commit"
+          else
+            git commit -m "chore: sync version to ${V}"
+          fi
+          git tag "$TAG"
+          git push origin main --tags
