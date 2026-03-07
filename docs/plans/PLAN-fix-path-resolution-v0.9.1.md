@@ -6,6 +6,47 @@
 
 ---
 
+## スコープ外: Recurrent Quine（`common-lisp/coglog-quine/`）
+
+### Recurrent Quine とは何か
+
+`common-lisp/coglog-quine/recurrent-quine.lisp` は、CogLog の漸化式 $a_{n+1} = f(a_n, x_n, y_n)$ を **ファイル自己書き換え** として実装したプログラムである。他の全実装（CLI / MCP）がデータディレクトリ内の `current.json` を読み書きするのに対し、Recurrent Quine は **このファイル自身がプログラムであると同時に状態** であり、`write` コマンドはファイル自身を次世代 $Q_{n+1}$ として上書きする。
+
+```
+他の全実装:   プログラム → current.json を読み書き
+Recurrent Quine:  recurrent-quine.lisp が自分自身を書き換える
+```
+
+内部構造は四つ組として設計されている:
+
+| 成分 | 役割 | 変異頻度 |
+|------|------|---------|
+| `*state*` | 現在のエントリ（表現型） | 毎世代 |
+| `*advance-source*` | 変換規則（構造遺伝子） | オプション引数で許容 |
+| `*affordance*` | LLM への案内（調節配列） | オプション引数で許容 |
+| `*self-source*` | 自己複製機構（DNA ポリメラーゼ） | 事実上不変 |
+
+`write-generation` 関数が `*self-path*`（= `*load-truename*`、つまり自分自身の絶対パス）に四つ組を書き出すことで、各世代がスタンドアロンで動作する完全なプログラムとして再生成される。
+
+### なぜ本計画のスコープ外か
+
+SPEC-path-resolution-v0.9.1 は **データディレクトリの解決規則** を定める仕様である:
+
+> CogLog はデータを単一のディレクトリ（データディレクトリ）内の `current.json` に保存する。本文書はデータディレクトリの解決規則を定める。
+> — SPEC-path-resolution-v0.9.1.md, L5
+
+Recurrent Quine はこの前提そのものに該当しない:
+
+1. **データディレクトリが存在しない。** Recurrent Quine にはデータディレクトリという概念がない。状態は `current.json` ではなく `.lisp` ファイル自身に埋め込まれている。パス解決の4段階（明示的指定 → `COGLOG_DIR` → ホームディレクトリ → フォールバック）が適用される対象自体が不在である。
+
+2. **書き込み先はプログラム自身。** `*self-path*` は `*load-truename*`（SBCL の `--script` モードで自動設定されるファイル自身の絶対パス）であり、環境変数やコマンドライン引数で解決されるものではない。
+
+3. **仕様の言語別テーブルに含まれていない。** SPEC-path-resolution-v0.9.1 の一覧テーブル（L146-159）は Common Lisp の通常の CLI/MCP 実装（`common-lisp/coglog/`, `common-lisp/coglog-mcp/`）を対象としており、Recurrent Quine は列挙されていない。
+
+したがって、本計画の違反分析および修正対象から Recurrent Quine を除外する。
+
+---
+
 ## 違反一覧
 
 | ID | 違反内容 | 影響範囲 | 深刻度 |
