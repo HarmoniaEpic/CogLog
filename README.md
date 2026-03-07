@@ -27,6 +27,7 @@ Why                   │
 What        データ=コード    純粋/不純の分離   POSIX還元
             data=code     pure/impure sep.  POSIX reduction
             _schemaの必然性   advance/writeの分離
+
                       │
   ┌────┬────┬─────────┼─────────┬────┬────┬────┬────┐
   ▼    ▼    ▼         ▼         ▼    ▼    ▼    ▼    ▼
