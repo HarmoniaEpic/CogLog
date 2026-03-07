@@ -6,6 +6,57 @@
 
 ---
 
+## スコープ外: 再帰的クワイン構造の解消
+
+### 現状の構造
+
+CogLog の MCP サーバー実装は、全言語において **CLI コアロジックの完全コピー** を単一ファイル内に内包する設計を採っている。
+
+```
+# 各 MCP サーバーのファイル冒頭に共通するコメント:
+"Single-file, zero external dependencies. Contains a complete copy of
+ the CogLog class for standalone operation."
+```
+
+具体的には、パス解決関数（`default_coglog_dir` / `DATA_DIR` 等）、CogLog クラス本体、JSON シリアライズロジックの全てが CLI → MCP へ手動コピーされている。
+
+| 言語 | CLI（コピー元） | MCP（コピー先） |
+|------|----------------|----------------|
+| Python | `python/coglog/src/coglog/__init__.py` | `python/coglog-mcp/src/coglog_mcp/__init__.py` |
+| Node.js | `node/coglog/index.mjs` | `node/coglog-mcp/index.mjs` |
+| Ruby | `ruby/coglog/lib/coglog.rb` | `ruby/coglog-mcp/lib/coglog_mcp.rb` |
+| C++ | `cpp/coglog/coglog-cli.cpp` | `cpp/coglog-mcp/coglog-mcp.cpp` |
+| Common Lisp | `common-lisp/coglog/adapter.lisp` | `common-lisp/coglog-mcp/mcp-server.lisp` |
+| Haskell | `haskell/coglog/Adapter.hs` | `haskell/coglog-mcp/McpServer.hs` |
+
+この構造は **再帰的クワイン（Recurrent Quine）** の設計思想と通底する。CogLog の Common Lisp 実装（`common-lisp/coglog-quine/`）は、プログラム自身がデータとコードの両方を内包し、$Q_n \to Q_{n+1}$ の自己遷移を行う再帰的クワインとして設計されている。MCP サーバーの single-file 設計も同根の原理——**一つの自己完結したファイルが、外部依存なしに完全な CogLog として機能する**——に基づく。
+
+### なぜ本計画のスコープ外とするか
+
+**1. 設計意図の尊重**
+
+single-file・zero-dependency 原則は、MCP サーバーの配布・デプロイを極限まで簡素化するための意図的な設計判断である。ファイルを1つコピーすれば動く、という性質は MCP エコシステムにおいて実用上の価値が大きい。この設計原則を壊してモジュール共有化（CLI と MCP でコアを import する構造）に変更することは、アーキテクチャレベルの再設計であり、パス解決のバグ修正とは独立した判断を要する。
+
+**2. 影響範囲の爆発**
+
+コード共有化を行うと、各言語のパッケージング（PyPI / npm / Cargo / gem 等）、ビルドシステム、テスト構成、CI パイプラインの全てに波及する。本計画の目的はパス解決仕様への準拠であり、パッケージングの再構成は別の設計判断と別の計画を要する。
+
+**3. 再帰的クワインとの構造的矛盾**
+
+Common Lisp の Recurrent Quine は、四つ組 $(\text{*state*},\ \text{*advance-source*},\ \text{*affordance*},\ \text{*self-source*})$ を単一ファイル内に閉じ込めることで自己参照・自己書き換えを実現している。MCP サーバーの single-file 設計を崩すことは、この自己完結性の原則と矛盾する。Recurrent Quine の `*self-source*`（自己複製機構）は「事実上不変」と定義されており、コード構造の分割は系譜の断絶に相当する変更である。
+
+**4. バグの同型性が保証する修正の機械的適用**
+
+CLI と MCP のコードがコピーであるという事実は、逆説的に修正作業を単純化する。V1（空文字列処理）の修正パターンは CLI と MCP で完全に同一であり、同じ diff を機械的に適用すればよい。共有化していなくても、修正の正しさは同型性によって保証される。
+
+### 本計画での対処方針
+
+再帰的クワイン構造（single-file コピー設計）はそのまま維持する。各違反について、CLI とその MCP コピーの **両方に同一の修正** を適用する。結果として修正箇所は倍になるが、各修正は機械的であり、リスクは低い。
+
+コピー構造の解消を将来的に検討する場合は、別途アーキテクチャ設計文書を起こすべきである。
+
+---
+
 ## 違反一覧
 
 | ID | 違反内容 | 影響範囲 | 深刻度 |
