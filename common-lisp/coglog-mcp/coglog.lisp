@@ -1,5 +1,5 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog v0.9.1 — Common Lisp Pure Core
+;;;; CogLog — Common Lisp Pure Core
 ;;;;
 ;;;; This file is an annotation from the homoiconicity perspective in DESIGN-v0.9.1.md.
 ;;;; It can be loaded into SBCL without adapter.lisp.
@@ -151,10 +151,10 @@
 ;;; With S-expressions, (:key . "value") becomes a data structure the moment it is read,
 ;;; and the key name itself functions as a schema.
 
-(defparameter +schema-version+ "0.9.1")
+(defparameter +schema-version+ "0.9.1")  ; @coglog-version
 
 (defun make-schema ()
-  "Generate the CogLog v0.9.1 _schema.
+  "Generate the CogLog _schema.
    The return value is an alist that is self-contained as an S-expression."
   `((:version . ,+schema-version+)
     (:fact-layer

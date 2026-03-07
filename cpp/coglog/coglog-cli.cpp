@@ -1,5 +1,5 @@
 /*
- * CogLog v0.9.1 — Minimal cognitive continuity for LLMs (C++ implementation)
+ * CogLog — Minimal cognitive continuity for LLMs (C++ implementation)
  *
  * A single-window (size 1) log that holds the previous turn's three-layer
  * structure (user utterance, thinking process, assistant output) plus a
@@ -370,7 +370,7 @@ using Json = json::Value;
 
 static Json make_schema() {
     Json schema = Json::object();
-    schema.set("version", "0.9.1");
+    schema.set("version", "0.9.1");  // @coglog-version
 
     Json fact = Json::object();
     fact.set("user",

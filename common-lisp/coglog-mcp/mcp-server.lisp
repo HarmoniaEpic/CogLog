@@ -1,5 +1,5 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog MCP Server v0.9.1 — Common Lisp
+;;;; CogLog MCP Server — Common Lisp
 ;;;;
 ;;;; Exposes CogLog read/write/clear as MCP tools over stdio transport.
 ;;;; Loads coglog.lisp (pure core) and adapter JSON/IO functions.
@@ -338,7 +338,7 @@
 
 (defun mcp-handle-initialize (msg-id)
   (mcp-send-result msg-id
-    "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"))
+    "{\"protocolVersion\":\"2024-11-05\",\"capabilities\":{\"tools\":{}},\"serverInfo\":{\"name\":\"coglog\",\"version\":\"0.9.1\"}}"))  ; @coglog-version
 
 (defun mcp-handle-tools-list (msg-id)
   (mcp-send-result msg-id

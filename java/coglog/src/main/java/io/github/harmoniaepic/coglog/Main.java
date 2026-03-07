@@ -5,12 +5,12 @@ import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 /**
- * CogLog CLI v0.9.1
+ * CogLog CLI
  *
  * <p>Usage:
- *   java -jar coglog-0.9.1.jar read
- *   echo '...' | java -jar coglog-0.9.1.jar write
- *   java -jar coglog-0.9.1.jar clear</p>
+ *   java -jar coglog.jar read
+ *   echo '...' | java -jar coglog.jar write
+ *   java -jar coglog.jar clear</p>
  */
 public class Main {
 

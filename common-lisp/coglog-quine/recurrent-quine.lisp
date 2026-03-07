@@ -1,5 +1,5 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog v0.9.1 — Recurrent Quine
+;;;; CogLog — Recurrent Quine
 ;;;;
 ;;;; CogLog as a self-rewriting program.
 ;;;; This file is a program and simultaneously its own state.
@@ -85,7 +85,7 @@
 ;;; functions here as an affordance for LLMs.
 
 (defvar *affordance*
- '((:version . "0.9.1")
+ '((:version . "0.9.1")  ; @coglog-version
    (:fact-layer
     (:user . "non-empty string required — user's original utterance")
     (:thinking
