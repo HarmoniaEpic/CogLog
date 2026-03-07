@@ -131,9 +131,32 @@ func (a *WriteArgs) Validate() error {
 	if a.Assistant == "" {
 		return fmt.Errorf("%w: missing required field: assistant", ErrValidation)
 	}
-	// Interpretation layer: string required, empty acceptable.
-	// Go struct fields are always present (zero value is ""), so no check needed.
 	return nil
+}
+
+// ParseWriteArgs parses JSON bytes into WriteArgs, verifying that all
+// interpretation layer fields are explicitly present in the input.
+// Go's json.Unmarshal silently assigns zero values to missing fields,
+// so we first check field presence via map[string]interface{}.
+func ParseWriteArgs(data []byte) (WriteArgs, error) {
+	var raw map[string]interface{}
+	if err := json.Unmarshal(data, &raw); err != nil {
+		return WriteArgs{}, fmt.Errorf("invalid JSON: %w", err)
+	}
+	for _, key := range []string{"current_focus", "theory_of_mind", "self_narrative", "annotation"} {
+		val, ok := raw[key]
+		if !ok {
+			return WriteArgs{}, fmt.Errorf("%w: missing required field: %s (empty string is acceptable)", ErrValidation, key)
+		}
+		if _, isStr := val.(string); !isStr {
+			return WriteArgs{}, fmt.Errorf("%w: field %s must be a string", ErrValidation, key)
+		}
+	}
+	var args WriteArgs
+	if err := json.Unmarshal(data, &args); err != nil {
+		return WriteArgs{}, fmt.Errorf("invalid JSON: %w", err)
+	}
+	return args, nil
 }
 
 // ═══════════════════════════════════════════════════════════════════
