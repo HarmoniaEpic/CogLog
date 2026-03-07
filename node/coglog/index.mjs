@@ -164,9 +164,20 @@ if (isMain) {
         for await (const chunk of process.stdin) {
           chunks.push(chunk);
         }
-        const input = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
-        const entry = await ml.write(input);
-        console.log(`coglog: turn ${entry.turn_id} written`);
+        try {
+          const input = JSON.parse(Buffer.concat(chunks).toString('utf-8'));
+          const entry = await ml.write(input);
+          console.log(`coglog: turn ${entry.turn_id} written`);
+        } catch (e) {
+          if (e instanceof SyntaxError) {
+            console.error('coglog error: invalid JSON input');
+          } else if (e instanceof Error) {
+            console.error(`coglog error: ${e.message}`);
+          } else {
+            console.error('coglog error: unknown write failure');
+          }
+          process.exit(1);
+        }
         break;
       }
 
