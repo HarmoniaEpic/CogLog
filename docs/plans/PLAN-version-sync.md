@@ -10,6 +10,7 @@
 > | 2026-03-07 | §4 Step 3 を改訂: 機能テスト中心から PLAN-i18n-build-verify.md 準拠のビルド/構文検証＋スモークテストに変更。機能テストは削除済み |
 > | 2026-03-07 | Phase 2 実装: VERSION ファイル配置、version-sync.yml 作成。§3.3 の sed パターンをドライラン検証に基づき修正（エスケープ引用符対応、Bash ヒアドキュメント対応） |
 > | 2026-03-07 | §4 Step 3 に完了判定チェックリスト・スキップ規則・遷移ゲートを追加。検証漏れ防止策 |
+> | 2026-03-07 | §4 Step 3b（Recurrent Quine 機能テスト）・Step 3c（機能テスト・相互運用テスト・MCP 動作確認）を追加 |
 
 ---
 
@@ -460,6 +461,236 @@ Step 3 の全検証項目の結果を以下のテーブルに記録する。**�
 ##### スキップ規則
 
 スキップが許容されるのは **ツールチェインが未インストール** の場合のみ。ツールが利用可能にもかかわらず省略する場合は、具体的理由をチェックリストの「スキップ理由」欄に記載し、ユーザーの承認を得ること。
+
+#### Step 3b: Recurrent Quine 機能テスト
+
+##### 前提
+
+Recurrent Quine は自己書き換えプログラムであり、通常の CogLog 実装とは質的に異なる。
+
+| 項目 | 通常の 11 言語実装 | Recurrent Quine |
+|------|-------------------|-----------------|
+| write / clear の影響範囲 | `$COGLOG_DIR/current.json` のみ | **`recurrent-quine.lisp` 自身** |
+| COGLOG_DIR による隔離 | 有効（一時ディレクトリで安全） | **無効**（ファイル自身の書き換えは防げない） |
+| テスト後の状態復元 | 一時ディレクトリ削除で完了 | バックアップからの `cp` が必須 |
+| 入力形式 | JSON (stdin) | Common Lisp plist (stdin) |
+
+> **禁止事項:** バックアップなしで `write` または `clear` を実行してはならない。Q_0 の散文コメントが不可逆に失われる。
+
+##### 3b-1. 非破壊テスト（read のみ）
+
+`read` はファイルを一切変更しない唯一の操作である。
+
+```bash
+sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp read
+```
+
+**判定基準:**
+
+| 項目 | 期待結果 |
+|------|---------|
+| 終了コード | 0 |
+| stdout | `;;; (no coglog found)` を含む（初期状態） |
+| stdout | `;;; affordance` と affordance S 式を含む |
+| ファイル | `git diff` で変更なし |
+
+##### 3b-2. 破壊的テスト（write → read → 復元）
+
+write / clear の動作確認には、バックアップ→実行→復元の手順を厳守する。
+
+```bash
+QUINE=common-lisp/coglog-quine/recurrent-quine.lisp
+
+# 1. バックアップ（スキップ厳禁）
+cp "$QUINE" /tmp/recurrent-quine-backup.lisp
+
+# 2. write（ファイル自身が次世代に書き換わる）
+echo '(:user "test" :thinking "test" :assistant "test" :current-focus "" :theory-of-mind "" :self-narrative "" :annotation "")' \
+  | sbcl --script "$QUINE" write
+
+# 3. 次世代が read できることを確認
+sbcl --script "$QUINE" read
+
+# 4. clear
+sbcl --script "$QUINE" clear
+
+# 5. clear 後の read
+sbcl --script "$QUINE" read
+
+# 6. 復元（スキップ厳禁）
+cp /tmp/recurrent-quine-backup.lisp "$QUINE"
+
+# 7. 復元確認
+git diff --stat "$QUINE"  # 差分がないこと
+```
+
+**判定基準:**
+
+| 手順 | 期待結果 |
+|------|---------|
+| 手順 2 | `coglog: turn 1 written` を含む。exit 0 |
+| 手順 3 | `;;; state` に続いて全フィールドが出力される。exit 0 |
+| 手順 4 | `coglog: cleared` を含む。exit 0 |
+| 手順 5 | `;;; (no coglog found)` を含む。exit 0 |
+| 手順 7 | `git diff` の出力が空（完全復元） |
+
+> **手順 6 を実行せずに Step 3b を完了としてはならない。** 復元を怠ると `git status` にファイル変更が残り、以降のコミットで Q_0 が失われる。
+
+##### 3b-3. 並列実行の禁止
+
+Step 3b の破壊的テスト（3b-2）は `recurrent-quine.lisp` を直接書き換えるため、他のいかなるステップとも **並列実行してはならない**。特に Step 3c の Common Lisp 機能テスト（`common-lisp/coglog/` 経由）とは無関係なファイルを操作するが、同一の SBCL プロセスモデルを共有するため、混乱を避ける意味でも逐次実行とする。
+
+##### 完了判定チェックリスト
+
+| テスト | 結果 | スキップ理由 |
+|--------|------|------------|
+| 3b-1 非破壊テスト（read） | | |
+| 3b-2 破壊的テスト（write → read → clear → read → 復元） | | |
+| 3b-2 復元確認（git diff 差分なし） | | |
+
+#### Step 3c: 機能テスト・相互運用テスト・MCP 動作確認
+
+Step 3 のビルド/構文検証、Step 3b の Recurrent Quine テストに続き、通常の 11 言語実装の実動作を確認する。SPEC-TEST-v0.9.1.md のテスト群 1・2・8・12・13 から最小限のサブセットを抽出する。
+
+> **注:** 本ステップの Common Lisp テストは `common-lisp/coglog/`（通常の CLI 実装）が対象である。Recurrent Quine (`common-lisp/coglog-quine/`) は Step 3b で個別にテスト済みであり、ここでは実施しない。
+
+##### 3c-1. 機能テスト（read / write / clear）
+
+各言語の CLI で初期状態 read → write → read → clear → read の一連フローを実行し、基本動作を確認する。
+
+```bash
+# 共通手順（言語ごとに CLI_CMD を差し替え）
+TMPDIR=$(mktemp -d)
+FIXTURE='{"user":"Hello","thinking":"User greeted me","assistant":"Hi there!","current_focus":"greeting","theory_of_mind":"friendly","self_narrative":"conversational partner","annotation":"follow up on tone"}'
+
+# 1. 初期状態 read → "(no coglog found)"
+COGLOG_DIR="$TMPDIR" $CLI_CMD read
+
+# 2. write
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" $CLI_CMD write
+
+# 3. write 後の read → JSON にフィールドが含まれる
+COGLOG_DIR="$TMPDIR" $CLI_CMD read
+
+# 4. clear
+COGLOG_DIR="$TMPDIR" $CLI_CMD clear
+
+# 5. clear 後の read → "(no coglog found)"
+COGLOG_DIR="$TMPDIR" $CLI_CMD read
+
+rm -rf "$TMPDIR"
+```
+
+**CLI_CMD 対応表:**
+
+| 言語 | CLI_CMD |
+|------|---------|
+| Rust | `cargo run -p coglog --` |
+| Python | `python3 python/coglog/src/coglog/__init__.py` |
+| Node.js | `node node/coglog/index.mjs` |
+| Go | `go run ./go/cmd/coglog-cli` |
+| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` |
+| Java | `java -jar java/coglog/target/coglog-cli.jar` |
+| C# | `dotnet run --project csharp/coglog --` |
+| Haskell | `cabal run coglog --` |
+| Common Lisp | `sbcl --script common-lisp/coglog/adapter.lisp` |
+| C++ | `cpp/coglog/coglog-cli` (要事前ビルド) |
+| Bash | `bash bash/coglog/coglog-cli.sh` |
+
+**判定基準:**
+
+| 手順 | 期待結果 |
+|------|---------|
+| 手順 1 | stdout に `(no coglog found)` を含む。exit 0 |
+| 手順 2 | stdout に `coglog: turn 1 written` を含む。exit 0 |
+| 手順 3 | stdout が valid JSON。`user` = `"Hello"`, `_schema.version` = `"0.9.1"` |
+| 手順 4 | stdout に `coglog: cleared` を含む。exit 0 |
+| 手順 5 | stdout に `(no coglog found)` を含む。exit 0 |
+
+##### 3c-2. 相互運用テスト（クロス言語 write → read）
+
+異なる言語間でデータ形式の互換性を確認する。SPEC-TEST-v0.9.1.md テスト群 12 から、異なるランタイム系統（コンパイル型・インタプリタ型・VM 型）を跨ぐ代表 3 組を選定する。
+
+```bash
+TMPDIR=$(mktemp -d)
+FIXTURE='{"user":"cross-test","thinking":"interop check","assistant":"OK","current_focus":"","theory_of_mind":"","self_narrative":"","annotation":""}'
+
+# 組 1: Rust write → Python read
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" cargo run -p coglog -- write
+COGLOG_DIR="$TMPDIR" python3 python/coglog/src/coglog/__init__.py read
+
+# 組 2: Node.js write → Go read
+rm -f "$TMPDIR/current.json"
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" node node/coglog/index.mjs write
+COGLOG_DIR="$TMPDIR" go run ./go/cmd/coglog-cli read
+
+# 組 3: Python write → Ruby read
+rm -f "$TMPDIR/current.json"
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" python3 python/coglog/src/coglog/__init__.py write
+COGLOG_DIR="$TMPDIR" ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli read
+
+rm -rf "$TMPDIR"
+```
+
+**判定基準:** 各組の read 結果が write 入力の全 7 フィールドと一致すること。`_schema.version` が `"0.9.1"` であること。
+
+##### 3c-3. MCP サーバー動作確認
+
+MCP サーバーが起動し、`initialize` ハンドシェイクと `tools/list` に正しく応答することを確認する。代表 3 言語（Rust・Python・Node.js）で実施する。
+
+```bash
+TMPDIR=$(mktemp -d)
+
+# JSON-RPC リクエスト
+INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":"2024-11-05","capabilities":{},"clientInfo":{"name":"test","version":"0.1"}}}'
+LIST='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
+
+# Rust
+echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" cargo run -p coglog-mcp 2>/dev/null
+
+# Python
+echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" python3 -m coglog_mcp 2>/dev/null
+
+# Node.js
+echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" node node/coglog-mcp/index.mjs 2>/dev/null
+
+rm -rf "$TMPDIR"
+```
+
+**判定基準:**
+
+| 応答 | 期待結果 |
+|------|---------|
+| `initialize` 応答 | `protocolVersion`, `capabilities.tools`, `serverInfo` を含む |
+| `tools/list` 応答 | `coglog_read`, `coglog_write`, `coglog_clear` の 3 ツールが列挙される |
+
+##### 完了判定チェックリスト
+
+**全行が PASS または SKIP（理由付き）で埋まるまで Step 4 に進んではならない。**
+
+| テスト | 言語 | 結果 | スキップ理由 |
+|--------|------|------|------------|
+| 3c-1 機能テスト | Rust | | |
+| 3c-1 機能テスト | Python | | |
+| 3c-1 機能テスト | Node.js | | |
+| 3c-1 機能テスト | Go | | |
+| 3c-1 機能テスト | Ruby | | |
+| 3c-1 機能テスト | Java | | |
+| 3c-1 機能テスト | C# | | |
+| 3c-1 機能テスト | Haskell | | |
+| 3c-1 機能テスト | Common Lisp (not coglog-quine) | | |
+| 3c-1 機能テスト | C++ | | |
+| 3c-1 機能テスト | Bash | | |
+| 3c-2 相互運用 | Rust → Python | | |
+| 3c-2 相互運用 | Node.js → Go | | |
+| 3c-2 相互運用 | Python → Ruby | | |
+| 3c-3 MCP | Rust | | |
+| 3c-3 MCP | Python | | |
+| 3c-3 MCP | Node.js | | |
+
+##### スキップ規則
+
+Step 3 と同一。ツールチェインが未インストールの場合のみスキップ可。機能テストの失敗は Step 1・2 の変更に起因する回帰の可能性があるため、環境問題でない限りスキップ不可。
 
 #### Step 4: マーカー・残存バージョンの検証
 
