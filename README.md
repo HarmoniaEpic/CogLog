@@ -104,6 +104,40 @@ flowchart LR
 
 ## データ構造 / Data Model
 
+```json
+{
+  "_schema": {
+    "version": "0.9.1",
+    "fact_layer": {
+      "user": "non-empty string required — user's original utterance",
+      "thinking": "non-empty string required — AI's full thinking process",
+      "assistant": "non-empty string required — AI's original output"
+    },
+    "interpretation_layer": {
+      "current_focus": "string required, empty OK — present: what am I working on?",
+      "theory_of_mind": "string required, empty OK — other: what is the user's state?",
+      "self_narrative": "string required, empty OK — self: who am I in this moment?",
+      "annotation": "string required, empty OK — future: what should I do next?"
+    },
+    "constraints": {
+      "window_size": "1 turn (overwritten each write)",
+      "interpretation_empty": "choosing not to write is itself a metacognitive act"
+    }
+  },
+  "turn_id": 1,
+  "timestamp": "2026-02-26T00:00:00+00:00",
+  "layers": {
+    "user": "User's utterance (verbatim)",
+    "thinking": "AI's thinking process (full text)",
+    "assistant": "AI's output (verbatim)"
+  },
+  "current_focus": "What I am working on right now",
+  "theory_of_mind": "Inference about the user — who they are right now",
+  "self_narrative": "Improvised self-story — who I am right now",
+  "annotation": "Note to future self — what to do next"
+}
+```
+
 ```mermaid
 classDiagram
   class Entry {
