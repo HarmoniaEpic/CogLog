@@ -122,14 +122,14 @@ tests/
 
 | 言語 | CLI コマンド | MCP コマンド |
 |---|---|---|
-| Rust | `cargo run -p coglog --` | `cargo run -p coglog-mcp --` |
-| Python | `python -m coglog` | `python -m coglog_mcp` |
+| Rust | `cargo run --manifest-path rust/Cargo.toml -p coglog --` | `cargo run --manifest-path rust/Cargo.toml -p coglog-mcp --` |
+| Python | `PYTHONPATH=python/coglog/src python3 -m coglog` | `PYTHONPATH=python/coglog-mcp/src python3 -m coglog_mcp` |
 | Node.js | `node node/coglog/index.mjs` | `node node/coglog-mcp/index.mjs` |
 | Go | `go run ./go/cmd/coglog-cli` | `go run ./go/cmd/coglog-mcp` |
 | Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` | `ruby -Iruby/coglog-mcp/lib ruby/coglog-mcp/bin/coglog-mcp` |
 | Java | `java -jar java/coglog/target/coglog-cli.jar` | `java -jar java/coglog-mcp/target/coglog-mcp.jar` |
 | C# | `dotnet run --project csharp/coglog --` | `dotnet run --project csharp/coglog-mcp --` |
-| Haskell | `cabal run coglog-cli --` | `cabal run coglog-mcp --` |
+| Haskell | `cd haskell/coglog && cabal run coglog-cli --` | `cd haskell/coglog-mcp && cabal run coglog-mcp --` |
 | CL | `sbcl --script common-lisp/coglog/adapter.lisp` | `sbcl --script common-lisp/coglog-mcp/mcp-server.lisp` |
 | C++ | `cpp/coglog/coglog-cli` | `cpp/coglog-mcp/coglog-mcp` |
 | Bash | `bash bash/coglog/coglog-cli.sh` | —（MCP なし） |
@@ -334,10 +334,10 @@ tests/fixtures-quine/
 
 | # | テストケース | 期待結果 |
 |---|---|---|
-| Q.1 | read（初期状態） | `(no metalog found)` + affordance の出力 |
+| Q.1 | read（初期状態） | `(no coglog found)` + affordance の出力 |
 | Q.2 | write → read | turn 1。全フィールドが write 時の値と一致 |
 | Q.3 | write → write → read | turn 2。前回の内容は消失（窓サイズ1） |
-| Q.4 | clear → read | `(no metalog found)` |
+| Q.4 | clear → read | `(no coglog found)` |
 | Q.5 | 事実層フィールドを空文字列で write | バリデーションエラー |
 | Q.6 | 解釈層4フィールドを全て空文字列で write | 成功 |
 
