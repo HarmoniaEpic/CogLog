@@ -1,7 +1,7 @@
 #!/usr/bin/env node
 
 /**
- * CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+ * CogLog — Minimal cognitive continuity for LLMs.
  *
  * A single-window (size 1) log that holds the previous turn's three-layer
  * structure (user utterance, thinking process, assistant output) plus a
@@ -13,12 +13,12 @@
  * the JSON file itself describes how to read and write it.
  *
  * Usage as CLI:
- *   node coglog-v0.9.1.mjs read
- *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | node coglog-v0.9.1.mjs write
- *   node coglog-v0.9.1.mjs clear
+ *   node coglog.mjs read
+ *   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | node coglog.mjs write
+ *   node coglog.mjs clear
  *
  * Usage as module:
- *   import { CogLog } from './coglog-v0.9.1.mjs';
+ *   import { CogLog } from './coglog.mjs';
  *   const ml = new CogLog();
  *   await ml.write({ user, thinking, assistant, current_focus, theory_of_mind, self_narrative, annotation });
  *   const prev = await ml.read();
@@ -35,7 +35,7 @@ const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
-  version: "0.9.1",
+  version: "0.9.1",  // @coglog-version
   fact_layer: {
     user: "non-empty string required — user's original utterance",
     thinking: "non-empty string required — AI's full thinking process",
@@ -177,7 +177,7 @@ if (isMain) {
       }
 
       default:
-        console.log(`usage: coglog-v0.9.1.mjs <read|write|clear>
+        console.log(`usage: coglog.mjs <read|write|clear>
 
   read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)

@@ -1,5 +1,5 @@
 /**
- * CogLog MCP Server v0.9.1 — TypeScript type definitions.
+ * CogLog MCP Server — TypeScript type definitions.
  */
 
 export interface FactLayerSchema {
