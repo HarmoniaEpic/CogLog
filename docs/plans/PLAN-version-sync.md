@@ -7,7 +7,9 @@
 > | 2026-03-07 | 初版作成（ソースコード バージョン埋め込みの置換容易化計画） |
 > | 2026-03-07 | GitHub Actions によるバージョン一元管理計画に拡張。パッケージマニフェスト・ワークフロー設計を追加。対象言語に C#・Haskell・Rust・Node.js・JSX を追加 |
 > | 2026-03-07 | §1 ステータス更新（全言語 ◎）。§4 作業手順を改訂: テスト検証・計画書更新ステップ追加、§2 の明示的参照、ドライラン確認項目追加 |
-> | 2026-03-07 | §4 Step 3 を改訂: 機能テスト中心から PLAN-i18n-build-verify.md 準拠のビルド/構文検証＋スモークテストに変更。機能テストはオプションに格下げ |
+> | 2026-03-07 | §4 Step 3 を改訂: 機能テスト中心から PLAN-i18n-build-verify.md 準拠のビルド/構文検証＋スモークテストに変更。機能テストは削除済み |
+> | 2026-03-07 | Phase 2 実装: VERSION ファイル配置、version-sync.yml 作成。§3.3 の sed パターンをドライラン検証に基づき修正（エスケープ引用符対応、Bash ヒアドキュメント対応） |
+> | 2026-03-07 | §4 Step 3 に完了判定チェックリスト・スキップ規則・遷移ゲートを追加。検証漏れ防止策 |
 
 ---
 
@@ -247,6 +249,7 @@ VERSION ファイル変更 (push to main)
 NEW_VERSION=$(cat VERSION | tr -d '[:space:]')
 
 # @coglog-version マーカー行のバージョン文字列を一括置換
+# \\? で通常の引用符 ("0.9.1") とエスケープされた引用符 (\"0.9.1\") の両方に対応
 grep -rl '@coglog-version' \
   --include='*.py' --include='*.rb' --include='*.java' \
   --include='*.cpp' --include='*.sh' --include='*.go' \
@@ -254,7 +257,11 @@ grep -rl '@coglog-version' \
   --include='*.lhs' --include='*.rs' --include='*.mjs' \
   --include='*.jsx' . |
   xargs sed -i -E \
-    "s/([\"'])([0-9]+\.[0-9]+\.[0-9]+)\1(.*@coglog-version)/\1${NEW_VERSION}\1\3/g"
+    "s/(\\\\?[\"'])[0-9]+\.[0-9]+\.[0-9]+(\\\\?[\"'].*@coglog-version)/\1${NEW_VERSION}\2/g"
+
+# Bash ヒアドキュメント: マーカーの 2 行後にバージョンがある
+sed -i -E "/@coglog-version.*next line/{n;n; s/[0-9]+\.[0-9]+\.[0-9]+/${NEW_VERSION}/;}" \
+  bash/coglog/coglog-cli.sh
 ```
 
 ### 3.4 パッケージマニフェスト更新
@@ -432,6 +439,28 @@ MCP サーバー (`coglog-mcp`) は stdio JSON-RPC が必要なためスモー�
 | 変更起因の破損（文字列閉じ忘れ、Haddock マーカー破損等） | 該当ソースを修正し、失敗ステップを再実行 |
 | 環境起因（ツールチェイン不在等） | 記録してスキップ。CI または別環境で再検証 |
 
+##### 完了判定チェックリスト
+
+Step 3 の全検証項目の結果を以下のテーブルに記録する。**全行が PASS または SKIP（理由付き）で埋まるまで Step 4 に進んではならない。**
+
+| 言語 | 構文/ビルド | スモーク | 結果 | スキップ理由 |
+|------|-----------|--------|------|------------|
+| Rust | `cargo build --release` | `--help` | PASS | |
+| C++ | `c++ -std=c++17` | `--help` | PASS | |
+| Go | `go build ./...` | `--help` | PASS | |
+| Java | `mvn compile` / `javac` | `--help` | PASS | javac 直接コンパイルで確認（Maven は DNS 解決失敗で使用不可） |
+| C# | `dotnet build` | `--help` | PASS | |
+| Haskell | `cabal build` | `--help` | PASS | |
+| Common Lisp | `sbcl --eval '(load ...)'` | `read` | PASS | STYLE-WARNING は既存の前方参照（変更無関係） |
+| Python | `py_compile` | `--help` | PASS | |
+| Node.js | `node --check` | `--help` | PASS | |
+| Ruby | `ruby -c` | `--help` | PASS | |
+| Bash | `bash -n` | `--help` | PASS | |
+
+##### スキップ規則
+
+スキップが許容されるのは **ツールチェインが未インストール** の場合のみ。ツールが利用可能にもかかわらず省略する場合は、具体的理由をチェックリストの「スキップ理由」欄に記載し、ユーザーの承認を得ること。
+
 #### Step 4: マーカー・残存バージョンの検証
 
 ```bash
@@ -481,11 +510,11 @@ grep -rn '0\.9\.1' \
 
 **確認項目:**
 
-- [ ] `@coglog-version` マーカー行のバージョンが全て更新されている
+- [x] `@coglog-version` マーカー行のバージョンが全て更新されている（ローカルドライラン: 9.9.9 で全34箇所＋Bashヒアドキュメント1箇所を確認）
 - [ ] 全パッケージマニフェスト（§2 対象 18 ファイル）のバージョンが更新されている
 - [ ] pom.xml で `<dependency>` 等の無関係な `<version>` が誤置換されていない
 - [ ] `Cargo.lock` が `cargo generate-lockfile` で正常に再生成されている
-- [ ] 分類 C（`DESIGN-v0.9.1.md`）が変更されていない
+- [x] 分類 C（`DESIGN-v0.9.1.md`）が変更されていない（ローカルドライランで残存確認済み）
 - [ ] `v{VERSION}` タグが正しく作成されている
 - [ ] 既存リリースワークフロー（release-bash / release-cpp / release-coglog-skill）がタグにより正常に発火する
 
