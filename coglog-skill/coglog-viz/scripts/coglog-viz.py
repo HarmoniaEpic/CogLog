@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-CogLog Viz v0.9.1 — Cognitive continuity for LLMs with visualization.
+CogLog Viz — Cognitive continuity for LLMs with visualization.
 
 A single-window (size 1) log that holds the previous turn's three-layer
 structure (user utterance, thinking process, assistant output) plus a
@@ -42,7 +42,7 @@ VIEWER_TEMPLATE = Path(__file__).parent.parent / "viewer" / "coglog-viewer-templ
 VIZ_OUTPUT_DIR = Path("/mnt/user-data/outputs")
 
 SCHEMA = {
-    "version": "0.9.1",
+    "version": "0.9.1",  # @coglog-version
     "fact_layer": {
         "user": "non-empty string required — user's original utterance",
         "thinking": "non-empty string required — AI's full thinking process",

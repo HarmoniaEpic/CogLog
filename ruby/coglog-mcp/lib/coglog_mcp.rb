@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-# CogLog MCP Server v0.9.1
+# CogLog MCP Server
 #
 # Exposes CogLog read/write/clear as MCP tools over stdio transport.
 # Single-file, zero external dependencies. Contains a complete copy of
@@ -14,7 +14,7 @@ require 'time'
 require 'fileutils'
 
 module CogLogMCP
-  VERSION = '0.9.1'
+  VERSION = '0.9.1'  # @coglog-version
 
   SCHEMA = {
     'version' => VERSION,

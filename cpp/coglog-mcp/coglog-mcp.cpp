@@ -1,5 +1,5 @@
 /*
- * CogLog MCP Server v0.9.1 — Minimal cognitive continuity for LLMs (C++)
+ * CogLog MCP Server — Minimal cognitive continuity for LLMs (C++)
  *
  * Exposes CogLog read/write/clear as MCP tools over stdio transport.
  * Single-file, zero external dependencies. Contains a complete copy of
@@ -360,7 +360,7 @@ using Json = json::Value;
 
 static Json make_schema() {
     Json schema = Json::object();
-    schema.set("version", "0.9.1");
+    schema.set("version", "0.9.1");  // @coglog-version
 
     Json fact = Json::object();
     fact.set("user",
@@ -661,7 +661,7 @@ static void log(const std::string& msg) {
 static void handle_initialize(const Json& msg_id) {
     Json server_info = Json::object();
     server_info.set("name", "coglog");
-    server_info.set("version", "0.9.1");
+    server_info.set("version", "0.9.1");  // @coglog-version
 
     Json caps = Json::object();
     caps.set("tools", Json::object());

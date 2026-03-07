@@ -1,4 +1,4 @@
-// Package coglog provides CogLog v0.9.1 — minimal cognitive continuity for LLMs.
+// Package coglog provides CogLog — minimal cognitive continuity for LLMs.
 //
 // A single-window (size 1) log that holds the previous turn's three-layer
 // structure (user utterance, thinking process, assistant output) plus a
@@ -89,10 +89,10 @@ type ClearResult struct {
 // Schema constant
 // ═══════════════════════════════════════════════════════════════════
 
-// MakeSchema returns the CogLog v0.9.1 schema.
+// MakeSchema returns the CogLog schema.
 func MakeSchema() Schema {
 	return Schema{
-		Version: "0.9.1",
+		Version: "0.9.1",  // @coglog-version
 		FactLayer: FactLayerSchema{
 			User:      "non-empty string required \u2014 user's original utterance",
 			Thinking:  "non-empty string required \u2014 AI's full thinking process",

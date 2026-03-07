@@ -9,13 +9,13 @@ import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 /**
- * CogLog v0.9.1 — Minimal cognitive continuity for LLMs.
+ * CogLog — Minimal cognitive continuity for LLMs.
  *
  * <p>A single-window (size 1) log that holds the previous turn's three-layer
  * structure plus a four-axis interpretation layer.</p>
  */
 public class CogLog {
-    public static final String VERSION = "0.9.1";
+    public static final String VERSION = "0.9.1";  // @coglog-version
 
     private final Path dataDir;
     private final Path currentFile;
