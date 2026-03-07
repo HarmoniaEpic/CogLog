@@ -30,8 +30,8 @@ import sys
 from datetime import datetime, timezone
 from pathlib import Path
 
-DATA_DIR = Path(os.environ["COGLOG_DIR"]) if "COGLOG_DIR" in os.environ \
-           else Path.home() / ".coglog"
+_env = os.environ.get("COGLOG_DIR")
+DATA_DIR = Path(_env) if _env else Path.home() / ".coglog"
 CURRENT_FILE = DATA_DIR / "current.json"
 
 SCHEMA = {

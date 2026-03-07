@@ -22,7 +22,7 @@ import { homedir } from 'node:os';
 // CogLog class (copied from coglog/index.mjs)
 // ═══════════════════════════════════════════════════════════════
 
-const DATA_DIR = process.env.COGLOG_DIR ?? join(homedir(), '.coglog');
+const DATA_DIR = process.env.COGLOG_DIR || join(homedir(), '.coglog');
 const CURRENT_FILE = join(DATA_DIR, 'current.json');
 
 const SCHEMA = {
