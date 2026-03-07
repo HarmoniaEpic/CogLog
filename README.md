@@ -67,6 +67,38 @@ echo '{"user":"...","thinking":"...","assistant":"...", ...}' | coglog-cli write
 coglog-cli clear
 ```
 
+## データ構造 / Data Model
+
+```mermaid
+classDiagram
+  class Entry {
+    +_schema
+    +turn_id
+    +timestamp
+    +layers
+    +current_focus
+    +theory_of_mind
+    +self_narrative
+    +annotation
+  }
+
+  class Layers {
+    +user
+    +thinking
+    +assistant
+  }
+
+  class Schema {
+    +version
+    +fact_layer
+    +interpretation_layer
+    +constraints
+  }
+
+  Entry --> Layers
+  Entry --> Schema
+```
+
 ## MCP 設定 / MCP Configuration
 
 ```json
@@ -80,6 +112,27 @@ coglog-cli clear
 ```
 
 3ツール / 3 tools: `coglog_read`, `coglog_write`, `coglog_clear`
+
+```mermaid
+flowchart LR
+  U["User / Agent"] --> CLI["coglog-cli"]
+  U --> MCP["coglog-mcp"]
+
+  CLI --> R["read"]
+  CLI --> W["write"]
+  CLI --> C["clear"]
+
+  MCP --> TR["coglog_read"]
+  MCP --> TW["coglog_write"]
+  MCP --> TC["coglog_clear"]
+
+  R --> F[("~/.coglog/current.json")]
+  W --> F
+  C --> F
+  TR --> F
+  TW --> F
+  TC --> F
+```
 
 ## 言語一覧 / Language List
 
@@ -120,6 +173,23 @@ coglog-cli clear
 全11言語のデータ形式は同一。任意の言語で `write` したデータを任意の言語で `read` できる。
 
 The data format is identical across all 11 languages. Data written with `write` in any language can be read with `read` in any other language.
+
+```mermaid
+flowchart TB
+  subgraph Writers["Write (any language)"]
+    W1["Python"] --> J[("current.json\n(common schema)")]
+    W2["Rust"] --> J
+    W3["Go"] --> J
+    W4["Node"] --> J
+  end
+
+  subgraph Readers["Read (any language)"]
+    J --> R1["Java"]
+    J --> R2["Ruby"]
+    J --> R3["C#"]
+    J --> R4["Haskell / Lisp / Bash"]
+  end
+```
 
 ## 詳細 / Details
 
