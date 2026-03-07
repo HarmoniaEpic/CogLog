@@ -173,7 +173,7 @@ fn handle_ping(id: &Value) {
 // ═══════════════════════════════════════════════════════════════════
 
 fn main() {
-    // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+    // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
     let argv: Vec<String> = std::env::args().collect();
     let ml = if argv.len() >= 3 && argv[1] == "--coglog-dir" {
         CogLog::with_dir(std::path::PathBuf::from(&argv[2]))

@@ -1,9 +1,9 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog v0.9.1 — Common Lisp 純粋核
+;;;; CogLog v0.9.1 — Common Lisp Pure Core
 ;;;;
-;;;; このファイルは DESIGN-v0.9.1.md のホモイコニシティからの注釈である。
-;;;; adapter.lisp なしで SBCL にロードできる。
-;;;; JSON やファイルシステムへの依存は一切ない。
+;;;; This file is an annotation from the homoiconicity perspective in DESIGN-v0.9.1.md.
+;;;; It can be loaded into SBCL without adapter.lisp.
+;;;; It has no dependencies on JSON or the filesystem.
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defpackage :coglog
@@ -17,99 +17,101 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 第1章: S式としての漸化式
+;;;; Chapter 1: The Recurrence Relation as S-Expressions
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; CogLog の核は漸化式 a_{n+1} = f(a_n, x_n) である。
+;;; The core of CogLog is the recurrence relation a_{n+1} = f(a_n, x_n).
 ;;;
-;;; 実用層の5実装（Python, Node.js, C++, Rust, MCP各種）では
-;;; この漸化式は JSON の読み書きとして実装されている。
-;;; f は「前のエントリを読み、新しいエントリを構築し、ファイルに書く」関数であり、
-;;; 副作用（ファイル I/O, タイムスタンプ取得）と純粋な構築が混在している。
+;;; In the 5 practical-layer implementations (Python, Node.js, C++, Rust, various MCPs),
+;;; this recurrence relation is implemented as JSON reading and writing.
+;;; f is a function that "reads the previous entry, constructs a new entry, and writes it to a file,"
+;;; mixing side effects (file I/O, timestamp retrieval) with pure construction.
 ;;;
-;;; Common Lisp において、f はデータ変換として記述される。
-;;; 入力も出力も同じ S式（alist）であり、
-;;; 「データの形式」と「コードの形式」の区別がない。
-;;; これがホモイコニシティ——コードとデータの同質性——の意味するところである。
+;;; In Common Lisp, f is described as a data transformation.
+;;; Both input and output are the same S-expressions (alists),
+;;; with no distinction between "data format" and "code format."
+;;; This is what homoiconicity — the identity of code and data — means.
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 第2章: 型の世界
+;;;; Chapter 2: The World of Types
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; CogLog のデータ構造は三つの層で構成される。
+;;; CogLog's data structure is composed of three layers.
 ;;;
-;;;   メタデータ層 (_schema) — このデータの読み方
-;;;   事実層 (layers)        — 何があったか
-;;;   解釈層 (4フィールド)   — それをどう読んだか
+;;;   Metadata layer (_schema) — how to read this data
+;;;   Fact layer (layers)      — what happened
+;;;   Interpretation layer (4 fields) — how it was interpreted
 ;;;
-;;; Haskell 版では、事実層と解釈層のバリデーション規則の違いを
-;;; 型の違い（NonEmptyText vs String）として表現する。
-;;; コンパイラが制約を強制する世界。
+;;; In the Haskell version, the difference in validation rules between
+;;; the fact and interpretation layers is expressed as a type difference
+;;; (NonEmptyText vs String).
+;;; A world where the compiler enforces constraints.
 ;;;
-;;; Common Lisp では別のアプローチを取る。
-;;; 内部表現に alist を使う。alist のキーがフィールド名であり、
-;;; 値が文字列である。型の区別は実行時の validate-args が担う。
+;;; Common Lisp takes a different approach.
+;;; It uses alists for internal representation. The alist keys are field names,
+;;; and the values are strings. The type distinction is handled at runtime by validate-args.
 ;;;
-;;; この選択にはトレードオフがある。
-;;; 型安全のコストを払わない代わりに、制約の記述が直接的で読みやすい。
-;;; そして、alist は S式として印字・読み取り可能である——
-;;; defstruct にはない性質。
+;;; This choice has trade-offs.
+;;; Instead of paying the cost of type safety, constraint descriptions are direct and readable.
+;;; And alists can be printed and read as S-expressions —
+;;; a property that defstruct does not have.
 
-;;; Entry は以下のキーを持つ alist として表現される:
+;;; An Entry is represented as an alist with the following keys:
 ;;;
-;;;   :_schema       — メタデータ層（alist）
-;;;   :turn-id       — 単調増加するターン番号（整数）
-;;;   :timestamp     — 書き込み時刻（ISO 8601 文字列）
-;;;   :layers        — 事実層（alist: :user, :thinking, :assistant）
-;;;   :current-focus — 解釈層・現在方向（文字列）
-;;;   :theory-of-mind — 解釈層・他者方向（文字列）
-;;;   :self-narrative — 解釈層・自己方向（文字列）
-;;;   :annotation    — 解釈層・未来方向（文字列）
+;;;   :_schema       — metadata layer (alist)
+;;;   :turn-id       — monotonically increasing turn number (integer)
+;;;   :timestamp     — write time (ISO 8601 string)
+;;;   :layers        — fact layer (alist: :user, :thinking, :assistant)
+;;;   :current-focus — interpretation layer, present direction (string)
+;;;   :theory-of-mind — interpretation layer, other direction (string)
+;;;   :self-narrative — interpretation layer, self direction (string)
+;;;   :annotation    — interpretation layer, future direction (string)
 
-;;; 事実層のキー。非空文字列を要求する。
+;;; Fact layer keys. Require non-empty strings.
 (defparameter +fact-keys+ '(:user :thinking :assistant))
 
-;;; 解釈層のキー。文字列を要求するが、空を許容する。
-;;; 「書かないという判断もメタ認知的行為である。」
+;;; Interpretation layer keys. Require strings, but accept empty.
+;;; "Choosing not to write is itself a metacognitive act."
 (defparameter +interpretation-keys+
   '(:current-focus :theory-of-mind :self-narrative :annotation))
 
-;;; 全フィールドキー（事実層 + 解釈層）。
+;;; All field keys (fact layer + interpretation layer).
 (defparameter +all-field-keys+ (append +fact-keys+ +interpretation-keys+))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 第3章: validate — 制約の宣言
+;;;; Chapter 3: validate — Declaring Constraints
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; バリデーションは Entry の構築前に行われる。
+;;; Validation is performed before Entry construction.
 ;;;
-;;; Haskell 版では NonEmptyText の構築関数がゲートキーパーとして機能する。
-;;; 型の構築に成功した時点で、値が非空であることが保証される。
+;;; In the Haskell version, the NonEmptyText constructor function acts as a gatekeeper.
+;;; Once the type is successfully constructed, the value is guaranteed to be non-empty.
 ;;;
-;;; Common Lisp 版では、validate-args が全フィールドを走査する。
-;;; 事実層のフィールドが欠落または空文字列の場合、condition をシグナルする。
-;;; 解釈層のフィールドが欠落している場合はエラーだが、空文字列は許容する。
+;;; In the Common Lisp version, validate-args traverses all fields.
+;;; If a fact layer field is missing or an empty string, it signals a condition.
+;;; If an interpretation layer field is missing, it is an error, but empty strings are accepted.
 ;;;
-;;; どちらのアプローチでも、validate が通過した args から構築された Entry は
-;;; 制約を満たすことが保証される。保証の手段が型か条件分岐かという違いのみ。
+;;; In both approaches, an Entry constructed from args that passed validate
+;;; is guaranteed to satisfy the constraints. The only difference is whether
+;;; the guarantee comes from types or conditional branches.
 
 (define-condition validation-error (simple-error) ()
-  (:documentation "事実層の非空制約違反を示す。"))
+  (:documentation "Indicates a non-empty constraint violation in the fact layer."))
 
 (defun validate-args (args)
-  "ARGS（plist）が CogLog のバリデーション規則を満たすか検査する。
-   事実層: 非空文字列必須。解釈層: 文字列必須、空許容。
-   違反時は validation-error をシグナルする。成功時は NIL を返す。"
-  ;; 事実層: 存在 + 非空
+  "Check that ARGS (plist) satisfies CogLog's validation rules.
+   Fact layer: non-empty string required. Interpretation layer: string required, empty OK.
+   Signals validation-error on violation. Returns NIL on success."
+  ;; Fact layer: existence + non-empty
   (dolist (key +fact-keys+)
     (let ((val (getf args key)))
       (unless (and (stringp val) (plusp (length val)))
         (error 'validation-error
                :format-control "missing required field: ~(~a~)"
                :format-arguments (list key)))))
-  ;; 解釈層: 存在（文字列であること）
+  ;; Interpretation layer: existence (must be a string)
   (dolist (key +interpretation-keys+)
     (let ((val (getf args key)))
       (unless (stringp val)
@@ -120,40 +122,40 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 第4章: _schema — なぜデータが自分を記述するか
+;;;; Chapter 4: _schema — Why Data Describes Itself
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; ここが Common Lisp 版の存在理由の核心である。
+;;; This is the heart of the Common Lisp version's reason for existence.
 ;;;
-;;; 実用層の5実装では、_schema は「JSON オブジェクトの中に埋め込まれた説明文」
-;;; である。それ自体はデータであり、コードではない。読むのは LLM であって
-;;; 処理系ではない。
+;;; In the 5 practical-layer implementations, _schema is "a description
+;;; embedded within a JSON object." It is data, not code. It is read by LLMs,
+;;; not by language runtimes.
 ;;;
-;;; Common Lisp では事情が異なる。
-;;; make-schema が返す値は alist であり、それ自体が Lisp のリーダーで
-;;; 読み込み可能なデータである。(read) で S式として取り込み、
-;;; (eval) で評価し、(print) で出力できる。
-;;; データを生成するコードと、そのコードが生成するデータに、
-;;; 構造的な区別がない。
+;;; In Common Lisp, the situation is different.
+;;; The value returned by make-schema is an alist, which is itself
+;;; data readable by the Lisp reader. It can be taken in as an S-expression with (read),
+;;; evaluated with (eval), and output with (print).
+;;; There is no structural distinction between the code that generates data
+;;; and the data that code generates.
 ;;;
-;;; ギブソンのアフォーダンスは「環境が行為者に行為の可能性を提供する」ことだった。
-;;; S式は行為者（Lisp リーダー / 評価器）に対して、
-;;; 読み取り・評価・変換の可能性を構文レベルで提供している。
-;;; _schema は JSON にこの性質を部分的に持ち込む試みであり、
-;;; S式の世界ではそもそも不要な工夫——だからこそ、
-;;; JSON において _schema が必要である理由が S式との対比で明確になる。
+;;; Gibson's affordance was "the environment providing possibilities for action to the agent."
+;;; S-expressions provide possibilities of reading, evaluation, and transformation
+;;; at the syntactic level to the agent (Lisp reader / evaluator).
+;;; _schema is an attempt to partially bring this property to JSON,
+;;; and is an unnecessary device in the world of S-expressions — which is precisely why
+;;; the contrast with S-expressions clarifies why _schema is necessary in JSON.
 ;;;
-;;; JSON はホモイコニックではない。
-;;; {"key": "value"} は文字列であり、プログラムではない。
-;;; だから _schema という「読み方の説明書」を添付する必要がある。
-;;; S式なら (:key . "value") は読み込んだ瞬間にデータ構造になり、
-;;; そのキーの名前自体がスキーマとして機能する。
+;;; JSON is not homoiconic.
+;;; {"key": "value"} is a string, not a program.
+;;; That is why a "reading guide" called _schema must be attached.
+;;; With S-expressions, (:key . "value") becomes a data structure the moment it is read,
+;;; and the key name itself functions as a schema.
 
 (defparameter +schema-version+ "0.9.1")
 
 (defun make-schema ()
-  "CogLog v0.9.1 の _schema を生成する。
-   返り値は alist であり、それ自体が S式として自己完結する。"
+  "Generate the CogLog v0.9.1 _schema.
+   The return value is an alist that is self-contained as an S-expression."
   `((:version . ,+schema-version+)
     (:fact-layer
      . ((:user . "non-empty string required — user's original utterance")
@@ -170,31 +172,31 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 第5章: advance — 変換
+;;;; Chapter 5: advance — Transformation
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; advance は漸化式の f に対応する。
+;;; advance corresponds to f in the recurrence relation.
 ;;;
-;;; Haskell 版では型シグネチャがこの関数の性質を宣言する:
+;;; In the Haskell version, the type signature declares this function's properties:
 ;;;
 ;;;   advance :: Maybe Entry -> WriteArgs -> UTCTime -> Entry
 ;;;
-;;; 「Maybe Entry と WriteArgs と UTCTime を受け取り、Entry を返す。
-;;;  IO は型に現れない——つまり副作用がない。」
+;;; "Takes a Maybe Entry, WriteArgs, and UTCTime, and returns an Entry.
+;;;  IO does not appear in the type — meaning there are no side effects."
 ;;;
-;;; Common Lisp にはこの宣言がない。
-;;; しかし、advance の本体を見れば副作用がないことが読み取れる。
-;;; setf, setq, write, format への副作用呼び出しがどこにもない。
-;;; バッククォートテンプレートが新しい alist を構築して返すだけ。
+;;; Common Lisp has no such declaration.
+;;; However, reading the body of advance reveals the absence of side effects.
+;;; There are no side-effecting calls to setf, setq, write, or format.
+;;; The backquote template simply constructs and returns a new alist.
 ;;;
-;;; Haskell は「副作用がないことを型で保証する」。
-;;; Common Lisp は「副作用がないことをコードで示す」。
-;;; 保証の強度は異なるが、CogLog の規模では読み取り可能性で十分である。
+;;; Haskell "guarantees the absence of side effects through types."
+;;; Common Lisp "demonstrates the absence of side effects through code."
+;;; The strength of the guarantee differs, but at CogLog's scale, readability suffices.
 
 (defun advance (prev args timestamp)
-  "前のエントリ PREV（alist または NIL）と ARGS（plist）と TIMESTAMP（文字列）から
-   新しいエントリ（alist）を構築する。純粋関数。副作用なし。
-   ARGS は validate-args を通過済みでなければならない。"
+  "Construct a new entry (alist) from the previous entry PREV (alist or NIL),
+   ARGS (plist), and TIMESTAMP (string). Pure function. No side effects.
+   ARGS must have already passed through validate-args."
   (let ((turn-id (1+ (or (cdr (assoc :turn-id prev)) 0))))
     `((:_schema    . ,(make-schema))
       (:turn-id    . ,turn-id)
@@ -209,33 +211,31 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; 補遺: advance のテンプレートとしての読み方
+;;;; Appendix: Reading advance as a Template
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; 上の advance を改めて見る。
+;;; Look again at advance above.
 ;;;
 ;;; `((:_schema . ,(make-schema))
 ;;;   (:turn-id . ,turn-id)
 ;;;   ...)
 ;;;
-;;; バッククォート (`) は「このS式をテンプレートとして使え」を意味する。
-;;; カンマ (,) は「ここだけ評価しろ」を意味する。
-;;; つまり advance の本体は
-;;; 「Entry の構造をそのまま書き下ろし、動的な部分だけ穴を開けたもの」
-;;; である。
+;;; The backquote (`) means "use this S-expression as a template."
+;;; The comma (,) means "evaluate only this part."
+;;; In other words, the body of advance is
+;;; "the Entry structure written out directly, with holes opened only for dynamic parts."
 ;;;
-;;; JSON で同じことをするには文字列テンプレートか、
-;;; オブジェクトリテラルの構築が必要になる。
+;;; To do the same in JSON, you need string templates or object literal construction.
 ;;; Python: entry = {"_schema": SCHEMA, "turn_id": turn_id, ...}
 ;;; Rust:   Entry { _schema: make_schema(), turn_id, ... }
 ;;;
-;;; いずれも「データの形」と「コードの形」が異なる。
-;;; Python の辞書リテラルは Python の構文であり JSON ではない。
-;;; Rust の構造体リテラルは Rust の構文であり JSON ではない。
+;;; In both cases, "the shape of data" and "the shape of code" differ.
+;;; Python's dictionary literal is Python syntax, not JSON.
+;;; Rust's struct literal is Rust syntax, not JSON.
 ;;;
-;;; S式のバッククォートテンプレートでは、
-;;; 出力されるデータの形と、それを生成するコードの形が同じである。
-;;; これがホモイコニシティの具体的な意味である。
+;;; In S-expression backquote templates,
+;;; the shape of the output data and the shape of the code that generates it are the same.
+;;; This is the concrete meaning of homoiconicity.
 
 ;;; ═══════════════════════════════════════════════════════════════════
 ;;; End of coglog.lisp

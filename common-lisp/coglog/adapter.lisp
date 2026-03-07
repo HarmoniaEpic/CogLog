@@ -1,8 +1,8 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; CogLog v0.9.1 — Common Lisp アダプター
+;;;; CogLog v0.9.1 — Common Lisp Adapter
 ;;;;
-;;;; coglog.lisp の純粋核を current.json に接地する。
-;;;; JSON シリアライズ/パース、ファイル I/O、CLI を提供する。
+;;;; Grounds the pure core from coglog.lisp to current.json.
+;;;; Provides JSON serialization/parsing, file I/O, and CLI.
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (load (merge-pathnames "coglog.lisp" *load-truename*))
@@ -10,11 +10,11 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; パス解決
+;;;; Path resolution
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun default-coglog-dir ()
-  "COGLOG_DIR 環境変数 > $HOME/.coglog/ の順で解決する。"
+  "Resolve in order: COGLOG_DIR env var > $HOME/.coglog/"
   (let ((env (sb-ext:posix-getenv "COGLOG_DIR")))
     (if env
         (parse-namestring (concatenate 'string env "/"))
@@ -26,17 +26,17 @@
   (merge-pathnames "current.json" *data-dir*))
 
 (defun set-coglog-dir (dir)
-  "データディレクトリを動的に変更する。"
+  "Dynamically change the data directory."
   (setf *data-dir*    (parse-namestring (concatenate 'string dir "/")))
   (setf *current-file* (merge-pathnames "current.json" *data-dir*)))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; タイムスタンプ
+;;;; Timestamp
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun utc-timestamp ()
-  "ISO 8601 UTC タイムスタンプを返す。"
+  "Return an ISO 8601 UTC timestamp."
   (multiple-value-bind (sec min hour day month year)
       (decode-universal-time (get-universal-time) 0)
     (format nil "~4,'0d-~2,'0d-~2,'0dT~2,'0d:~2,'0d:~2,'0dZ"
@@ -44,14 +44,14 @@
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; JSON シリアライズ（alist → JSON 文字列）
+;;;; JSON serialization (alist -> JSON string)
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; CogLog の alist 構造に特化した JSON シリアライザー。
-;;; 対応する型: 文字列、整数、alist（JSON オブジェクト）、NIL（null にはしない）。
+;;; JSON serializer specialized for CogLog's alist structure.
+;;; Supported types: string, integer, alist (JSON object), NIL (not mapped to null).
 
 (defun json-escape (string)
-  "JSON 文字列エスケープ。"
+  "JSON string escape."
   (with-output-to-string (out)
     (loop for ch across string do
       (case ch
@@ -66,23 +66,23 @@
              (write-char ch out)))))))
 
 (defun json-key (keyword)
-  "キーワードシンボルを JSON キー文字列に変換する。
-   :_schema → \"_schema\", :turn-id → \"turn_id\""
+  "Convert a keyword symbol to a JSON key string.
+   :_schema -> \"_schema\", :turn-id -> \"turn_id\""
   (let ((name (string-downcase (symbol-name keyword))))
     (substitute #\_ #\- name)))
 
 (defun write-json (value stream &optional (indent 0) (depth 0))
-  "VALUE を JSON として STREAM に書き込む。"
+  "Write VALUE as JSON to STREAM."
   (let ((prefix (make-string (* depth indent) :initial-element #\Space))
         (inner  (make-string (* (1+ depth) indent) :initial-element #\Space)))
     (cond
-      ;; 文字列
+      ;; String
       ((stringp value)
        (format stream "\"~a\"" (json-escape value)))
-      ;; 整数
+      ;; Integer
       ((integerp value)
        (format stream "~d" value))
-      ;; alist（JSON オブジェクト）— 最初の要素が cons かどうかで判定
+      ;; alist (JSON object) — determined by whether the first element is a cons
       ((and (consp value) (consp (car value)))
        (format stream "{~%" )
        (loop for (pair . rest) on value
@@ -93,24 +93,24 @@
                 (when rest (write-char #\, stream))
                 (format stream "~%"))
        (format stream "~a}" prefix))
-      ;; NIL → 空オブジェクトではなく、ここでは到達しない設計
+      ;; NIL -> not an empty object; by design, this branch is not reached
       (t
        (format stream "null")))))
 
 (defun entry-to-json (entry)
-  "エントリ（alist）を pretty-print JSON 文字列に変換する。"
+  "Convert an entry (alist) to a pretty-printed JSON string."
   (with-output-to-string (s)
     (write-json entry s 2)
     (terpri s)))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; JSON パース（JSON 文字列 → alist）
+;;;; JSON parsing (JSON string -> alist)
 ;;;; ═══════════════════════════════════════════════════════════════════
 
-;;; 再帰下降パーサー。CogLog の current.json に出現する構造のみ対応。
-;;; 対応する型: string, number (integer), object, null, true, false.
-;;; 配列は CogLog の current.json には出現しないため未実装。
+;;; Recursive descent parser. Supports only structures appearing in CogLog's current.json.
+;;; Supported types: string, number (integer), object, null, true, false.
+;;; Arrays are not implemented as they do not appear in CogLog's current.json.
 
 (defstruct json-parser
   (source "" :type string)
@@ -145,7 +145,7 @@
       t)))
 
 (defun parse-json-string (p)
-  "JSON 文字列をパースする。開始の \" は消費済みである前提。"
+  "Parse a JSON string. Assumes the opening \" has already been consumed."
   (with-output-to-string (out)
     (loop for ch = (parser-next p)
           until (eql ch #\")
@@ -159,13 +159,13 @@
                      (#\r (write-char #\Return out))
                      (#\t (write-char #\Tab out))
                      (#\u
-                      ;; \uXXXX — BMP のみ
+                      ;; \uXXXX — BMP only
                       (let ((hex (subseq (json-parser-source p)
                                          (json-parser-pos p)
                                          (+ (json-parser-pos p) 4))))
                         (incf (json-parser-pos p) 4)
                         (let ((cp (parse-integer hex :radix 16)))
-                          ;; UTF-8 エンコード
+                          ;; UTF-8 encoding
                           (cond
                             ((< cp #x80)
                              (write-char (code-char cp) out))
@@ -180,18 +180,18 @@
                  (write-char ch out)))))
 
 (defun parse-json-number (p)
-  "JSON 数値（整数）をパースする。"
+  "Parse a JSON number (integer)."
   (let ((start (json-parser-pos p))
         (src (json-parser-source p)))
-    ;; 先頭のマイナス
+    ;; Leading minus
     (when (eql (parser-peek p) #\-) (parser-next p))
-    ;; 数字列
+    ;; Digit sequence
     (loop while (and (parser-peek p) (digit-char-p (parser-peek p)))
           do (parser-next p))
     (parse-integer (subseq src start (json-parser-pos p)))))
 
 (defun parse-json-value (p)
-  "JSON 値をパースする。"
+  "Parse a JSON value."
   (parser-skip-ws p)
   (let ((ch (parser-peek p)))
     (cond
@@ -210,14 +210,14 @@
                 (or ch "EOF") (json-parser-pos p))))))
 
 (defun json-key-to-keyword (key-string)
-  "JSON キー文字列をキーワードシンボルに変換する。
-   \"turn_id\" → :TURN-ID, \"_schema\" → :_SCHEMA"
+  "Convert a JSON key string to a keyword symbol.
+   \"turn_id\" -> :TURN-ID, \"_schema\" -> :_SCHEMA"
   (intern (string-upcase (substitute #\- #\_ key-string))
           :keyword))
 
 (defun parse-json-object (p)
-  "JSON オブジェクトをパースする。開始の { は消費済みである前提。
-   alist を返す。"
+  "Parse a JSON object. Assumes the opening { has already been consumed.
+   Returns an alist."
   (parser-skip-ws p)
   (when (eql (parser-peek p) #\})
     (parser-next p)
@@ -241,17 +241,17 @@
         finally (return pairs)))
 
 (defun parse-json (string)
-  "JSON 文字列をパースして alist を返す。"
+  "Parse a JSON string and return an alist."
   (let ((p (make-json-parser :source string)))
     (parse-json-value p)))
 
 
 ;;;; ═══════════════════════════════════════════════════════════════════
-;;;; ファイル I/O
+;;;; File I/O
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun read-coglog ()
-  "current.json を読み出し、alist として返す。ファイルがなければ NIL。"
+  "Read current.json and return it as an alist. Returns NIL if the file does not exist."
   (when (probe-file *current-file*)
     (let ((content (with-open-file (in *current-file*
                                     :direction :input
@@ -262,8 +262,8 @@
       (parse-json content))))
 
 (defun write-coglog (args-plist)
-  "ARGS-PLIST（plist）をバリデーションし、current.json に書き込む。
-   書き込まれたエントリ（alist）を返す。"
+  "Validate ARGS-PLIST (plist) and write to current.json.
+   Returns the written entry (alist)."
   (validate-args args-plist)
   (ensure-directories-exist *current-file*)
   (let* ((prev (read-coglog))
@@ -278,7 +278,7 @@
     entry))
 
 (defun clear-coglog ()
-  "current.json を削除する。結果を alist で返す。"
+  "Delete current.json. Returns the result as an alist."
   (cond
     ((probe-file *current-file*)
      (delete-file *current-file*)
@@ -293,7 +293,7 @@
 ;;;; ═══════════════════════════════════════════════════════════════════
 
 (defun read-stdin ()
-  "stdin から全内容を読み込み、文字列として返す。"
+  "Read all content from stdin and return it as a string."
   (with-output-to-string (out)
     (loop for line = (read-line *standard-input* nil nil)
           while line
@@ -301,7 +301,7 @@
              (terpri out))))
 
 (defun json-to-args-plist (json-string)
-  "JSON 文字列をパースし、フラットな plist に変換する。"
+  "Parse a JSON string and convert it to a flat plist."
   (let ((alist (parse-json json-string)))
     (loop for (key . val) in alist
           collect key
@@ -316,7 +316,7 @@
 (defun main ()
   (let* ((all-args #+sbcl sb-ext:*posix-argv*
                    #-sbcl (list "coglog"))
-         ;; --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
+         ;; Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
          (args (if (and (>= (length all-args) 3)
                         (string= (second all-args) "--coglog-dir"))
                    (progn
