@@ -212,6 +212,7 @@ coglog/
 │   ├── coglog-mcp/
 │   │   ├── coglog-mcp.asd
 │   │   ├── README.md
+│   │   ├── coglog.lisp                # 純粋核（通常版から複製）
 │   │   └── mcp-server.lisp            # MCP サーバー（load coglog.lisp）
 │   └── coglog-quine/
 │       ├── coglog-quine.asd

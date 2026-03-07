@@ -118,7 +118,7 @@ Phase 1 が完了しなければ Phase 2 の `sed` が安全に動作しない�
 | 言語 | ファイル | 現状 | 変更後 |
 |------|---------|------|--------|
 | Python | `python/coglog/src/coglog/__init__.py` | `CogLog v0.9.1 — Minimal cognitive...` | `CogLog — Minimal cognitive...` |
-| Python | `python/coglog/src/coglog/__init__.py` | `python3 coglog-v0.9.1.py read` | `python3 coglog.py read` |
+| Python | `python/coglog/src/coglog/__init__.py` | `python3 coglog-v0.9.1.py read` | `python -m coglog read` |
 | Python | `python/coglog/src/coglog/__init__.py` | `coglog-v0.9.1.py <read\|write\|clear>` | `coglog.py <read\|write\|clear>` |
 | Python | `python/coglog-mcp/src/coglog_mcp/__init__.py` | `CogLog MCP Server v0.9.1` | `CogLog MCP Server` |
 | Python | `python/coglog-mcp/src/coglog_mcp/__init__.py` | `# CogLog class (copied from coglog-v0.9.1.py)` | `# CogLog class (copied from coglog.py)` |
@@ -422,13 +422,13 @@ Pass: 全コマンドが exit 0（Ruby は `Syntax OK` を出力）。
 |------|---------|---------|
 | Rust | `rust/target/release/coglog-cli --help` | Usage 表示、exit 0 |
 | C++ | `/tmp/coglog-cli --help` | Usage 表示、exit 0 |
-| Go | `go run ./cmd/coglog-cli --help` | Usage 表示、exit 0 |
-| Haskell | `cabal run coglog -- --help` | Usage 表示、exit 0 |
+| Go | `go run ./go/cmd/coglog-cli --help` | Usage 表示、exit 0 |
+| Haskell | `cd haskell/coglog && cabal run coglog-cli -- --help` | Usage 表示、exit 0 |
 | Java | `java -jar java/coglog/target/coglog-cli.jar --help` | Usage 表示、exit 0 |
 | C# | `dotnet run --project csharp/coglog -- --help` | Usage 表示、exit 0 |
-| Python | `python3 python/coglog/src/coglog/__init__.py --help` | Usage 表示、exit 0 |
+| Python | `PYTHONPATH=python/coglog/src python3 -m coglog --help` | Usage 表示、exit 0 |
 | Node.js | `node node/coglog/index.mjs --help` | Usage 表示、exit 0 |
-| Ruby | `ruby ruby/coglog/lib/coglog.rb --help` | Usage 表示、exit 0 |
+| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli --help` | Usage 表示、exit 0 |
 | Bash | `bash bash/coglog/coglog-cli.sh --help` | Usage 表示、exit 0 |
 | CL Quine | `sbcl --script .../recurrent-quine.lisp read` | 状態表示、exit 0（Priority 1 で実施済み） |
 
@@ -621,17 +621,17 @@ TMPDIR=$(mktemp -d)
 FIXTURE='{"user":"cross-test","thinking":"interop check","assistant":"OK","current_focus":"","theory_of_mind":"","self_narrative":"","annotation":""}'
 
 # 組 1: Rust write → Python read
-echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" cargo run -p coglog -- write
-COGLOG_DIR="$TMPDIR" python3 python/coglog/src/coglog/__init__.py read
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" cargo run --manifest-path rust/Cargo.toml -p coglog -- write
+COGLOG_DIR="$TMPDIR" PYTHONPATH=python/coglog/src python3 -m coglog read
 
 # 組 2: Node.js write → Go read
 rm -f "$TMPDIR/current.json"
 echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" node node/coglog/index.mjs write
-COGLOG_DIR="$TMPDIR" go run ./go/cmd/coglog-cli read
+(cd go && COGLOG_DIR="$TMPDIR" go run ./cmd/coglog-cli read)
 
 # 組 3: Python write → Ruby read
 rm -f "$TMPDIR/current.json"
-echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" python3 python/coglog/src/coglog/__init__.py write
+echo "$FIXTURE" | COGLOG_DIR="$TMPDIR" PYTHONPATH=python/coglog/src python3 -m coglog write
 COGLOG_DIR="$TMPDIR" ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli read
 
 rm -rf "$TMPDIR"
@@ -651,10 +651,10 @@ INIT='{"jsonrpc":"2.0","id":1,"method":"initialize","params":{"protocolVersion":
 LIST='{"jsonrpc":"2.0","id":2,"method":"tools/list","params":{}}'
 
 # Rust
-echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" cargo run -p coglog-mcp 2>/dev/null
+echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" cargo run --manifest-path rust/Cargo.toml -p coglog-mcp -- 2>/dev/null
 
 # Python
-echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" python3 -m coglog_mcp 2>/dev/null
+echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" PYTHONPATH=python/coglog-mcp/src python3 -m coglog_mcp 2>/dev/null
 
 # Node.js
 echo -e "${INIT}\n${LIST}" | COGLOG_DIR="$TMPDIR" node node/coglog-mcp/index.mjs 2>/dev/null
