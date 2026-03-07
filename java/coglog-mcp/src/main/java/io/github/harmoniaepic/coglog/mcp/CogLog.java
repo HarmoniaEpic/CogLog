@@ -250,7 +250,13 @@ public class CogLog {
         if (c == '{') return parseObject(src, pos);
         if (c == '[') return parseArray(src, pos);
         if (c == 't' || c == 'f') return parseBool(src, pos);
-        if (c == 'n') { pos[0] += 4; return null; }
+        if (c == 'n') {
+            if (src.startsWith("null", pos[0])) {
+                pos[0] += 4;
+                return null;
+            }
+            throw new RuntimeException("Expected 'null' at " + pos[0]);
+        }
         if (c == '-' || Character.isDigit(c)) return parseNumber(src, pos);
         throw new RuntimeException("Unexpected char '" + c + "' at " + pos[0]);
     }

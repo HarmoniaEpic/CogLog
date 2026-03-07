@@ -157,8 +157,8 @@ func handleToolsCall(id *json.RawMessage, params json.RawMessage, cl *coglog.Cog
 		sendToolResult(id, string(data), false)
 
 	case "coglog_write":
-		var args coglog.WriteArgs
-		if err := json.Unmarshal(p.Arguments, &args); err != nil {
+		args, err := coglog.ParseWriteArgs(p.Arguments)
+		if err != nil {
 			sendToolResult(id, fmt.Sprintf("Error: %v", err), true)
 			return
 		}
