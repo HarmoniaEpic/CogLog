@@ -6,6 +6,8 @@
 > |------|------|
 > | 2026-03-07 | 初版作成（ソースコード バージョン埋め込みの置換容易化計画） |
 > | 2026-03-07 | GitHub Actions によるバージョン一元管理計画に拡張。パッケージマニフェスト・ワークフロー設計を追加。対象言語に C#・Haskell・Rust・Node.js・JSX を追加 |
+> | 2026-03-07 | §1 ステータス更新（全言語 ◎）。§4 作業手順を改訂: テスト検証・計画書更新ステップ追加、§2 の明示的参照、ドライラン確認項目追加 |
+> | 2026-03-07 | §4 Step 3 を改訂: 機能テスト中心から PLAN-i18n-build-verify.md 準拠のビルド/構文検証＋スモークテストに変更。機能テストはオプションに格下げ |
 
 ---
 
@@ -91,19 +93,19 @@ Phase 1 が完了しなければ Phase 2 の `sed` が安全に動作しない�
 | ◎ | CL | `common-lisp/coglog-quine/recurrent-quine.lisp` | `'((:version . "0.9.1")` | `'((:version . "0.9.1")  ; @coglog-version` |
 | ◎ | Python | `coglog-skill/coglog/scripts/coglog.py` | `"version": "0.9.1",` | `"version": "0.9.1",  # @coglog-version` |
 | ◎ | Python | `coglog-skill/coglog-viz/scripts/coglog-viz.py` | `"version": "0.9.1",` | `"version": "0.9.1",  # @coglog-version` |
-| ○ | C# | `csharp/coglog/CogLog.cs` | `public const string Version = "0.9.1";` | `public const string Version = "0.9.1";  // @coglog-version` |
-| ○ | C# | `csharp/coglog-mcp/CogLog.cs` | `public const string Version = "0.9.1";` | `public const string Version = "0.9.1";  // @coglog-version` |
-| ○ | C# | `csharp/coglog-mcp/Program.cs` | `["version"] = "0.9.1"` | `["version"] = "0.9.1"  // @coglog-version` |
-| ○ | Haskell | `haskell/coglog/CogLog.lhs` | `> schemaVersion = "0.9.1"` | `> schemaVersion = "0.9.1"  -- @coglog-version` |
-| ○ | Haskell | `haskell/coglog-mcp/CogLog.lhs` | `> schemaVersion = "0.9.1"` | `> schemaVersion = "0.9.1"  -- @coglog-version` |
-| ○ | Haskell | `haskell/coglog-mcp/McpServer.hs` | `"version\":\"0.9.1\"` (JSON文字列内) | `...  -- @coglog-version` |
-| ○ | Rust | `rust/coglog-core/src/lib.rs` | `version: "0.9.1".into(),` | `version: "0.9.1".into(),  // @coglog-version` |
-| ○ | Rust | `rust/coglog-mcp/src/main.rs` | `"version": "0.9.1"` (JSON文字列内) | `...  // @coglog-version` |
-| ○ | Node.js | `node/coglog/index.mjs` | `version: "0.9.1",` (SCHEMA) | `version: "0.9.1",  // @coglog-version` |
-| ○ | Node.js | `node/coglog-mcp/index.mjs` | `version: "0.9.1",` (SCHEMA) | `version: "0.9.1",  // @coglog-version` |
-| ○ | Node.js | `node/coglog-mcp/index.mjs` | `version: "0.9.1"` (SERVER_INFO) | `version: "0.9.1"  // @coglog-version` |
-| ○ | JSX | `coglog-skill/coglog-viz/viewer/coglog-viewer-template.jsx` | `"version": "0.9.1",` | `"version": "0.9.1",  // @coglog-version` |
-| ○ | JSX | `coglog-skill/coglog-viz/viewer/coglog-viewer-template.jsx` | `"0.9.1"` (フォールバック表示) | `... // @coglog-version` |
+| ◎ | C# | `csharp/coglog/CogLog.cs` | `public const string Version = "0.9.1";` | `public const string Version = "0.9.1";  // @coglog-version` |
+| ◎ | C# | `csharp/coglog-mcp/CogLog.cs` | `public const string Version = "0.9.1";` | `public const string Version = "0.9.1";  // @coglog-version` |
+| ◎ | C# | `csharp/coglog-mcp/Program.cs` | `["version"] = "0.9.1"` | `["version"] = "0.9.1"  // @coglog-version` |
+| ◎ | Haskell | `haskell/coglog/CogLog.lhs` | `> schemaVersion = "0.9.1"` | `> schemaVersion = "0.9.1"  -- @coglog-version` |
+| ◎ | Haskell | `haskell/coglog-mcp/CogLog.lhs` | `> schemaVersion = "0.9.1"` | `> schemaVersion = "0.9.1"  -- @coglog-version` |
+| ◎ | Haskell | `haskell/coglog-mcp/McpServer.hs` | `"version\":\"0.9.1\"` (JSON文字列内) | `...  -- @coglog-version` |
+| ◎ | Rust | `rust/coglog-core/src/lib.rs` | `version: "0.9.1".into(),` | `version: "0.9.1".into(),  // @coglog-version` |
+| ◎ | Rust | `rust/coglog-mcp/src/main.rs` | `"version": "0.9.1"` (JSON文字列内) | `...  // @coglog-version` |
+| ◎ | Node.js | `node/coglog/index.mjs` | `version: "0.9.1",` (SCHEMA) | `version: "0.9.1",  // @coglog-version` |
+| ◎ | Node.js | `node/coglog-mcp/index.mjs` | `version: "0.9.1",` (SCHEMA) | `version: "0.9.1",  // @coglog-version` |
+| ◎ | Node.js | `node/coglog-mcp/index.mjs` | `version: "0.9.1"` (SERVER_INFO) | `version: "0.9.1"  // @coglog-version` |
+| ◎ | JSX | `coglog-skill/coglog-viz/viewer/coglog-viewer-template.jsx` | `"version": "0.9.1",` | `"version": "0.9.1",  // @coglog-version` |
+| ◎ | JSX | `coglog-skill/coglog-viz/viewer/coglog-viewer-template.jsx` | `"0.9.1"` (フォールバック表示) | `... {/* @coglog-version */}` |
 
 #### 分類 B: コメント/docstring からバージョン削除
 
@@ -323,15 +325,114 @@ cd rust && cargo generate-lockfile && cd ..
 
 全 11 言語の対象ファイルのヘッダーコメント・docstring・usage 文字列からバージョン番号を除去する。
 
-**確認:** 各言語のテストを実行し、動作に影響がないことを検証する。
+> **完了:** Python・Ruby・Java・C++・Bash・Go・Common Lisp（7c6d1e0）、C#・Haskell・Rust・Node.js・JSX（cf6bf45）
 
 #### Step 2: 分類 A — マーカーコメント追加
 
-未実装の C#・Haskell・Rust・Node.js・JSX のランタイム定数行に `@coglog-version` マーカーを追加する。
+全 11 言語のランタイム定数行に `@coglog-version` マーカーを追加する。
 
-**確認:** 各言語のテストを実行し、動作に影響がないことを検証する。
+> **完了:** Python・Ruby・Java・C++・Bash・Go・Common Lisp（7c6d1e0）、C#・Haskell・Rust・Node.js・JSX（cf6bf45）
 
-#### Step 3: 検証
+#### Step 3: ビルド・構文検証
+
+Step 1・Step 2 の変更（コメント/docstring の編集およびマーカーコメント追加）はランタイムロジックに影響しない。したがって、重い機能テストではなく **ビルド/構文チェック＋スモークテスト** で十分である（PLAN-i18n-build-verify.md と同一のアプローチ）。
+
+##### Priority 1: コードとコメントの境界が曖昧な言語
+
+**Haskell** — Literate Haskell の散文行はコードと隣接しており、編集ミスがコンパイルエラーを引き起こしうる。
+
+```bash
+cd haskell/coglog     && cabal build && cabal haddock
+cd haskell/coglog-mcp && cabal build && cabal haddock
+```
+
+Pass: `cabal build` / `cabal haddock` が exit 0。Haddock パース警告なし。
+
+**Common Lisp** — docstring は S 式内の文字列リテラルであり、エスケープ漏れがリーダーエラーになる。
+
+```bash
+sbcl --non-interactive \
+  --eval '(require :asdf)' \
+  --load common-lisp/coglog/coglog.asd \
+  --eval '(asdf:load-system :coglog)'
+
+sbcl --non-interactive \
+  --eval '(require :asdf)' \
+  --load common-lisp/coglog-mcp/coglog-mcp.asd \
+  --eval '(asdf:load-system :coglog-mcp)'
+```
+
+Pass: SBCL がリーダー/コンパイルエラーなしでロード完了。
+
+**Common Lisp — Recurrent Quine** — `asdf:load-system` はトップレベルの `(main)` が `exit` を呼ぶため使えない。`write`/`clear` はファイル自身を不可逆に書き換えるため **`read` のみが安全** な検証手段である。
+
+```bash
+sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp read
+```
+
+Pass: exit 0。stdout に `;;; (no coglog found)` と `;;; affordance` が出力される。
+
+> **警告**: `write` / `clear` を実行すると Q_0 のコメントが不可逆に失われる。破壊的ラウンドトリップテストが必要な場合は、必ずバックアップ→復元の手順を踏むこと（詳細は PLAN-i18n-build-verify.md Step 2b を参照）。
+
+##### Priority 2: コンパイル言語
+
+```bash
+cd rust && cargo build --release
+c++ -std=c++17 -Os -o /tmp/coglog-cli     cpp/coglog/coglog-cli.cpp
+c++ -std=c++17 -Os -o /tmp/coglog-mcp-cpp cpp/coglog-mcp/coglog-mcp.cpp
+cd go && go build ./...
+cd java/coglog     && mvn -q compile
+cd java/coglog-mcp && mvn -q compile
+cd csharp/coglog     && dotnet build --nologo -q
+cd csharp/coglog-mcp && dotnet build --nologo -q
+```
+
+Pass: 全コマンドが exit 0。
+
+> **C++ 環境注記**: CI は `cosmocc` を使用するが、ローカル環境では `c++` で代替する。`-mtiny` は Cosmopolitan 固有フラグのため省略。目的はコンパイル可否の確認であり、リリースバイナリの生成ではない。
+
+##### Priority 3: インタプリタ言語（構文チェック）
+
+```bash
+python3 -c "import py_compile; py_compile.compile('python/coglog/src/coglog/__init__.py', doraise=True)"
+python3 -c "import py_compile; py_compile.compile('python/coglog-mcp/src/coglog_mcp/__init__.py', doraise=True)"
+node --check node/coglog/index.mjs
+node --check node/coglog-mcp/index.mjs
+ruby -c ruby/coglog/lib/coglog.rb
+ruby -c ruby/coglog-mcp/lib/coglog_mcp.rb
+bash -n bash/coglog/coglog-cli.sh
+```
+
+Pass: 全コマンドが exit 0（Ruby は `Syntax OK` を出力）。
+
+##### スモークテスト
+
+コンパイル済みバイナリおよびスクリプトに `--help` を渡し、クラッシュせず usage テキストが表示されることを確認する。
+
+| 言語 | コマンド | 期待結果 |
+|------|---------|---------|
+| Rust | `rust/target/release/coglog-cli --help` | Usage 表示、exit 0 |
+| C++ | `/tmp/coglog-cli --help` | Usage 表示、exit 0 |
+| Go | `go run ./cmd/coglog-cli --help` | Usage 表示、exit 0 |
+| Haskell | `cabal run coglog -- --help` | Usage 表示、exit 0 |
+| Java | `java -jar java/coglog/target/coglog-cli.jar --help` | Usage 表示、exit 0 |
+| C# | `dotnet run --project csharp/coglog -- --help` | Usage 表示、exit 0 |
+| Python | `python3 python/coglog/src/coglog/__init__.py --help` | Usage 表示、exit 0 |
+| Node.js | `node node/coglog/index.mjs --help` | Usage 表示、exit 0 |
+| Ruby | `ruby ruby/coglog/lib/coglog.rb --help` | Usage 表示、exit 0 |
+| Bash | `bash bash/coglog/coglog-cli.sh --help` | Usage 表示、exit 0 |
+| CL Quine | `sbcl --script .../recurrent-quine.lisp read` | 状態表示、exit 0（Priority 1 で実施済み） |
+
+MCP サーバー (`coglog-mcp`) は stdio JSON-RPC が必要なためスモークテスト対象外。
+
+##### 失敗時の切り分け
+
+| 原因 | 対応 |
+|------|------|
+| 変更起因の破損（文字列閉じ忘れ、Haddock マーカー破損等） | 該当ソースを修正し、失敗ステップを再実行 |
+| 環境起因（ツールチェイン不在等） | 記録してスキップ。CI または別環境で再検証 |
+
+#### Step 4: マーカー・残存バージョンの検証
 
 ```bash
 # マーカー行の一覧を確認
@@ -340,7 +441,7 @@ grep -rn '@coglog-version' \
   --include='*.cpp' --include='*.sh' --include='*.go' \
   --include='*.lisp' --include='*.cs' --include='*.hs' \
   --include='*.lhs' --include='*.rs' --include='*.mjs' \
-  --include='*.jsx' .
+  --include='*.jsx' --include='*.d.mts' .
 
 # 分類 C (ドキュメント参照) が残っていることを確認
 grep -rn 'DESIGN-v0.9.1.md' --include='*.lisp' --include='*.lhs' .
@@ -352,22 +453,41 @@ grep -rn '0\.9\.1' \
   --include='*.cpp' --include='*.sh' --include='*.go' \
   --include='*.lisp' --include='*.cs' --include='*.hs' \
   --include='*.lhs' --include='*.rs' --include='*.mjs' \
-  --include='*.jsx' . | grep -v '@coglog-version'
+  --include='*.jsx' --include='*.d.mts' . | grep -v '@coglog-version'
 ```
+
+#### Step 5: 計画書ステータス更新
+
+§1 分類 A テーブルの ○ → ◎ を反映し、改訂履歴にコミットハッシュを追記する。
 
 ### Phase 2: ワークフロー構築
 
-#### Step 4: VERSION ファイル配置
+#### Step 6: VERSION ファイル配置
 
 リポジトリルートに `VERSION` ファイルを配置する（内容: 現在のバージョン文字列のみ）。
 
-#### Step 5: version-sync ワークフロー作成
+#### Step 7: version-sync ワークフロー作成
 
-`.github/workflows/version-sync.yml` を作成する。§3 の設計に基づき実装する。
+`.github/workflows/version-sync.yml` を作成する。
 
-#### Step 6: ドライラン検証
+- **ソースコード定数の更新**: §3.3 に基づき、`@coglog-version` マーカー行を sed で一括置換する
+- **パッケージマニフェストの更新**: §2 の対象ファイル一覧と §3.4 のスクリプトに基づき、ファイル形式ごとに更新する
+- **Cargo.lock の再生成**: `cargo generate-lockfile` を実行する（Rust ツールチェインが必要）
+- **コミット・タグ**: 変更をコミットし、`v{VERSION}` タグをプッシュする
+
+#### Step 8: ドライラン検証
 
 ブランチ上で VERSION を変更し、ワークフローが正しく全ファイルを更新することを確認する。
+
+**確認項目:**
+
+- [ ] `@coglog-version` マーカー行のバージョンが全て更新されている
+- [ ] 全パッケージマニフェスト（§2 対象 18 ファイル）のバージョンが更新されている
+- [ ] pom.xml で `<dependency>` 等の無関係な `<version>` が誤置換されていない
+- [ ] `Cargo.lock` が `cargo generate-lockfile` で正常に再生成されている
+- [ ] 分類 C（`DESIGN-v0.9.1.md`）が変更されていない
+- [ ] `v{VERSION}` タグが正しく作成されている
+- [ ] 既存リリースワークフロー（release-bash / release-cpp / release-coglog-skill）がタグにより正常に発火する
 
 ---
 
