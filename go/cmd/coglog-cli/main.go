@@ -77,9 +77,9 @@ func run() error {
 		if err != nil {
 			return err
 		}
-		var args coglog.WriteArgs
-		if err := json.Unmarshal(input, &args); err != nil {
-			return fmt.Errorf("invalid JSON: %w", err)
+		args, err := coglog.ParseWriteArgs(input)
+		if err != nil {
+			return err
 		}
 		entry, err := cl.Write(args)
 		if err != nil {

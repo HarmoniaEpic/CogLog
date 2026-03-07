@@ -83,7 +83,7 @@ class CogLog {
     const entry = {
       _schema: SCHEMA,
       turn_id,
-      timestamp: new Date().toISOString(),
+      timestamp: new Date().toISOString().replace(/\.\d{3}Z$/, 'Z'),
       layers: { user, thinking, assistant },
       current_focus,
       theory_of_mind,

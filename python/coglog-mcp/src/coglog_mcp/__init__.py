@@ -70,7 +70,7 @@ class CogLog:
         entry = {
             "_schema": SCHEMA,
             "turn_id": turn_id,
-            "timestamp": datetime.now(timezone.utc).isoformat(),
+            "timestamp": datetime.now(timezone.utc).strftime('%Y-%m-%dT%H:%M:%SZ'),
             "layers": {"user": user, "thinking": thinking, "assistant": assistant},
             "current_focus": current_focus,
             "theory_of_mind": theory_of_mind,
