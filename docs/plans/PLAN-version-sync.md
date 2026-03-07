@@ -118,7 +118,7 @@ Phase 1 が完了しなければ Phase 2 の `sed` が安全に動作しない�
 | 言語 | ファイル | 現状 | 変更後 |
 |------|---------|------|--------|
 | Python | `python/coglog/src/coglog/__init__.py` | `CogLog v0.9.1 — Minimal cognitive...` | `CogLog — Minimal cognitive...` |
-| Python | `python/coglog/src/coglog/__init__.py` | `python3 coglog-v0.9.1.py read` | `python3 coglog.py read` |
+| Python | `python/coglog/src/coglog/__init__.py` | `python3 coglog-v0.9.1.py read` | `python -m coglog read` |
 | Python | `python/coglog/src/coglog/__init__.py` | `coglog-v0.9.1.py <read\|write\|clear>` | `coglog.py <read\|write\|clear>` |
 | Python | `python/coglog-mcp/src/coglog_mcp/__init__.py` | `CogLog MCP Server v0.9.1` | `CogLog MCP Server` |
 | Python | `python/coglog-mcp/src/coglog_mcp/__init__.py` | `# CogLog class (copied from coglog-v0.9.1.py)` | `# CogLog class (copied from coglog.py)` |
