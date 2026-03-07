@@ -19,7 +19,14 @@
     "index.d.mts",
     "README.md"
   ],
-  "keywords": ["llm", "metacognition", "mcp", "mcp-server", "ai", "cognitive"],
+  "keywords": [
+    "llm",
+    "metacognition",
+    "mcp",
+    "mcp-server",
+    "ai",
+    "cognitive"
+  ],
   "author": "HarmoniaEpic",
   "license": "MIT",
   "repository": {
