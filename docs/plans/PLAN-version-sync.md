@@ -422,7 +422,7 @@ Pass: 全コマンドが exit 0（Ruby は `Syntax OK` を出力）。
 |------|---------|---------|
 | Rust | `rust/target/release/coglog-cli --help` | Usage 表示、exit 0 |
 | C++ | `/tmp/coglog-cli --help` | Usage 表示、exit 0 |
-| Go | `go run ./go/cmd/coglog-cli --help` | Usage 表示、exit 0 |
+| Go | `cd go && go run ./cmd/coglog-cli --help` | Usage 表示、exit 0 |
 | Haskell | `cd haskell/coglog && cabal run coglog-cli -- --help` | Usage 表示、exit 0 |
 | Java | `java -jar java/coglog/target/coglog-cli.jar --help` | Usage 表示、exit 0 |
 | C# | `dotnet run --project csharp/coglog -- --help` | Usage 表示、exit 0 |
