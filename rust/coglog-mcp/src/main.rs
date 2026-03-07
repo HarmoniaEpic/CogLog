@@ -1,4 +1,4 @@
-//! CogLog MCP Server v0.9.1
+//! CogLog MCP Server
 //!
 //! Exposes CogLog read/write/clear as MCP tools over stdio transport.
 //!
@@ -106,7 +106,7 @@ fn handle_initialize(id: &Value) {
         json!({
             "protocolVersion": "2024-11-05",
             "capabilities": { "tools": {} },
-            "serverInfo": { "name": "coglog", "version": "0.9.1" }
+            "serverInfo": { "name": "coglog", "version": "0.9.1" }  // @coglog-version
         }),
     );
 }

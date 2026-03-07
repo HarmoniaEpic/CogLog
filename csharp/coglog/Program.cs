@@ -1,4 +1,4 @@
-// CogLog CLI v0.9.1
+// CogLog CLI
 using System;
 using System.Collections.Generic;
 using System.Text.Json;
