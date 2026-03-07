@@ -1,6 +1,6 @@
 # PLAN: SPEC-path-resolution-v0.9.1 違反の修正
 
-**ステータス:** 未着手
+**ステータス:** 完了
 **対象仕様:** `docs/designs/SPEC-path-resolution-v0.9.1.md`
 **作成日:** 2026-03-07
 

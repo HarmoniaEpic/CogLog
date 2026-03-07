@@ -407,7 +407,9 @@ static const Json SCHEMA = make_schema();
 
 static std::string default_coglog_dir() {
     // Priority: COGLOG_DIR env > $HOME/.coglog > ./.coglog (final fallback)
-    if (const char* env = std::getenv("COGLOG_DIR")) return env;
+    if (const char* env = std::getenv("COGLOG_DIR")) {
+        if (env[0] != '\0') return env;
+    }
     if (const char* home = std::getenv("HOME"))
         return std::string(home) + "/.coglog";
     if (const struct passwd* pw = getpwuid(getuid()))
@@ -431,9 +433,14 @@ static bool file_exists(const std::string& path) {
 }
 
 static void ensure_dir(const std::string& path) {
-    if (!file_exists(path)) {
-        ::mkdir(path.c_str(), 0755);
+    if (file_exists(path)) return;
+    // Recursively create parent directories (mkdir -p equivalent)
+    for (size_t pos = 1; pos < path.size(); ++pos) {
+        if (path[pos] == '/') {
+            ::mkdir(path.substr(0, pos).c_str(), 0755);
+        }
     }
+    ::mkdir(path.c_str(), 0755);
 }
 
 static std::string read_file(const std::string& path) {

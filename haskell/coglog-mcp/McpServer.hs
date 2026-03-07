@@ -1,3 +1,4 @@
+{-# LANGUAGE ScopedTypeVariables #-}
 module Main where
 
 import CogLog
@@ -9,8 +10,9 @@ import System.IO (hPutStrLn, hPutStr, hGetContents, hGetLine, hFlush,
                    hIsEOF,
                    stderr, stdin, stdout, hSetEncoding, hSetBuffering,
                    utf8, withFile, IOMode(..), BufferMode(..))
+import Control.Exception (IOException, catch)
 import System.Directory (doesFileExist, createDirectoryIfMissing,
-                         removeFile, getHomeDirectory)
+                         removeFile, getHomeDirectory, getCurrentDirectory)
 import System.Environment (getArgs, lookupEnv)
 import qualified System.FilePath as FP
 
@@ -258,9 +260,9 @@ defaultCoglogPath :: IO FilePath
 defaultCoglogPath = do
   envDir <- lookupEnv "COGLOG_DIR"
   case envDir of
-    Just d  -> return (d FP.</> "current.json")
-    Nothing -> do
-      home <- getHomeDirectory
+    Just d | not (null d) -> return (d FP.</> "current.json")
+    _ -> do
+      home <- getHomeDirectory `catch` (\(_ :: IOException) -> getCurrentDirectory)
       return (home FP.</> ".coglog" FP.</> "current.json")
 
 readCoglog :: FilePath -> IO (Maybe Entry)
