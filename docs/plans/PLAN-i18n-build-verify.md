@@ -84,6 +84,72 @@ sbcl --non-interactive \
 
 ---
 
+### Step 2b: Common Lisp — Recurrent Quine (coglog-quine)
+
+**Priority: Highest** — The recurrent quine contains translated comments *and* docstrings embedded in quoted S-expressions (`*self-source*`, `*advance-source*`, `*affordance*`). A mistranslation inside a quoted form silently corrupts the program's self-replication.
+
+#### Why `asdf:load-system` cannot be used
+
+`recurrent-quine.lisp` ends with top-level forms:
+
+```lisp
+(eval *advance-source*)
+(eval *self-source*)
+(main)
+```
+
+`asdf:load-system :coglog-quine` would execute `(main)`, which parses CLI arguments and calls `exit`. This makes ASDF loading unusable for build verification.
+
+#### Why `write` and `clear` are destructive
+
+The recurrent quine is a self-rewriting program. `write` calls `write-generation`, which overwrites `recurrent-quine.lisp` itself with the next generation. `clear` does the same (resetting state to nil). **Any execution of `write` or `clear` irreversibly modifies the source file.**
+
+From Q_1 onward, the prose comments in the original Q_0 are gone by design — `write-generation` outputs only a minimal header. This means a careless smoke test can permanently strip the repository's Q_0 comments.
+
+#### Safe verification: `read` command only
+
+The `read` command is the only non-destructive operation. It prints `*state*` and `*affordance*` to stdout without modifying any file.
+
+```bash
+# Verify SBCL can read, compile, and execute the file without reader errors.
+# The 'read' command inspects state without modifying the file.
+sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp read
+```
+
+**Pass criteria**:
+- SBCL exits 0 (no reader errors, no compilation errors).
+- stdout contains `;;; (no coglog found)` (initial state) followed by `;;; affordance` and the affordance S-expression.
+
+#### Optional: destructive round-trip test (requires backup)
+
+If a full round-trip verification is desired, **the source file must be backed up and restored**:
+
+```bash
+QUINE=common-lisp/coglog-quine/recurrent-quine.lisp
+
+# 1. Backup
+cp "$QUINE" /tmp/recurrent-quine-backup.lisp
+
+# 2. Write (destructive — rewrites the file)
+echo '(:user "test" :thinking "test" :assistant "test" :current-focus "" :theory-of-mind "" :self-narrative "" :annotation "")' \
+  | sbcl --script "$QUINE" write
+
+# 3. Verify next generation can read
+sbcl --script "$QUINE" read
+
+# 4. Restore original Q_0
+cp /tmp/recurrent-quine-backup.lisp "$QUINE"
+```
+
+**Pass criteria for optional test**:
+- Step 2 prints `coglog: turn 1 written` and exits 0.
+- Step 3 prints `;;; state` followed by the entry, and exits 0.
+- Step 4 restores the file. Verify with `git diff` that no changes remain.
+
+**Warning**: Do NOT skip step 4. If the backup is not restored, subsequent `git diff` or `git status` will show the file as modified, and the original Q_0 prose comments will be lost.
+
+---
+
 ### Step 3: Rust
 
 ```bash
@@ -205,12 +271,14 @@ For compiled languages, run the built binary with `--help` (or no arguments) to 
 
 MCP server variants (`coglog-mcp`) are not smoke-tested here because they require stdio JSON-RPC interaction.
 
+**Recurrent Quine**: The `read` command in Step 2b already serves as the smoke test. No additional entry is needed here. Do NOT run `write` or `clear` as a smoke test — see Step 2b for the rationale.
+
 ---
 
 ## Execution Order & Priority
 
 ```
-Priority 1 (PLAN-required):  Step 1 (Haskell) + Step 2 (Common Lisp)
+Priority 1 (PLAN-required):  Step 1 (Haskell) + Step 2 (Common Lisp) + Step 2b (Recurrent Quine)
 Priority 2 (compiled):       Step 3 (Rust) + Step 4 (C++) + Step 5 (Go)
                               Step 6 (Java) + Step 7 (C#)
 Priority 3 (interpreted):    Step 8 (Python) + Step 9 (Node) + Step 10 (Ruby) + Step 11 (Bash)
@@ -218,6 +286,8 @@ Smoke tests:                  After each priority group
 ```
 
 Steps within the same priority group are independent and may run in parallel.
+
+**Note**: Step 2b's optional destructive round-trip test must NOT run in parallel with any other Common Lisp step, as it modifies and restores `recurrent-quine.lisp`.
 
 ---
 
