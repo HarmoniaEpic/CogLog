@@ -690,7 +690,7 @@ rm -rf "$TMPDIR"
 | 3c-2 相互運用 | Node.js → Go | PASS | |
 | 3c-2 相互運用 | Python → Ruby | PASS | |
 | 3c-3 MCP | Rust | PASS | |
-| 3c-3 MCP | Python | SKIP | 既存バグ: `main()` 内で `coglog_dir` 未定義 (NameError)。バージョン同期の変更とは無関係 |
+| 3c-3 MCP | Python | PASS | 既存バグ `coglog_dir` 未定義を修正済み |
 | 3c-3 MCP | Node.js | PASS | |
 
 ##### スキップ規則

@@ -229,7 +229,7 @@ def handle_ping(msg_id):
 # ═══════════════════════════════════════════════════════════════
 
 def main():
-    ml = CogLog(data_dir=coglog_dir)
+    ml = CogLog()
     log("server started")
 
     for line in sys.stdin:
