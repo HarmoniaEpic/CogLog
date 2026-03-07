@@ -2,7 +2,7 @@
 module Main where
 
 import CogLog
-import Data.Char (isSpace, isDigit)
+import Data.Char (isSpace, isDigit, isHexDigit)
 import Data.List (intercalate, isPrefixOf, isSuffixOf)
 import Data.Time (UTCTime, getCurrentTime, formatTime, defaultTimeLocale)
 import Data.Time.Format (parseTimeM)
@@ -129,7 +129,7 @@ parseJString s0 = case skipWS s0 of
       'n'  -> go rest ('\n' : acc)
       't'  -> go rest ('\t' : acc)
       'u'  -> let (hex, rest') = splitAt 4 rest
-              in if length hex == 4
+              in if length hex == 4 && all isHexDigit hex
                  then go rest' (toEnum (read ("0x" ++ hex)) : acc)
                  else Left "invalid unicode escape"
       _    -> go rest (c : acc)
