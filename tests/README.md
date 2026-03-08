@@ -4,11 +4,25 @@ Two-layer test architecture for all 11 language implementations.
 
 ## Prerequisites
 
-- `jq` (JSON processing)
-- Language toolchains for each language under test
-- `sbcl` (for Recurrent Quine tests only)
+- `jq` (JSON processing, required)
 
-Java (JAR) and C++ (binary) are auto-built by the harness if needed. Maven is used when available; otherwise `javac`/`jar` is used as a fallback.
+### Language toolchains
+
+Each language requires its toolchain to be installed. The harness checks for the required command before running tests; **languages whose toolchain is not found are automatically skipped** (reported as SKIP in the summary).
+
+| Language | Required command(s) | Notes |
+|----------|-------------------|-------|
+| Rust | `cargo` | Builds and runs via `cargo run` |
+| Python | `python3` | |
+| Node | `node` | |
+| Go | `go` | Builds and runs via `go run` |
+| Ruby | `ruby` | |
+| Java | `java`, `javac` | JAR auto-built; uses `mvn` if available, falls back to `javac`/`jar` |
+| C# | `dotnet` | Builds and runs via `dotnet run` |
+| Haskell | `cabal` | Builds and runs via `cabal run` |
+| Common Lisp | `sbcl` | Also required for Recurrent Quine tests |
+| C++ | `c++` | Binary auto-built from source |
+| Bash | *(always available)* | Layer 1 only (no MCP) |
 
 ## Layer 1: CLI Black-Box Tests
 
