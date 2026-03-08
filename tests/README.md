@@ -8,32 +8,7 @@ Two-layer test architecture for all 11 language implementations.
 - Language toolchains for each language under test
 - `sbcl` (for Recurrent Quine tests only)
 
-### Pre-build steps
-
-Some languages require pre-building before running the harness:
-
-```bash
-# Java (JAR)
-mvn -f java/coglog/pom.xml package -q
-mvn -f java/coglog-mcp/pom.xml package -q
-
-# C++ (binary)
-c++ -std=c++17 -Os -o cpp-coglog-cli cpp/coglog/coglog-cli.cpp
-c++ -std=c++17 -Os -o cpp-coglog-mcp cpp/coglog-mcp/coglog-mcp.cpp
-```
-
-If Maven is unavailable, Java can be built directly:
-
-```bash
-mkdir -p /tmp/coglog-java-classes
-javac -d /tmp/coglog-java-classes java/coglog/src/main/java/io/github/harmoniaepic/coglog/*.java
-jar cfe java/coglog/target/coglog-cli.jar io.github.harmoniaepic.coglog.Main -C /tmp/coglog-java-classes .
-
-mkdir -p /tmp/coglog-mcp-classes
-javac -d /tmp/coglog-mcp-classes java/coglog-mcp/src/main/java/io/github/harmoniaepic/coglog/mcp/*.java
-mkdir -p java/coglog-mcp/target
-jar cfe java/coglog-mcp/target/coglog-mcp.jar io.github.harmoniaepic.coglog.mcp.McpServer -C /tmp/coglog-mcp-classes .
-```
+Java (JAR) and C++ (binary) are auto-built by the harness if needed. Maven is used when available; otherwise `javac`/`jar` is used as a fallback.
 
 ## Layer 1: CLI Black-Box Tests
 
