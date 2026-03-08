@@ -144,17 +144,16 @@ run_mcp_session() {
     sleep 0.1
   done
 
-  # Wait for responses (with timeout)
-  local waited=0
+  # Wait for responses (with timeout in real seconds)
+  local start_time=$SECONDS
   local expected_count=$#
-  while [ "$waited" -lt "$MCP_TIMEOUT" ]; do
+  while [ $((SECONDS - start_time)) -lt "$MCP_TIMEOUT" ]; do
     local line_count
     line_count=$(wc -l < "$resp_file" 2>/dev/null || echo 0)
     if [ "$line_count" -ge "$expected_count" ]; then
       break
     fi
     sleep 0.2
-    waited=$((waited + 1))
   done
 
   # Close fifo and kill server
