@@ -65,6 +65,28 @@ restore_baseline() {
   cp "$BASELINE_FILE" "$QUINE_FILE"
 }
 
+# Extract *self-source* from the quine file without executing it.
+# Reads the file as data (S-expressions), finds the (defvar *self-source* ...)
+# form, and prints its value. This avoids loading the file, which would
+# execute (main) and call (exit) before extraction could occur.
+extract_self_source() {
+  sbcl --non-interactive --eval '
+    (with-open-file (in "'"$QUINE_FILE"'" :direction :input)
+      (loop for form = (read in nil nil)
+            while form
+            when (and (consp form)
+                      (eq (car form) (quote defvar))
+                      (eq (cadr form) (quote *self-source*)))
+            do (let ((*print-case* :downcase)
+                     (*print-right-margin* nil)
+                     (*print-pretty* nil)
+                     (*print-circle* nil))
+                 (write (caddr form) :stream *standard-output*)
+                 (terpri)
+                 (return))))
+  ' 2>/dev/null
+}
+
 # Run the quine with a command and optional stdin.
 # Usage: run_quine <cmd> [stdin_text]
 # Captures stdout to $Q_STDOUT, stderr to $Q_STDERR, exit code to $Q_EXIT.
@@ -394,23 +416,12 @@ test_q11_opt_self_identity() {
 
   restore_baseline
 
-  # Extract current *self-source* from the baseline
-  # The *self-source* starts after "(defvar *self-source*\n '" and ends before the final ")"
-  # We use sbcl to extract it programmatically
+  # Extract current *self-source* without executing the quine
   local self_source
-  self_source=$(sbcl --non-interactive --eval '
-    (load "'"$QUINE_FILE"'")
-    ' --eval '
-    (let ((*print-case* :downcase)
-          (*print-right-margin* nil)
-          (*print-pretty* nil)
-          (*print-circle* nil))
-      (write *self-source* :stream *standard-output*)
-      (terpri))
-    ' 2>/dev/null) || true
+  self_source=$(extract_self_source) || true
 
   if [ -z "$self_source" ]; then
-    skip "Q.11 could not extract *self-source* (sbcl load failed)"
+    skip "Q.11 could not extract *self-source* (sbcl extraction failed)"
     return
   fi
 
@@ -437,18 +448,9 @@ test_q12_all_options() {
 
   restore_baseline
 
-  # Extract current *self-source*
+  # Extract current *self-source* without executing the quine
   local self_source
-  self_source=$(sbcl --non-interactive --eval '
-    (load "'"$QUINE_FILE"'")
-    ' --eval '
-    (let ((*print-case* :downcase)
-          (*print-right-margin* nil)
-          (*print-pretty* nil)
-          (*print-circle* nil))
-      (write *self-source* :stream *standard-output*)
-      (terpri))
-    ' 2>/dev/null) || true
+  self_source=$(extract_self_source) || true
 
   if [ -z "$self_source" ]; then
     skip "Q.12 could not extract *self-source*"
@@ -542,18 +544,9 @@ test_q14_opt_self_fidelity() {
 
   restore_baseline
 
-  # Extract current *self-source*
+  # Extract current *self-source* without executing the quine
   local self_source
-  self_source=$(sbcl --non-interactive --eval '
-    (load "'"$QUINE_FILE"'")
-    ' --eval '
-    (let ((*print-case* :downcase)
-          (*print-right-margin* nil)
-          (*print-pretty* nil)
-          (*print-circle* nil))
-      (write *self-source* :stream *standard-output*)
-      (terpri))
-    ' 2>/dev/null) || true
+  self_source=$(extract_self_source) || true
 
   if [ -z "$self_source" ]; then
     skip "Q.14 could not extract *self-source*"
