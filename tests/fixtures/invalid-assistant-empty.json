@@ -1,0 +1,9 @@
+{
+  "user": "Hello",
+  "thinking": "User greeted me",
+  "assistant": "",
+  "current_focus": "greeting",
+  "theory_of_mind": "friendly",
+  "self_narrative": "conversational partner",
+  "annotation": "follow up on tone"
+}
