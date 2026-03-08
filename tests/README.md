@@ -4,6 +4,7 @@ Two-layer test architecture for all 11 language implementations.
 
 ## Prerequisites
 
+- `bash` (v4+ recommended; test harnesses are Bash scripts)
 - `jq` (JSON processing, required)
 
 ### Language toolchains
