@@ -75,10 +75,20 @@ A single shell script drives all 11 language implementations through the same CL
 
 **Warning:** Quine tests execute `write` which irreversibly rewrites `recurrent-quine.lisp`. The harness automatically backs up and restores the file using `recurrent-quine-baseline.lisp`.
 
+## Cleanup
+
+Remove all build artifacts and caches across every language:
+
+```bash
+./tests/clean.sh          # Remove artifacts
+./tests/clean.sh --dry    # Preview what would be removed
+```
+
 ## Directory Structure
 
 ```
 tests/
+├── clean.sh               # Repository cleanup script
 ├── fixtures/              # Shared JSON test fixtures (14 files)
 ├── fixtures-quine/        # Recurrent Quine plist fixtures (7 files)
 ├── harness.sh             # Layer 1 CLI black-box test harness
