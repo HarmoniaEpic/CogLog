@@ -287,12 +287,29 @@ Recurrent Quine は Layer 1 の共通ハーネスでテストできない。以�
 各テストの実行前に、テスト対象のファイルをバックアップからコピーして復元すること。
 
 ```bash
-cp recurrent-quine-baseline.lisp recurrent-quine.lisp  # 各テスト前に実行
+cp common-lisp/coglog-quine/recurrent-quine-baseline.lisp \
+   common-lisp/coglog-quine/recurrent-quine.lisp  # 各テスト前に実行
 ```
+
+ベースラインは `common-lisp/coglog-quine/recurrent-quine-baseline.lisp` に固定する。`harness-quine.sh` はこの固定パスのベースラインが既に生成済みであることを前提に、各テスト開始前に必ず復元コピーを実行する。
 
 ### テスト用ハーネス
 
 Recurrent Quine 専用の小規模ハーネス（`harness-quine.sh`）を用意する。plist フィクスチャと S式の出力パースを担当する。
+
+`harness-quine.sh` では Quine の配置を定数化する。
+
+```bash
+QUINE_DIR=common-lisp/coglog-quine
+QUINE_FILE="$QUINE_DIR/recurrent-quine.lisp"
+QUINE_BASELINE="$QUINE_DIR/recurrent-quine-baseline.lisp"
+
+restore_quine() {
+  cp "$QUINE_BASELINE" "$QUINE_FILE"
+}
+```
+
+各テストケースの冒頭で `restore_quine` を呼び、復元コピー処理を共通化する。
 
 ### フィクスチャ
 
@@ -316,10 +333,10 @@ tests/fixtures-quine/
 │ Recurrent Quine テストのライフサイクル（各テストケース）       │
 │                                                              │
 │  1. ベースラインからファイルを復元（cp）                      │
-│  2. テストを実行（sbcl --script recurrent-quine.lisp write） │
+│  2. テストを実行（sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp write） │
 │  3. 期待結果と比較（grep でパターン照合）                    │
 │  4. 必要に応じて次世代の動作を検証                           │
-│     （復元せずにもう一度 sbcl --script を実行）              │
+│     （復元せずにもう一度 sbcl --script common-lisp/coglog-quine/recurrent-quine.lisp を実行） │
 │  5. PASS / FAIL を出力                                       │
 │                                                              │
 │  注: 手順4は「次世代が動作するか」の検証であり、             │
@@ -418,7 +435,8 @@ Phase 5: Layer 2 — MCP テスト
   # Java: java -jar java/coglog-mcp/target/coglog-mcp.jar
 
 Phase 6: Recurrent Quine テスト
-  cp recurrent-quine.lisp recurrent-quine-baseline.lisp  # ベースライン退避
+  cp common-lisp/coglog-quine/recurrent-quine.lisp \
+     common-lisp/coglog-quine/recurrent-quine-baseline.lisp  # ベースライン退避（固定生成位置）
   ./tests/harness-quine.sh
   # テスト Q.1〜Q.14
 ```
