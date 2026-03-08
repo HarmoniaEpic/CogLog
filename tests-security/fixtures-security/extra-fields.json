@@ -1,0 +1,12 @@
+{
+  "user": "Hello",
+  "thinking": "User greeted me",
+  "assistant": "Hi there!",
+  "current_focus": "greeting",
+  "theory_of_mind": "friendly",
+  "self_narrative": "conversational partner",
+  "annotation": "follow up on tone",
+  "unexpected_field": "should be ignored",
+  "another_extra": 12345,
+  "__proto__": {"admin": true}
+}
