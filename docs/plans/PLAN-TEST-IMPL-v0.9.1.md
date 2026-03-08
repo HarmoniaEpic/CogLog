@@ -1,6 +1,6 @@
 # CogLog v0.9.1 テスト実装プラン
 
-TEST-SPEC-v0.9.1.md から導出。個々の実装コードは参照していない。
+SPEC-TEST-v0.9.1.md から導出。個々の実装コードは参照していない。
 
 ---
 
@@ -126,15 +126,15 @@ tests/
 | Python | `PYTHONPATH=python/coglog/src python3 -m coglog` | `PYTHONPATH=python/coglog-mcp/src python3 -m coglog_mcp` |
 | Node.js | `node node/coglog/index.mjs` | `node node/coglog-mcp/index.mjs` |
 | Go | `go run ./go/cmd/coglog-cli` | `go run ./go/cmd/coglog-mcp` |
-| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` | `ruby -Iruby/coglog-mcp/lib ruby/coglog-mcp/bin/coglog-mcp` |
-| Java | `java -jar java/coglog/target/coglog-cli.jar` | `java -jar java/coglog-mcp/target/coglog-mcp.jar` |
+| Ruby | `coglog-cli` | `coglog-mcp` |
+| Java | `java -jar coglog-0.9.1.jar` | `java -jar coglog-mcp-0.9.1.jar` |
 | C# | `dotnet run --project csharp/coglog --` | `dotnet run --project csharp/coglog-mcp --` |
 | Haskell | `cd haskell/coglog && cabal run coglog-cli --` | `cd haskell/coglog-mcp && cabal run coglog-mcp --` |
 | CL | `sbcl --script common-lisp/coglog/adapter.lisp` | `sbcl --script common-lisp/coglog-mcp/mcp-server.lisp` |
-| C++ | `cpp/coglog/coglog-cli` | `cpp/coglog-mcp/coglog-mcp` |
+| C++ | `./coglog-cli` | `./coglog-mcp` |
 | Bash | `bash bash/coglog/coglog-cli.sh` | —（MCP なし） |
 
-注: Java は事前に `mvn package` が必要。C++ は事前ビルドが必要。ハーネスはビルド済みを前提とし、ビルド自体はテストしない。
+注: Ruby は gem で CLI コマンドを利用可能な状態を前提とする。Java は README に従った JAR 生成（例: `mvn package`）が必要。C++ は README の手順で事前ビルドが必要。ハーネスはビルド済みを前提とし、ビルド自体はテストしない。
 
 ### テスト仕様とカバレッジの対応
 
@@ -472,7 +472,7 @@ jobs:
 
 ## 恒真命題の再確認
 
-ハーネス実装時に以下を混入しないこと（TEST-SPEC-v0.9.1.md より）:
+ハーネス実装時に以下を混入しないこと（SPEC-TEST-v0.9.1.md より）:
 
 - ❌ CLI の終了コードが 0 であることだけを検証する（何を出力したかを検証しなければ無意味）
 - ❌ write 後に current.json が存在することだけを検証する（中身を検証しなければ無意味）
