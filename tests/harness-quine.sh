@@ -70,20 +70,25 @@ restore_baseline() {
 # form, and prints its value. This avoids loading the file, which would
 # execute (main) and call (exit) before extraction could occur.
 extract_self_source() {
-  sbcl --non-interactive --eval '
+  sbcl --noinform --non-interactive --eval '
     (with-open-file (in "'"$QUINE_FILE"'" :direction :input)
       (loop for form = (read in nil nil)
             while form
             when (and (consp form)
                       (eq (car form) (quote defvar))
                       (eq (cadr form) (quote *self-source*)))
-            do (let ((*print-case* :downcase)
-                     (*print-right-margin* nil)
-                     (*print-pretty* nil)
-                     (*print-circle* nil))
-                 (write (caddr form) :stream *standard-output*)
-                 (terpri)
-                 (return))))
+            do (let* ((quoted-form (caddr form))
+                      (val (if (and (consp quoted-form)
+                                    (eq (car quoted-form) (quote quote)))
+                               (cadr quoted-form)
+                               quoted-form)))
+                 (let ((*print-case* :downcase)
+                       (*print-right-margin* nil)
+                       (*print-pretty* nil)
+                       (*print-circle* nil))
+                   (write val :stream *standard-output*)
+                   (terpri)
+                   (return)))))
   ' 2>/dev/null
 }
 
