@@ -125,16 +125,16 @@ tests/
 | Rust | `cargo run --manifest-path rust/Cargo.toml -p coglog --` | `cargo run --manifest-path rust/Cargo.toml -p coglog-mcp --` |
 | Python | `PYTHONPATH=python/coglog/src python3 -m coglog` | `PYTHONPATH=python/coglog-mcp/src python3 -m coglog_mcp` |
 | Node.js | `node node/coglog/index.mjs` | `node node/coglog-mcp/index.mjs` |
-| Go | `go run ./go/cmd/coglog-cli` | `go run ./go/cmd/coglog-mcp` |
-| Ruby | `coglog-cli` | `coglog-mcp` |
-| Java | `java -jar coglog-0.9.1.jar` | `java -jar coglog-mcp-0.9.1.jar` |
+| Go | `cd go && go run ./cmd/coglog-cli` | `cd go && go run ./cmd/coglog-mcp` |
+| Ruby | `ruby -Iruby/coglog/lib ruby/coglog/bin/coglog-cli` | `ruby -Iruby/coglog-mcp/lib ruby/coglog-mcp/bin/coglog-mcp` |
+| Java | `java -jar java/coglog/target/coglog-cli.jar` | `java -jar java/coglog-mcp/target/coglog-mcp.jar` |
 | C# | `dotnet run --project csharp/coglog --` | `dotnet run --project csharp/coglog-mcp --` |
 | Haskell | `cd haskell/coglog && cabal run coglog-cli --` | `cd haskell/coglog-mcp && cabal run coglog-mcp --` |
 | CL | `sbcl --script common-lisp/coglog/adapter.lisp` | `sbcl --script common-lisp/coglog-mcp/mcp-server.lisp` |
 | C++ | `./coglog-cli` | `./coglog-mcp` |
 | Bash | `bash bash/coglog/coglog-cli.sh` | —（MCP なし） |
 
-注: Ruby は gem で CLI コマンドを利用可能な状態を前提とする。Java は README に従った JAR 生成（例: `mvn package`）が必要。C++ は README の手順で事前ビルドが必要。ハーネスはビルド済みを前提とし、ビルド自体はテストしない。
+注: Java は事前に `mvn -f java/coglog/pom.xml package` と `mvn -f java/coglog-mcp/pom.xml package` で JAR を生成する。C++ は README の手順で事前ビルドが必要。ハーネスはビルド済みを前提とし、ビルド自体はテストしない。
 
 ### テスト仕様とカバレッジの対応
 
@@ -224,7 +224,7 @@ jq は Bash 版 CogLog の依存でもあるため、テスト実行環境に追
 MCP は JSON-RPC over stdio であり、CLI ハーネスでは扱いにくい。言語ごとに stdin/stdout をパイプで接続してテストする。
 
 ```
-echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | coglog-mcp
+echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | <MCPコマンド>
 ```
 
 各テストケースの実行パターン:
@@ -234,7 +234,7 @@ echo '{"jsonrpc":"2.0","id":1,"method":"initialize","params":{...}}' | coglog-mc
 │ MCP テストのライフサイクル                                     │
 │                                                              │
 │  1. 一時ディレクトリを作成                                    │
-│  2. coglog-mcp --coglog-dir <tmpdir> をバックグラウンド起動   │
+│  2. 各言語の MCP コマンドで --coglog-dir <tmpdir> を指定して起動 │
 │  3. stdin に JSON-RPC メッセージを書き込む                    │
 │  4. stdout から応答を読み取る                                 │
 │  5. 応答の JSON を検証                                        │
@@ -388,10 +388,11 @@ Phase 1: フィクスチャ生成
 
 Phase 2: 各言語のビルド（テスト対象の準備）
   cargo build --workspace
-  mvn package (java/coglog, java/coglog-mcp)
+  mvn -f java/coglog/pom.xml package
+  mvn -f java/coglog-mcp/pom.xml package
   dotnet build (csharp/coglog, csharp/coglog-mcp)
   g++ / cosmoc++ (cpp)
-  # Python, Node.js, Ruby, Go, Haskell, CL, Bash はビルド不要
+  # Python, Node.js, Ruby, Go, Haskell, CL, Bash は追加ビルド不要
 
 Phase 3: Layer 1 — CLI ブラックボックステスト
   ./tests/harness.sh all
@@ -412,6 +413,9 @@ Phase 4: Layer 2 — 言語固有テスト
 Phase 5: Layer 2 — MCP テスト
   ./tests/harness-mcp.sh all
   # テスト群 13（全10言語）
+  # Go: cd go && go run ./cmd/coglog-mcp
+  # Ruby: ruby -Iruby/coglog-mcp/lib ruby/coglog-mcp/bin/coglog-mcp
+  # Java: java -jar java/coglog-mcp/target/coglog-mcp.jar
 
 Phase 6: Recurrent Quine テスト
   cp recurrent-quine.lisp recurrent-quine-baseline.lisp  # ベースライン退避
