@@ -53,26 +53,40 @@ graph TB
 
 ## エンタープライズ採用に関する注意 / Enterprise Adoption Notice
 
+
+### スコープ内 / In Scope
+
 ```mermaid
 graph LR
-    subgraph in_scope ["スコープ内 / In Scope"]
-        A["単一ユーザー<br/>Single user"]
-        B["ローカルファイル I/O<br/>Local file I/O"]
-        C["サンドボックス内実行<br/>Sandboxed execution"]
-    end
+    A["✅ 単一ユーザー<br/>Single user"]
+    B["✅ ローカルファイル I/O<br/>Local file I/O"]
+    C["✅ サンドボックス内実行<br/>Sandboxed execution"]
 
-    subgraph out_scope ["スコープ外（採用者責任）/ Out of Scope — Adopter's responsibility"]
-        D["パース堅牢性<br/>Parsing robustness"]
-        E["マルチユーザー<br/>Multi-user access"]
-        F["入力サニタイズ<br/>Input sanitization"]
-        G["サプライチェーン監査<br/>Supply-chain audit"]
-        H["改ざん検知<br/>Tamper evidence"]
-    end
+    A ~~~ B ~~~ C
 
-    in_scope ~~~ out_scope
+    style A fill:#e8f4e8,stroke:#2d8a2d,stroke-width:2px
+    style B fill:#e8f4e8,stroke:#2d8a2d,stroke-width:2px
+    style C fill:#e8f4e8,stroke:#2d8a2d,stroke-width:2px
+```
 
-    style in_scope fill:#e8f4e8,stroke:#2d8a2d,stroke-width:2px
-    style out_scope fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
+### スコープ外（採用者責任）/ Out of Scope — Adopter's Responsibility
+
+```mermaid
+graph LR
+    D["⚠ パース堅牢性<br/>Parsing robustness"]
+    E["⚠ マルチユーザー<br/>Multi-user access"]
+    F["⚠ 入力サニタイズ<br/>Input sanitization"]
+    G["⚠ サプライチェーン監査<br/>Supply-chain audit"]
+    H["⚠ 改ざん検知<br/>Tamper evidence"]
+
+    D ~~~ E ~~~ F
+    G ~~~ H
+
+    style D fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
+    style E fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
+    style F fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
+    style G fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
+    style H fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
 CogLog は個人ユーザーが自身の AI 環境内で使用することを前提に設計されている。マルチユーザー環境や本番環境への導入を検討する場合、以下の領域は**本プロジェクトのスコープ外**である。
