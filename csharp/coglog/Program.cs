@@ -50,7 +50,14 @@ try
             foreach (var key in new[] { "user", "thinking", "assistant",
                 "current_focus", "theory_of_mind", "self_narrative", "annotation" })
             {
-                writeArgs[key] = data[key]?.GetValue<string>() ?? "";
+                if (!data.ContainsKey(key))
+                    throw new ArgumentException($"missing required field: {key}");
+                var node = data[key];
+                if (node is null || node.GetValueKind() == JsonValueKind.Null)
+                    throw new ArgumentException($"field '{key}' must be a string, got null");
+                if (node.GetValueKind() != JsonValueKind.String)
+                    throw new ArgumentException($"field '{key}' must be a string, got {node.GetValueKind()}");
+                writeArgs[key] = node.GetValue<string>();
             }
             var written = cl.Write(writeArgs);
             Console.WriteLine($"coglog: turn {written["turn_id"]} written");
