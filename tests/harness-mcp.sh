@@ -145,8 +145,12 @@ run_mcp_session() {
   done
 
   # Wait for responses (with timeout in real seconds)
+  # Count only JSON-RPC requests (messages with "id":) — notifications have no response.
   local start_time=$SECONDS
-  local expected_count=$#
+  local expected_count=0
+  for msg in "$@"; do
+    case "$msg" in *'"id"'*) expected_count=$((expected_count + 1)) ;; esac
+  done
   while [ $((SECONDS - start_time)) -lt "$MCP_TIMEOUT" ]; do
     local line_count
     line_count=$(wc -l < "$resp_file" 2>/dev/null || echo 0)
