@@ -481,10 +481,10 @@ tests/
 | P2 | 未達（Python timestamp が `+00:00` + マイクロ秒） | **達成** | Python CLI/MCP と skill script で `strftime('%Y-%m-%dT%H:%M:%SZ')` に統一済み |
 | P3 | 未達（Node.js timestamp がミリ秒付き） | **達成** | Node CLI/MCP とも `toISOString().replace(/\.\d{3}Z$/, 'Z')` で秒精度 `...Z` に統一済み |
 | P4 | 未達（Java MCP null 解析不備） | **達成** | Java MCP の JSON パーサで `n` 開始時に `null` リテラルを厳密検証する分岐を実装済み |
-| P5 | 未達 | **未達（継続）** | Haskell 側の `\uXXXX` 解析で 16進数妥当性検証が未実装 |
+| P5 | 未達 | **達成** | 本報告の修正方針どおり `all isHexDigit hex` ガードを追加済み（`Adapter.hs` L140、`McpServer.hs` L132）。不正な16進数には `Left "invalid unicode escape"` を返す |
 | P6 | 未達 | **未達（継続）** | `tests/` 配下のハーネス・フィクスチャ実装は未着手 |
 
-**補足:** 今後の優先順位付けは、上記のとおり未達が残る P5・P6 を中心に再設定することが望ましい。
+**補足:** P5 は修正方針に記載した `all isHexDigit hex` ガードの追加により解消済み。今後の優先順位付けは、唯一未達の P6（テスト実装）を中心に再設定することが望ましい。
 
 ---
 
