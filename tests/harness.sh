@@ -92,7 +92,7 @@ run_cli() {
         >"$tmpout" 2>"$tmperr" || CLI_EXIT=$?
       ;;
     csharp)
-      dotnet run --no-build --project "$REPO_ROOT/csharp/coglog" -- "$@" \
+      dotnet run --project "$REPO_ROOT/csharp/coglog" -- "$@" \
         >"$tmpout" 2>"$tmperr" || CLI_EXIT=$?
       ;;
     haskell)
@@ -153,7 +153,7 @@ run_cli_stdin() {
         <"$input_file" >"$tmpout" 2>"$tmperr" || CLI_EXIT=$?
       ;;
     csharp)
-      dotnet run --no-build --project "$REPO_ROOT/csharp/coglog" -- "$@" \
+      dotnet run --project "$REPO_ROOT/csharp/coglog" -- "$@" \
         <"$input_file" >"$tmpout" 2>"$tmperr" || CLI_EXIT=$?
       ;;
     haskell)
