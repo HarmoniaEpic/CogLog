@@ -84,6 +84,15 @@ Remove all build artifacts and caches across every language:
 ./tests/clean.sh --dry    # Preview what would be removed
 ```
 
+Running `clean.sh` before tests ensures a fresh build from source; running it after tests reclaims disk space. Recommended workflow:
+
+```bash
+./tests/clean.sh            # Pre-test: start from clean state
+./tests/harness.sh all      # Run Layer 1
+./tests/harness-mcp.sh all  # Run Layer 2
+./tests/clean.sh            # Post-test: reclaim ~170 MB
+```
+
 ## Directory Structure
 
 ```
