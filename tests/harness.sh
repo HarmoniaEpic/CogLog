@@ -627,10 +627,8 @@ test_11_path_resolution() {
   fi
   rm -rf "$(dirname "$nodir")"
 
-  # 11.5 Explicit --coglog-dir overrides COGLOG_DIR (skip for bash)
-  if [ "$lang" = "bash" ]; then
-    skip "11.5 --coglog-dir (Bash uses env var only)"
-  else
+  # 11.5 Explicit --coglog-dir overrides COGLOG_DIR
+  {
     local dir1; dir1=$(mktemp -d)
     local dir2; dir2=$(mktemp -d)
     COGLOG_DIR="$dir1" run_cli_stdin "$lang" "$FIXTURES/valid-full.json" write --coglog-dir "$dir2"
@@ -649,7 +647,7 @@ test_11_path_resolution() {
       fail "11.5 --coglog-dir overrides COGLOG_DIR" "current.json not found in either dir"
     fi
     rm -rf "$dir1" "$dir2"
-  fi
+  }
 
   # 11.13 COGLOG_DIR="" falls back to default
   setup_tmpdir
