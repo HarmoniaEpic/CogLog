@@ -471,6 +471,23 @@ tests/
 
 ---
 
+## 達成状況マトリクス（2026-03-07 時点の再確認）
+
+本ドキュメントの P1-P6 は「問題報告としての初出時点」の記録であり、現行コードでは一部が解消済みである。以下に、報告時点と現状の差分を整理する。
+
+| ID | 報告時点 | 現状 | 判定根拠（現行コード） |
+|----|----------|------|-------------------------|
+| P1 | 未達（Go が解釈層の欠落を暗黙受理） | **達成** | `ParseWriteArgs` で `current_focus` / `theory_of_mind` / `self_narrative` / `annotation` の存在と string 型を明示検証する実装に更新済み |
+| P2 | 未達（Python timestamp が `+00:00` + マイクロ秒） | **達成** | Python CLI/MCP と skill script で `strftime('%Y-%m-%dT%H:%M:%SZ')` に統一済み |
+| P3 | 未達（Node.js timestamp がミリ秒付き） | **達成** | Node CLI/MCP とも `toISOString().replace(/\.\d{3}Z$/, 'Z')` で秒精度 `...Z` に統一済み |
+| P4 | 未達（Java MCP null 解析不備） | **達成** | Java MCP の JSON パーサで `n` 開始時に `null` リテラルを厳密検証する分岐を実装済み |
+| P5 | 未達 | **達成** | 本報告の修正方針どおり `all isHexDigit hex` ガードを追加済み（`Adapter.hs` L140、`McpServer.hs` L132）。不正な16進数には `Left "invalid unicode escape"` を返す |
+| P6 | 未達 | **未達（継続）** | `tests/` 配下のハーネス・フィクスチャ実装は未着手 |
+
+**補足:** P5 は修正方針に記載した `all isHexDigit hex` ガードの追加により解消済み。今後の優先順位付けは、唯一未達の P6（テスト実装）を中心に再設定することが望ましい。
+
+---
+
 ## 推奨修正順序
 
 | 順序 | 対象 | 理由 |
