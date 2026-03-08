@@ -1,0 +1,31 @@
+{
+  "_schema": {
+    "version": "0.9.1",
+    "fact_layer": {
+      "user": "non-empty string required",
+      "thinking": "non-empty string required",
+      "assistant": "non-empty string required"
+    },
+    "interpretation_layer": {
+      "current_focus": "string required, empty OK",
+      "theory_of_mind": "string required, empty OK",
+      "self_narrative": "string required, empty OK",
+      "annotation": "string required, empty OK"
+    },
+    "constraints": {
+      "window_size": "1 turn (overwritten each write)",
+      "interpretation_empty": "choosing not to write is itself a metacognitive act"
+    }
+  },
+  "turn_id": -999,
+  "timestamp": "2026-01-01T00:00:00Z",
+  "layers": {
+    "user": "Tampered",
+    "thinking": "Tampered thinking",
+    "assistant": "Tampered response"
+  },
+  "current_focus": "tampered",
+  "theory_of_mind": "",
+  "self_narrative": "",
+  "annotation": ""
+}
