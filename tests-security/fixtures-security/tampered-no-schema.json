@@ -1,0 +1,13 @@
+{
+  "turn_id": 1,
+  "timestamp": "2026-01-01T00:00:00Z",
+  "layers": {
+    "user": "No schema",
+    "thinking": "Schema was removed",
+    "assistant": "Response without schema"
+  },
+  "current_focus": "",
+  "theory_of_mind": "",
+  "self_narrative": "",
+  "annotation": ""
+}
