@@ -9,8 +9,8 @@
 |---|---|---|---|
 | Layer 1 (CLI Black-Box) | 518 | 0 | 0 |
 | Layer 2 (MCP Protocol) | 60 | 0 | 0 |
-| Recurrent Quine | 23 | 3 | 0 |
-| **Total** | **601** | **3** | **0** |
+| Recurrent Quine | 33 | 0 | 0 |
+| **Total** | **611** | **0** | **0** |
 
 ## Toolchain Versions
 
@@ -42,20 +42,16 @@ All 10 MCP-capable languages pass all 6 MCP tests (13.1–13.6). Bash is exclude
 
 ## Recurrent Quine Tests (`harness-quine.sh`)
 
-**Result: 23 PASS / 3 FAIL**
+**Result: 33 PASS / 0 FAIL**
 
-### Failures
+All 14 test groups (Q.1–Q.14) pass, including `:opt-self` identity, all-options simultaneous write, and 3-generation round-trip fidelity.
 
-| Test | Description | Error |
-|---|---|---|
-| Q.11 | `:opt-self` identity write | `Comma not inside a backquote` (SBCL reader error) |
-| Q.12 | All options simultaneously | `Comma not inside a backquote` (SBCL reader error) |
-| Q.14 | `:opt-self` round-trip fidelity (3 generations) | exit code 1 |
+### Previously Failing Tests (now fixed)
 
-All three failures relate to the `:opt-self` quine self-modification feature, where comma/backquote handling in the generated s-expression causes SBCL reader errors.
+| Test | Description | Root Cause | Fix |
+|---|---|---|---|
+| Q.11 | `:opt-self` identity write | `extract_self_source` lacked `--noinform`; SBCL banner (containing commas) leaked into stdout and was embedded in the plist, causing `Comma not inside a backquote` | Added `--noinform` flag |
+| Q.12 | All options simultaneously | Same as Q.11 | Same fix |
+| Q.14 | `:opt-self` round-trip fidelity | Same as Q.11, plus `(caddr form)` returned `(quote (progn ...))` instead of stripping the quote wrapper from the reader macro expansion of `'(progn ...)` | Added `--noinform` + unwrap `(quote ...)` to extract the raw form |
 
-## Analysis
-
-### Quine Failure Pattern
-
-All 3 quine failures trace to `:opt-self` — the mechanism for a quine to rewrite its own source. The error `Comma not inside a backquote` indicates that the quine's self-representation contains unescaped commas that break when read back by SBCL.
+The failures were in the test harness (`extract_self_source`), not in the quine itself. The quine's backquote avoidance design — using only `list`/`cons` to maintain `print → read` round-trip fidelity — is correct and verified across 3 generations.
