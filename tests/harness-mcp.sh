@@ -13,7 +13,7 @@
 # Prerequisites:
 #   - jq
 #   - Language toolchains for each language under test
-#   - Java JAR and C++ binary must be pre-built
+#   - Java and C++ are auto-built if needed
 #
 # Must be run from the repository root directory.
 # ═══════════════════════════════════════════════════════════════════
@@ -377,6 +377,50 @@ check_prerequisites() {
   fi
 }
 
+# ── Auto-build for compiled languages ──
+
+build_java_jar() {
+  local jar="$1" main_class="$2" src_dir="$3"
+  [ -f "$jar" ] && return 0
+  echo "  Building $jar ..."
+  if command -v mvn >/dev/null 2>&1; then
+    local pom; pom="$(dirname "$(dirname "$jar")")/pom.xml"
+    if mvn -f "$pom" package -q >/dev/null 2>&1; then
+      return 0
+    fi
+    echo "  mvn failed, falling back to javac ..."
+  fi
+  local tmp; tmp=$(mktemp -d)
+  javac -d "$tmp" "$src_dir"/*.java
+  mkdir -p "$(dirname "$jar")"
+  jar cfe "$jar" "$main_class" -C "$tmp" .
+  rm -rf "$tmp"
+}
+
+build_cpp_binary() {
+  local bin="$1" src="$2"
+  [ -f "$bin" ] && return 0
+  echo "  Building $bin ..."
+  c++ -std=c++17 -Os -o "$bin" "$src"
+}
+
+prepare_lang() {
+  local lang="$1"
+  case "$lang" in
+    java)
+      build_java_jar \
+        "$REPO_ROOT/java/coglog-mcp/target/coglog-mcp.jar" \
+        "io.github.harmoniaepic.coglog.mcp.McpServer" \
+        "$REPO_ROOT/java/coglog-mcp/src/main/java/io/github/harmoniaepic/coglog/mcp"
+      ;;
+    cpp)
+      build_cpp_binary \
+        "$REPO_ROOT/cpp-coglog-mcp" \
+        "$REPO_ROOT/cpp/coglog-mcp/coglog-mcp.cpp"
+      ;;
+  esac
+}
+
 main() {
   check_prerequisites
 
@@ -399,6 +443,7 @@ main() {
 
   for lang in $LANGS_TO_TEST; do
     printf "\n\033[1m════ %s ════\033[0m\n" "$lang"
+    prepare_lang "$lang"
     test_13_mcp "$lang"
   done
 
