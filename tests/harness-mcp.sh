@@ -98,7 +98,7 @@ start_mcp_server() {
         --coglog-dir "$coglog_dir"
       ;;
     csharp)
-      dotnet run --project "$REPO_ROOT/csharp/coglog-mcp" -- \
+      dotnet run --no-build --project "$REPO_ROOT/csharp/coglog-mcp" -- \
         --coglog-dir "$coglog_dir"
       ;;
     haskell)
