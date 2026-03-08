@@ -2,10 +2,10 @@
 
 ## 脅威モデル / Threat Model
 
-CogLog は **単一ユーザー・ローカル専用** のメタ認知ログツールであり、AI アシスタント付きサンドボックス（Claude Code、Cursor、Copilot Workspace 等）内での動作を想定している。
+CogLog は **単一ユーザー・ローカル専用** のメタ認知ログツールであり、AI アシスタント付きサンドボックス（Claude Code、Cursor、Copilot Workspace 他）内での動作を想定している。
 
 CogLog is a **single-user, local-only** cognitive logging tool designed to run
-inside an AI-assisted sandbox (e.g. Claude Code, Cursor, Copilot Workspace).
+inside an AI-assisted sandbox (e.g. Claude Code, Cursor, Copilot Workspace, and so on).
 
 **ネットワークサービスではない。** 以下の機能を持たない:
 
@@ -75,7 +75,7 @@ graph LR
     style out_scope fill:#fde8e8,stroke:#c0392b,stroke-width:2px,stroke-dasharray: 5 5
 ```
 
-CogLog は個人ユーザーが自身の AI 環境内で使用することを前提に設計されている。マルチユーザー環境や本番環境への導入を検討する場合、以下の領域は**本プロジェクトのスコープ外**であり、採用者の責任となる。
+CogLog は個人ユーザーが自身の AI 環境内で使用することを前提に設計されている。マルチユーザー環境や本番環境への導入を検討する場合、以下の領域は**本プロジェクトのスコープ外**である。
 
 CogLog is designed for individual users operating within their own AI
 environment. If you are evaluating it for multi-user or production deployment,
@@ -113,7 +113,7 @@ adopter's responsibility.
 
   CogLog does not maintain append-only or cryptographically committed logs.
 
-これらはバグではなく、意図的なスコープの境界である。CogLog をより広いシステムに組み込む採用者は、自身のセキュリティ要件に従ってこれらの領域を評価・対処しなければならない。
+これらはバグではなく、意図的なスコープの境界である。CogLog をより広いシステムに組み込む採用者は、自身のセキュリティ要件に従ってこれらの領域を評価・対処する。
 
 These are not bugs — they are deliberate scope boundaries. Adopters
 integrating CogLog into a broader system must evaluate and address these
