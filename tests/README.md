@@ -28,6 +28,11 @@ If Maven is unavailable, Java can be built directly:
 mkdir -p /tmp/coglog-java-classes
 javac -d /tmp/coglog-java-classes java/coglog/src/main/java/io/github/harmoniaepic/coglog/*.java
 jar cfe java/coglog/target/coglog-cli.jar io.github.harmoniaepic.coglog.Main -C /tmp/coglog-java-classes .
+
+mkdir -p /tmp/coglog-mcp-classes
+javac -d /tmp/coglog-mcp-classes java/coglog-mcp/src/main/java/io/github/harmoniaepic/coglog/mcp/*.java
+mkdir -p java/coglog-mcp/target
+jar cfe java/coglog-mcp/target/coglog-mcp.jar io.github.harmoniaepic.coglog.mcp.McpServer -C /tmp/coglog-mcp-classes .
 ```
 
 ## Layer 1: CLI Black-Box Tests
