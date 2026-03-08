@@ -4,11 +4,25 @@ Two-layer test architecture for all 11 language implementations.
 
 ## Prerequisites
 
-- `jq` (JSON processing)
-- Language toolchains for each language under test
-- `sbcl` (for Recurrent Quine tests only)
+- `jq` (JSON processing, required)
 
-Java (JAR) and C++ (binary) are auto-built by the harness if needed. Maven is used when available; otherwise `javac`/`jar` is used as a fallback.
+### Language toolchains
+
+Each language requires its toolchain to be installed. The harness checks for the required command before running tests; **languages whose toolchain is not found are automatically skipped** (reported as SKIP in the summary).
+
+| Language | Required command(s) | Notes |
+|----------|-------------------|-------|
+| Rust | `cargo` | Builds and runs via `cargo run` |
+| Python | `python3` | |
+| Node | `node` | |
+| Go | `go` | Builds and runs via `go run` |
+| Ruby | `ruby` | |
+| Java | `java`, `javac` | JAR auto-built; uses `mvn` if available, falls back to `javac`/`jar` |
+| C# | `dotnet` | Builds and runs via `dotnet run` |
+| Haskell | `cabal` | Builds and runs via `cabal run` |
+| Common Lisp | `sbcl` | Also required for Recurrent Quine tests |
+| C++ | `c++` | Binary auto-built from source |
+| Bash | *(always available)* | Layer 1 only (no MCP) |
 
 ## Layer 1: CLI Black-Box Tests
 
@@ -61,10 +75,29 @@ A single shell script drives all 11 language implementations through the same CL
 
 **Warning:** Quine tests execute `write` which irreversibly rewrites `recurrent-quine.lisp`. The harness automatically backs up and restores the file using `recurrent-quine-baseline.lisp`.
 
+## Cleanup
+
+Remove all build artifacts and caches across every language:
+
+```bash
+./tests/clean.sh          # Remove artifacts
+./tests/clean.sh --dry    # Preview what would be removed
+```
+
+Running `clean.sh` before tests ensures a fresh build from source; running it after tests reclaims disk space. Recommended workflow:
+
+```bash
+./tests/clean.sh            # Pre-test: start from clean state
+./tests/harness.sh all      # Run Layer 1
+./tests/harness-mcp.sh all  # Run Layer 2
+./tests/clean.sh            # Post-test: reclaim ~170 MB
+```
+
 ## Directory Structure
 
 ```
 tests/
+├── clean.sh               # Repository cleanup script
 ├── fixtures/              # Shared JSON test fixtures (14 files)
 ├── fixtures-quine/        # Recurrent Quine plist fixtures (7 files)
 ├── harness.sh             # Layer 1 CLI black-box test harness

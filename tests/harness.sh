@@ -815,7 +815,17 @@ check_prerequisites() {
   fi
 }
 
-# ── Auto-build for compiled languages ──
+# ── Toolchain check & auto-build ──
+
+# Check that a command exists; print warning and return 1 if missing.
+require_cmd() {
+  local cmd="$1" lang="$2"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    skip "$lang: '$cmd' not found — skipping"
+    return 1
+  fi
+  return 0
+}
 
 build_java_jar() {
   local jar="$1" main_class="$2" src_dir="$3"
@@ -842,20 +852,34 @@ build_cpp_binary() {
   c++ -std=c++17 -Os -o "$bin" "$src"
 }
 
+# Check toolchain availability and auto-build if needed.
+# Returns 0 if ready, 1 if the language should be skipped.
 prepare_lang() {
   local lang="$1"
   case "$lang" in
+    rust)     require_cmd cargo "$lang"  || return 1 ;;
+    python)   require_cmd python3 "$lang" || return 1 ;;
+    node)     require_cmd node "$lang"   || return 1 ;;
+    go)       require_cmd go "$lang"     || return 1 ;;
+    ruby)     require_cmd ruby "$lang"   || return 1 ;;
     java)
+      require_cmd java "$lang"  || return 1
+      require_cmd javac "$lang" || return 1
       build_java_jar \
         "$REPO_ROOT/java/coglog/target/coglog-cli.jar" \
         "io.github.harmoniaepic.coglog.Main" \
         "$REPO_ROOT/java/coglog/src/main/java/io/github/harmoniaepic/coglog"
       ;;
+    csharp)   require_cmd dotnet "$lang" || return 1 ;;
+    haskell)  require_cmd cabal "$lang"  || return 1 ;;
+    cl)       require_cmd sbcl "$lang"   || return 1 ;;
     cpp)
+      require_cmd c++ "$lang" || return 1
       build_cpp_binary \
         "$REPO_ROOT/cpp-coglog-cli" \
         "$REPO_ROOT/cpp/coglog/coglog-cli.cpp"
       ;;
+    bash)     ;; # always available
   esac
 }
 
@@ -863,7 +887,9 @@ run_tests_for_lang() {
   local lang="$1"
   printf "\n\033[1m════ %s ════\033[0m\n" "$lang"
 
-  prepare_lang "$lang"
+  if ! prepare_lang "$lang"; then
+    return
+  fi
 
   test_01_initial_state "$lang"
   test_02_roundtrip "$lang"
