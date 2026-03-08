@@ -109,3 +109,14 @@ usage: coglog-cli <read|write|clear>
 ### 重大度
 
 **P2** — ドキュメントの手順記載ミス。自動テストには影響しないが、手動スモークテストの手順をそのまま実行すると失敗する。
+
+---
+
+## 達成状況マトリクス
+
+本ドキュメントの P1・P2 は問題報告としての初出時点の記録であり、現行コードおよびドキュメントでは解消済みである。以下に、報告時点と現状の差分を整理する。
+
+| ID | 報告時点 | 現状 | 判定根拠（現行コード／ドキュメント） |
+|----|----------|------|--------------------------------------|
+| P1 | 未達（`require "coglog"` でソースチェックアウト実行不可） | **達成** | `ruby/coglog/bin/coglog-cli` L2 が `require_relative '../lib/coglog'` に復元済み。`ruby/coglog-mcp/bin/coglog-mcp` L2 も同様に `require_relative '../lib/coglog_mcp'` に復元済み。修正コミット `cac496b` |
+| P2 | 未達（Go スモークテストコマンドが実行不可能） | **達成** | `docs/plans/PLAN-version-sync.md` L425 が `cd go && go run ./cmd/coglog-cli --help` に修正済み。同ドキュメント内の他 3 箇所と一貫した `cd go &&` パターンに統一。修正コミット `cac496b` |
