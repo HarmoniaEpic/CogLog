@@ -192,42 +192,10 @@ teardown_tmpdir() {
 }
 
 # ═══════════════════════════════════════════════════════════════════
-# Toolchain check & auto-build (from tests/harness.sh)
+# Toolchain check & auto-build
 # ═══════════════════════════════════════════════════════════════════
 
-require_cmd() {
-  local cmd="$1" lang="$2"
-  if ! command -v "$cmd" >/dev/null 2>&1; then
-    skip "$lang: '$cmd' not found — skipping"
-    return 1
-  fi
-  return 0
-}
-
-build_java_jar() {
-  local jar="$1" main_class="$2" src_dir="$3"
-  [ -f "$jar" ] && return 0
-  echo "  Building $jar ..."
-  if command -v mvn >/dev/null 2>&1; then
-    local pom; pom="$(dirname "$(dirname "$jar")")/pom.xml"
-    if mvn -f "$pom" package -q >/dev/null 2>&1; then
-      return 0
-    fi
-    echo "  mvn failed, falling back to javac ..."
-  fi
-  local tmp; tmp=$(mktemp -d)
-  javac -d "$tmp" "$src_dir"/*.java
-  mkdir -p "$(dirname "$jar")"
-  jar cfe "$jar" "$main_class" -C "$tmp" .
-  rm -rf "$tmp"
-}
-
-build_cpp_binary() {
-  local bin="$1" src="$2"
-  [ -f "$bin" ] && return 0
-  echo "  Building $bin ..."
-  c++ -std=c++17 -Os -o "$bin" "$src"
-}
+source "$REPO_ROOT/tests/common-build.sh"
 
 prepare_lang() {
   local lang="$1"
@@ -318,9 +286,10 @@ run_mcp_session() {
   local coglog_dir="$2"
   shift 2
 
-  local fifo_in; fifo_in=$(mktemp -u)
-  local resp_file; resp_file=$(mktemp)
-  local err_file; err_file=$(mktemp)
+  local tmpdir; tmpdir=$(mktemp -d)
+  local fifo_in="$tmpdir/fifo"
+  local resp_file="$tmpdir/resp"
+  local err_file="$tmpdir/err"
   mkfifo "$fifo_in"
 
   start_mcp_server "$lang" "$coglog_dir" <"$fifo_in" >"$resp_file" 2>"$err_file" &
@@ -350,7 +319,6 @@ run_mcp_session() {
   exec 3>&-
   kill "$server_pid" 2>/dev/null || true
   wait "$server_pid" 2>/dev/null || true
-  rm -f "$fifo_in"
 
   MCP_RESPONSES=()
   while IFS= read -r line; do
@@ -358,7 +326,7 @@ run_mcp_session() {
   done < "$resp_file"
 
   MCP_STDERR=$(cat "$err_file")
-  rm -f "$resp_file" "$err_file"
+  rm -rf "$tmpdir"
 }
 
 prepare_lang_mcp() {
