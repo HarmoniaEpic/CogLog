@@ -154,12 +154,20 @@
 
 ### 軽微な懸念
 
-| # | 種別 | 内容 | 影響度 |
-|---|---|---|---|
-| 1 | 一貫性 | Go, Python, Node, Ruby, Rust, CL の6言語で同様の型チェック強化が未実施 | 低 — 各言語の既存実装の型安全性による |
-| 2 | DRY | `require_cmd`, `build_java_jar`, `build_cpp_binary` が `harness.sh` と `harness-mcp.sh` に重複 | 低 — 機能的には問題なし |
-| 3 | PR メタデータ | PR タイトル "from Devel" は内容を反映していない。説明文も未記入 | 低 — コード品質に影響なし |
-| 4 | 命名 | `README-SECURITY.md` と GitHub 標準の `SECURITY.md` の混同リスク | 低 |
+| # | 種別 | 内容 | 影響度 | 対応状況 |
+|---|---|---|---|---|
+| 1 | 一貫性 | Go, Python, Node, Ruby, Rust, CL の6言語で同様の型チェック強化が未実施 | 低 | **解消** — 調査の結果、6言語は既に厳格な型チェックを実装済み |
+| 2 | DRY | `require_cmd`, `build_java_jar`, `build_cpp_binary` が3ファイルに重複 | 低 | **修正済** — `tests/common-build.sh` に抽出 |
+| 3 | PR メタデータ | PR タイトル "from Devel" は内容を反映していない。説明文も未記入 | 低 | コード品質に影響なし |
+| 4 | 命名 | `README-SECURITY.md` と GitHub 標準の `SECURITY.md` の混同リスク | 低 | 役割が異なるため現状維持で問題なし |
+
+### Codex 指摘事項への対応
+
+| # | 内容 | 対応状況 |
+|---|---|---|
+| C1 | `common.sh` の FIFO 作成で `mktemp -u` → `mkfifo` 間に TOCTOU 競合余地 | **修正済** — `mktemp -d` 配下に FIFO を作成、`rm -rf` で一括 cleanup |
+| C2 | Bash CLI `--coglog-dir` の引数欠落時に `set -u` 由来の不親切なエラー | **修正済** — 値なし/空文字を明示検出し、stderr にエラーメッセージ出力 |
+| C3 | S.P.4 (read-only dir) が root ユーザーで偽陰性 | **修正済** — 実書き込みテストで root 等を検出し skip |
 
 ---
 
@@ -167,9 +175,13 @@
 
 本PRは CogLog v0.9.1 の品質・堅牢性を大幅に向上させる変更群であり、マージに適している。
 
-- 入力バリデーション強化は4言語にわたり一貫した修正
+- 入力バリデーション強化は4言語にわたり一貫した修正（残り6言語も既に対応済みと確認）
 - テスト基盤の自動ビルド・ツールチェーン検出は運用性を向上
 - セキュリティテストスイート (5ハーネス) とドキュメントはプロジェクトの成熟度を示す
 - 全611テストが PASS しており、リグレッションなし
 
-**推奨**: マージ可。上記の軽微な懸念は将来のイテレーションで対応可能。
+**ポストマージ修正** (本ブランチで実施):
+- FIFO 作成の TOCTOU 安全化 (`tests-security/common.sh`)
+- `--coglog-dir` 引数検証強化 (`bash/coglog/coglog-cli.sh`)
+- S.P.4 root 対応 (`tests-security/harness-path.sh`)
+- ビルドヘルパー DRY 化 (`tests/common-build.sh` 新規、3ファイルから `source`)

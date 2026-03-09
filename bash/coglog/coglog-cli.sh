@@ -275,7 +275,12 @@ main() {
   local args=()
   while [[ $# -gt 0 ]]; do
     case "$1" in
-      --coglog-dir) coglog_dir_override="$2"; shift 2 ;;
+      --coglog-dir)
+        if [[ $# -lt 2 || -z "$2" ]]; then
+          echo "error: --coglog-dir requires a path argument" >&2
+          exit 1
+        fi
+        coglog_dir_override="$2"; shift 2 ;;
       *)            args+=("$1"); shift ;;
     esac
   done

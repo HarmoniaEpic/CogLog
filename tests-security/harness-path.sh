@@ -104,6 +104,15 @@ test_sp4_readonly() {
   local rodir; rodir=$(mktemp -d)
   chmod 555 "$rodir"
 
+  # Root can write despite chmod 555; skip to avoid false failure
+  if touch "$rodir/.write_test" 2>/dev/null; then
+    rm -f "$rodir/.write_test"
+    chmod 755 "$rodir"
+    rm -rf "$rodir"
+    skip "S.P.4 read-only dir (effective user can write despite chmod 555)"
+    return
+  fi
+
   COGLOG_DIR="$rodir" run_cli_stdin "$lang" "$FIXTURES/valid-full.json" write
   if [ "$CLI_EXIT" -ne 0 ]; then
     pass "S.P.4 read-only dir write fails (exit $CLI_EXIT)"
