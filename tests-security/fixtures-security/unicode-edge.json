@@ -1,0 +1,9 @@
+{
+  "user": "Hello \ud83d\ude00 emoji and CJK \u4e16\u754c and RTL \u0627\u0644\u0639\u0631\u0628\u064a\u0629",
+  "thinking": "User sent mixed scripts with \u00e9\u00e8\u00ea accents and \u2603 snowman",
+  "assistant": "Acknowledged \u2764\ufe0f\u200d\ud83d\udd25 compound emoji",
+  "current_focus": "\ud83c\udff4\udb40\udc67\udb40\udc62\udb40\udc73\udb40\udc63\udb40\udc74\udb40\udc7f flag sequence",
+  "theory_of_mind": "",
+  "self_narrative": "zero-width: \u200b\u200c\u200d\ufeff",
+  "annotation": ""
+}

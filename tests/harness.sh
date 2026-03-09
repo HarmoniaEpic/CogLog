@@ -12,7 +12,7 @@
 # Prerequisites:
 #   - jq
 #   - Language toolchains for each language under test
-#   - Java JAR and C++ binary must be pre-built
+#   - Java and C++ are auto-built if needed
 #
 # Must be run from the repository root directory.
 # ═══════════════════════════════════════════════════════════════════
@@ -627,10 +627,8 @@ test_11_path_resolution() {
   fi
   rm -rf "$(dirname "$nodir")"
 
-  # 11.5 Explicit --coglog-dir overrides COGLOG_DIR (skip for bash)
-  if [ "$lang" = "bash" ]; then
-    skip "11.5 --coglog-dir (Bash uses env var only)"
-  else
+  # 11.5 Explicit --coglog-dir overrides COGLOG_DIR
+  {
     local dir1; dir1=$(mktemp -d)
     local dir2; dir2=$(mktemp -d)
     COGLOG_DIR="$dir1" run_cli_stdin "$lang" "$FIXTURES/valid-full.json" write --coglog-dir "$dir2"
@@ -649,7 +647,7 @@ test_11_path_resolution() {
       fail "11.5 --coglog-dir overrides COGLOG_DIR" "current.json not found in either dir"
     fi
     rm -rf "$dir1" "$dir2"
-  fi
+  }
 
   # 11.13 COGLOG_DIR="" falls back to default
   setup_tmpdir
@@ -817,9 +815,81 @@ check_prerequisites() {
   fi
 }
 
+# ── Toolchain check & auto-build ──
+
+# Check that a command exists; print warning and return 1 if missing.
+require_cmd() {
+  local cmd="$1" lang="$2"
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    skip "$lang: '$cmd' not found — skipping"
+    return 1
+  fi
+  return 0
+}
+
+build_java_jar() {
+  local jar="$1" main_class="$2" src_dir="$3"
+  [ -f "$jar" ] && return 0
+  echo "  Building $jar ..."
+  if command -v mvn >/dev/null 2>&1; then
+    local pom; pom="$(dirname "$(dirname "$jar")")/pom.xml"
+    if mvn -f "$pom" package -q >/dev/null 2>&1; then
+      return 0
+    fi
+    echo "  mvn failed, falling back to javac ..."
+  fi
+  local tmp; tmp=$(mktemp -d)
+  javac -d "$tmp" "$src_dir"/*.java
+  mkdir -p "$(dirname "$jar")"
+  jar cfe "$jar" "$main_class" -C "$tmp" .
+  rm -rf "$tmp"
+}
+
+build_cpp_binary() {
+  local bin="$1" src="$2"
+  [ -f "$bin" ] && return 0
+  echo "  Building $bin ..."
+  c++ -std=c++17 -Os -o "$bin" "$src"
+}
+
+# Check toolchain availability and auto-build if needed.
+# Returns 0 if ready, 1 if the language should be skipped.
+prepare_lang() {
+  local lang="$1"
+  case "$lang" in
+    rust)     require_cmd cargo "$lang"  || return 1 ;;
+    python)   require_cmd python3 "$lang" || return 1 ;;
+    node)     require_cmd node "$lang"   || return 1 ;;
+    go)       require_cmd go "$lang"     || return 1 ;;
+    ruby)     require_cmd ruby "$lang"   || return 1 ;;
+    java)
+      require_cmd java "$lang"  || return 1
+      require_cmd javac "$lang" || return 1
+      build_java_jar \
+        "$REPO_ROOT/java/coglog/target/coglog-cli.jar" \
+        "io.github.harmoniaepic.coglog.Main" \
+        "$REPO_ROOT/java/coglog/src/main/java/io/github/harmoniaepic/coglog"
+      ;;
+    csharp)   require_cmd dotnet "$lang" || return 1 ;;
+    haskell)  require_cmd cabal "$lang"  || return 1 ;;
+    cl)       require_cmd sbcl "$lang"   || return 1 ;;
+    cpp)
+      require_cmd c++ "$lang" || return 1
+      build_cpp_binary \
+        "$REPO_ROOT/cpp-coglog-cli" \
+        "$REPO_ROOT/cpp/coglog/coglog-cli.cpp"
+      ;;
+    bash)     ;; # always available
+  esac
+}
+
 run_tests_for_lang() {
   local lang="$1"
   printf "\n\033[1m════ %s ════\033[0m\n" "$lang"
+
+  if ! prepare_lang "$lang"; then
+    return
+  fi
 
   test_01_initial_state "$lang"
   test_02_roundtrip "$lang"

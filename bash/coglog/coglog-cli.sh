@@ -22,8 +22,8 @@
 set -euo pipefail
 
 readonly COGLOG_VERSION="0.9.1"  # @coglog-version
-readonly COGLOG_DIR="${COGLOG_DIR:-${HOME}/.coglog}"
-readonly COGLOG_FILE="${COGLOG_DIR}/current.json"
+COGLOG_DIR="${COGLOG_DIR:-${HOME}/.coglog}"
+COGLOG_FILE="${COGLOG_DIR}/current.json"
 
 # ═══════════════════════════════════════════════════════════════════
 # jq dependency check
@@ -232,11 +232,14 @@ cmd_clear() {
 
 cmd_usage() {
   cat <<'EOF'
-usage: coglog-cli.sh <read|write|clear>
+usage: coglog-cli.sh [--coglog-dir <path>] <read|write|clear>
 
   read    — display the previous turn's coglog
   write   — save current turn (reads JSON from stdin)
   clear   — reset coglog
+
+options:
+  --coglog-dir <path>  override data directory (takes precedence over COGLOG_DIR)
 
 write expects JSON on stdin (all fields required):
   {
@@ -267,12 +270,28 @@ EOF
 main() {
   require_jq
 
-  case "${1:-}" in
+  # Extract --coglog-dir from any position, collect remaining args
+  local coglog_dir_override=""
+  local args=()
+  while [[ $# -gt 0 ]]; do
+    case "$1" in
+      --coglog-dir) coglog_dir_override="$2"; shift 2 ;;
+      *)            args+=("$1"); shift ;;
+    esac
+  done
+
+  # Priority: --coglog-dir > COGLOG_DIR > default
+  if [[ -n "$coglog_dir_override" ]]; then
+    COGLOG_DIR="$coglog_dir_override"
+    COGLOG_FILE="${COGLOG_DIR}/current.json"
+  fi
+
+  case "${args[0]:-}" in
     read)  cmd_read  ;;
     write) cmd_write ;;
     clear) cmd_clear ;;
     *)     cmd_usage
-           [[ -n "${1:-}" ]] && exit 1 || exit 0
+           [[ -n "${args[0]:-}" ]] && exit 1 || exit 0
            ;;
   esac
 }

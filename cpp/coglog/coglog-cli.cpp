@@ -609,13 +609,21 @@ int main(int argc, char* argv[]) {
             std::string input = read_stdin();
             auto data = json::Value::parse(input);
             coglog::WriteArgs args;
-            args.user           = data.get_str("user");
-            args.thinking       = data.get_str("thinking");
-            args.assistant      = data.get_str("assistant");
-            args.current_focus  = data.get_str("current_focus");
-            args.theory_of_mind = data.get_str("theory_of_mind");
-            args.self_narrative = data.get_str("self_narrative");
-            args.annotation     = data.get_str("annotation");
+            auto require_str = [&](const char* key) -> std::string {
+                if (!data.has(key))
+                    throw std::runtime_error(std::string("missing required field: ") + key);
+                auto& v = data.get(key);
+                if (!v.is_string())
+                    throw std::runtime_error(std::string("field '") + key + "' must be a string");
+                return v.str();
+            };
+            args.user           = require_str("user");
+            args.thinking       = require_str("thinking");
+            args.assistant      = require_str("assistant");
+            args.current_focus  = require_str("current_focus");
+            args.theory_of_mind = require_str("theory_of_mind");
+            args.self_narrative = require_str("self_narrative");
+            args.annotation     = require_str("annotation");
             auto entry = coglog::write(args);
             std::fprintf(stdout, "coglog: turn %d written\n",
                          entry.get("turn_id").to_int());

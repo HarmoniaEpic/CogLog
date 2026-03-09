@@ -73,7 +73,11 @@ public class Main {
                     for (String key : new String[]{"user", "thinking", "assistant",
                             "current_focus", "theory_of_mind", "self_narrative", "annotation"}) {
                         Object val = data.get(key);
-                        writeArgs.put(key, val != null ? val.toString() : null);
+                        if (val != null && !(val instanceof String)) {
+                            throw new IllegalArgumentException(
+                                    "field '" + key + "' must be a string, got " + val.getClass().getSimpleName());
+                        }
+                        writeArgs.put(key, (String) val);
                     }
                     Map<String, Object> entry = cl.write(writeArgs);
                     System.out.printf("coglog: turn %d written%n", ((Number) entry.get("turn_id")).intValue());
