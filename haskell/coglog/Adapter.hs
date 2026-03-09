@@ -276,19 +276,15 @@ parseStdinArgs src = do
   u  <- jStr "user" top
   t  <- jStr "thinking" top
   a  <- jStr "assistant" top
-  cf <- fieldOr "current_focus" top
-  tm <- fieldOr "theory_of_mind" top
-  sn <- fieldOr "self_narrative" top
-  an <- fieldOr "annotation" top
+  cf <- jStr "current_focus" top
+  tm <- jStr "theory_of_mind" top
+  sn <- jStr "self_narrative" top
+  an <- jStr "annotation" top
   Right RawArgs
     { rawUser = u, rawThinking = t, rawAssistant = a
     , rawCurrentFocus = cf, rawTheoryOfMind = tm
     , rawSelfNarrative = sn, rawAnnotation = an
     }
-  where
-    fieldOr k kvs = case jStr k kvs of
-      Right v -> Right v
-      Left _  -> Right ""
 
 
 -- ═══════════════════════════════════════════════════════════

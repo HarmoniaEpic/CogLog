@@ -1,0 +1,9 @@
+{
+  "user": "line1\nline2\ttabbed",
+  "thinking": "contains\rcarriage return and\\backslash",
+  "assistant": "quote \" and slash /",
+  "current_focus": "backslash-n literal \\n not newline",
+  "theory_of_mind": "",
+  "self_narrative": "",
+  "annotation": ""
+}
