@@ -93,8 +93,7 @@ CogLog は個人ユーザーが自身の AI 環境内で使用することを前
 
 CogLog is designed for individual users operating within their own AI
 environment. If you are evaluating it for multi-user or production deployment,
-the following areas are **out of scope for this project** and fall under the
-adopter's responsibility.
+the following areas are **out of scope for this project**.
 
 - **パース処理の堅牢性 / Parsing robustness** —
   11 言語間の移植性のため、手書きパーサー（`jq` ベースのシェル、正規表現による抽出）を使用している。敵対的・不正な入力に対する耐性は備えていない。
