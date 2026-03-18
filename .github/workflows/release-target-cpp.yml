@@ -1,16 +1,14 @@
-name: Release C++ Universal Binary
+name: "Release Target: C++ Universal Binary"
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-  workflow_dispatch:
-
-permissions:
-  contents: write
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 jobs:
-  build-and-release:
+  build:
     runs-on: ubuntu-latest
 
     env:
@@ -33,7 +31,13 @@ jobs:
           mkdir -p "$COSMOCC_DIR" && cd "$COSMOCC_DIR"
           curl -fsSL "$URL" -o cosmocc.zip
           unzip -q cosmocc.zip
-          echo "$COSMOCC_DIR/bin" >> "$GITHUB_PATH"
+          COSMOCC_BIN=$(find "$COSMOCC_DIR" -name cosmoc++ -printf '%h\n' | head -1)
+          if [ -z "$COSMOCC_BIN" ]; then
+            echo "::error::cosmoc++ not found after extraction"
+            exit 1
+          fi
+          echo "cosmocc bin: $COSMOCC_BIN"
+          echo "$COSMOCC_BIN" >> "$GITHUB_PATH"
 
       - name: Build coglog-cli
         run: |
@@ -47,17 +51,16 @@ jobs:
 
       - name: Package
         run: |
-          VERSION="${GITHUB_REF_NAME:-dev}"
+          VERSION="${{ inputs.version }}"
           DIRNAME="coglog-cpp-${VERSION}"
           mkdir -p "$DIRNAME"
           cp coglog-cli coglog-mcp "$DIRNAME/"
           cp cpp/coglog/README.md "$DIRNAME/README-cli.md"
           cp cpp/coglog-mcp/README.md "$DIRNAME/README-mcp.md"
           zip -r "coglog-cpp-${VERSION}.zip" "$DIRNAME/"
-          echo "ASSET=coglog-cpp-${VERSION}.zip" >> "$GITHUB_ENV"
 
-      - name: Create GitHub Release and upload asset
-        uses: softprops/action-gh-release@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: ${{ env.ASSET }}
-          generate_release_notes: true
+          name: release-target-cpp
+          path: "*.zip"
