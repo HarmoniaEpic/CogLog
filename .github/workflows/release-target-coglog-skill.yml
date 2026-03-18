@@ -1,16 +1,14 @@
-name: Release coglog-skill
+name: "Release Target: coglog-skill"
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
-  workflow_dispatch:
-
-permissions:
-  contents: write
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
 
 jobs:
-  release:
+  build:
     runs-on: ubuntu-latest
 
     steps:
@@ -19,7 +17,7 @@ jobs:
 
       - name: Package
         run: |
-          VERSION="${GITHUB_REF_NAME:-dev}"
+          VERSION="${{ inputs.version }}"
 
           # coglog-skill: coglog-skill/coglog/ → zip 内に coglog-skill/coglog/ を保持
           mkdir -p _pkg/coglog-skill
@@ -31,13 +29,8 @@ jobs:
           cp -r coglog-skill/coglog-viz _pkg-viz/coglog-viz-skill/
           (cd _pkg-viz && zip -r "../coglog-viz-skill-${VERSION}.zip" coglog-viz-skill/)
 
-          echo "ASSET_COGLOG=coglog-skill-${VERSION}.zip" >> "$GITHUB_ENV"
-          echo "ASSET_VIZ=coglog-viz-skill-${VERSION}.zip" >> "$GITHUB_ENV"
-
-      - name: Create GitHub Release and upload assets
-        uses: softprops/action-gh-release@v2
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
         with:
-          files: |
-            ${{ env.ASSET_COGLOG }}
-            ${{ env.ASSET_VIZ }}
-          generate_release_notes: true
+          name: release-target-coglog-skill
+          path: "*.zip"
