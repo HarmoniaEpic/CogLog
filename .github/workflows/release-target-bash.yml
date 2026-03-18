@@ -1,0 +1,31 @@
+name: "Release Target: Bash"
+
+on:
+  workflow_call:
+    inputs:
+      version:
+        required: true
+        type: string
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Package
+        run: |
+          VERSION="${{ inputs.version }}"
+          DIRNAME="coglog-bash-${VERSION}"
+          mkdir -p "$DIRNAME"
+          cp bash/coglog/coglog-cli.sh "$DIRNAME/"
+          cp bash/coglog/README.md "$DIRNAME/"
+          zip -r "coglog-bash-${VERSION}.zip" "$DIRNAME/"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: release-target-bash
+          path: "*.zip"
