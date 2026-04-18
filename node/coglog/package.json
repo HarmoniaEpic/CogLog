@@ -1,5 +1,5 @@
 {
-  "name": "coglog",
+  "name": "coglog-cli",
   "version": "0.9.1",
   "description": "CogLog — a meta-cognition log for LLMs",
   "type": "module",
