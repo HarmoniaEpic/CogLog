@@ -56,7 +56,7 @@ coglog-mcp
 
 ## 詳細 / Details
 
-[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/coglog/blob/main/docs/designs/DESIGN-v0.9.1.md)
+[DESIGN-v0.9.1.md](https://github.com/HarmoniaEpic/CogLog/blob/main/docs/designs/DESIGN-v0.9.1.md)
 
 ## ライセンス / License
 
