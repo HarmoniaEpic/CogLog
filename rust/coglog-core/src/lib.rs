@@ -288,3 +288,9 @@ impl CogLog {
         }
     }
 }
+
+impl Default for CogLog {
+    fn default() -> Self {
+        Self::new()
+    }
+}
