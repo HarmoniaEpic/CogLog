@@ -6,7 +6,7 @@ resolver = "2"
 version = "0.9.1"
 edition = "2021"
 license = "MIT"
-repository = "https://github.com/HarmoniaEpic/coglog"
+repository = "https://github.com/HarmoniaEpic/CogLog"
 keywords = ["llm", "metacognition", "mcp", "ai", "cognitive"]
 
 [profile.release]
