@@ -124,7 +124,7 @@ Under construction — please try the shell script (Bash) version for now.
 | レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
 |---|---|---|
 | **PyPI** | `pip install coglog` | `pip install coglog-mcp` |
-| **npm** | `npm i -g coglog` | `npm i -g coglog-mcp` |
+| **npm** | `npm i -g coglog-cli` | `npm i -g coglog-mcp` |
 | **crates.io** | `cargo install coglog` | `cargo install coglog-mcp` |
 | **pkg.go.dev** | `go install .../coglog-cli@v0.9.1` | `go install .../coglog-mcp@v0.9.1` |
 | **RubyGems** | `gem install coglog` | `gem install coglog-mcp` |
