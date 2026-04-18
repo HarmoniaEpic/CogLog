@@ -5,7 +5,7 @@
 //!   echo '{"user":"...","thinking":"...","assistant":"...","current_focus":"...","theory_of_mind":"...","self_narrative":"...","annotation":"..."}' | coglog-cli write
 //!   coglog-cli clear
 
-use coglog_core::{default_coglog_dir, Error, CogLog, WriteArgs};
+use coglog_core::{Error, CogLog, WriteArgs};
 use std::io::Read;
 use std::path::PathBuf;
 use std::process;
