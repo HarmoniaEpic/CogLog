@@ -7,7 +7,7 @@ A mechanism that retains the three-layer structure of the AI's previous turn and
 ## インストール / Installation
 
 ```bash
-npm install -g coglog
+npm install -g coglog-cli
 ```
 
 ## 必要環境 / Requirements
