@@ -6,7 +6,7 @@
   "main": "./index.mjs",
   "types": "./index.d.mts",
   "bin": {
-    "coglog-cli": "./index.mjs"
+    "coglog-cli": "index.mjs"
   },
   "exports": {
     ".": {
