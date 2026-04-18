@@ -20,8 +20,17 @@ classifiers = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/HarmoniaEpic/coglog"
-Source = "https://github.com/HarmoniaEpic/coglog/tree/main/python/coglog"
+Homepage = "https://github.com/HarmoniaEpic/CogLog"
+Source = "https://github.com/HarmoniaEpic/CogLog/tree/main/python/coglog"
 
 [project.scripts]
 coglog-cli = "coglog:main"
+
+[tool.hatch.build]
+exclude = [
+    "*.bak",
+    "*.swp",
+    "*.swo",
+    "*~",
+    ".DS_Store",
+]
