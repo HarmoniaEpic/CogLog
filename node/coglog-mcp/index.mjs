@@ -13,7 +13,7 @@
 
 import { createInterface } from 'node:readline';
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -238,14 +238,9 @@ function handlePing(msgId) {
 // ═══════════════════════════════════════════════════════════════
 
 // --coglog-dir <path> の解析（優先順位: 引数 > COGLOG_DIR env > デフォルト）
-{
-  const argv = process.argv.slice(2);
-  if (argv[0] === '--coglog-dir' && argv[1]) {
-    process.env.COGLOG_DIR = argv[1];
-  }
-}
-const ml = new CogLog(process.env.COGLOG_DIR ?? null);
-const rl = createInterface({ input: process.stdin, terminal: false });
+// Note: ml is module-scope to allow processMessage to reference it via closure;
+// actual initialization happens inside the isMain guard below.
+let ml = null;
 
 // Queue + drain loop to serialize async handlers.
 // readline fires 'line' events synchronously; without serialization,
@@ -301,13 +296,35 @@ async function processMessage(line) {
   }
 }
 
-log("server started");
+// Determine if this module was directly invoked (handles symlinks from npm bin).
+const isMain = (() => {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+})();
 
-rl.on('line', (line) => {
-  queue.push(line);
-  drain();
-});
+if (isMain) {
+  // argv parsing: only when invoked directly (avoid polluting env on import)
+  {
+    const argv = process.argv.slice(2);
+    if (argv[0] === '--coglog-dir' && argv[1]) {
+      process.env.COGLOG_DIR = argv[1];
+    }
+  }
+  ml = new CogLog(process.env.COGLOG_DIR ?? null);
+  const rl = createInterface({ input: process.stdin, terminal: false });
 
-rl.on('close', () => {
-  log("server stopped");
-});
+  log("server started");
+
+  rl.on('line', (line) => {
+    queue.push(line);
+    drain();
+  });
+
+  rl.on('close', () => {
+    log("server stopped");
+  });
+}
