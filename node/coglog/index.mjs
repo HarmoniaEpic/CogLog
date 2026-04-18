@@ -26,7 +26,7 @@
  */
 
 import { readFile, writeFile, mkdir, rm } from 'node:fs/promises';
-import { existsSync } from 'node:fs';
+import { existsSync, realpathSync } from 'node:fs';
 import { join, dirname } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { homedir } from 'node:os';
@@ -132,9 +132,14 @@ export class CogLog {
 }
 
 // ── CLI ─────────────────────────────────────────────────────────
-const isMain = process.argv[1] &&
-  new URL(import.meta.url).pathname ===
-  new URL('file://' + process.argv[1]).pathname;
+const isMain = (() => {
+  if (!process.argv[1]) return false;
+  try {
+    return realpathSync(process.argv[1]) === realpathSync(fileURLToPath(import.meta.url));
+  } catch {
+    return false;
+  }
+})();
 
 if (isMain) {
   // Parse --coglog-dir <path> (priority: arg > COGLOG_DIR env > default)
