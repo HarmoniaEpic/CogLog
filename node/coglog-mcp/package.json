@@ -29,12 +29,19 @@
   ],
   "author": "HarmoniaEpic",
   "license": "MIT",
+  "homepage": "https://github.com/HarmoniaEpic/CogLog#readme",
+  "bugs": {
+    "url": "https://github.com/HarmoniaEpic/CogLog/issues"
+  },
   "repository": {
     "type": "git",
-    "url": "https://github.com/HarmoniaEpic/coglog",
+    "url": "git+https://github.com/HarmoniaEpic/CogLog.git",
     "directory": "node/coglog-mcp"
   },
   "engines": {
     "node": ">=18"
+  },
+  "publishConfig": {
+    "access": "public"
   }
 }
