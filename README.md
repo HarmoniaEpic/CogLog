@@ -137,7 +137,7 @@ Registration is in preparation. The commands below reflect the intended form aft
 | レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
 |---|---|---|
 | **RubyGems** | `gem install coglog` | `gem install coglog-mcp` |
-| **Maven Central** | `mvn dependency:get ...` | 同上 / ditto |
+| **Maven Central** | `mvn dependency:get -Dartifact=io.github.harmoniaepic:coglog:0.9.1` | `mvn dependency:get -Dartifact=io.github.harmoniaepic:coglog-mcp:0.9.1` |
 | **NuGet** | `dotnet tool install -g coglog` | `dotnet tool install -g coglog-mcp` |
 | **Hackage** | `cabal install coglog` | `cabal install coglog-mcp` |
 | **Quicklisp** | `(ql:quickload :coglog)` | `(ql:quickload :coglog-mcp)` |
