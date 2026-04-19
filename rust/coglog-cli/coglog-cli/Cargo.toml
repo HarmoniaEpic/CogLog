@@ -1,0 +1,17 @@
+[package]
+name = "coglog-cli"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+keywords.workspace = true
+description = "CogLog CLI — a meta-cognition log for LLMs"
+categories = ["command-line-utilities"]
+
+[[bin]]
+name = "coglog-command"
+path = "src/main.rs"
+
+[dependencies]
+coglog-core = { path = "../coglog-core", version = "0.9.1" }
+serde_json = "1"
