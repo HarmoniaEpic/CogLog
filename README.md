@@ -117,25 +117,39 @@ classDiagram
 
 ## インストール / Installation
 
-工事中につき、シェルスクリプト（Bash）版をお試し下さい。
+### 対応済み / Available now
 
-Under construction — please try the shell script (Bash) version for now.
+パッケージリポジトリへの登録が完了しており、以下のコマンドですぐにインストールできます。
+The packages listed below are already registered and installable.
 
 | レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
 |---|---|---|
 | **PyPI** | `pip install coglog` | `pip install coglog-mcp` |
 | **npm** | `npm i -g coglog-cli` | `npm i -g coglog-mcp` |
 | **crates.io** | `cargo install coglog` | `cargo install coglog-mcp` |
-| **pkg.go.dev** | `go install .../coglog-cli@v0.9.1` | `go install .../coglog-mcp@v0.9.1` |
+| **pkg.go.dev** | `go install github.com/HarmoniaEpic/coglog/go/cmd/coglog-cli@v0.9.1` | `go install github.com/HarmoniaEpic/coglog/go/cmd/coglog-mcp@v0.9.1` |
+
+### 対応予定 / Coming soon
+
+各レジストリへの登録を準備中です。下記コマンドは登録完了後の想定です。
+Registration is in preparation. The commands below reflect the intended form after registration.
+
+| レジストリ / Registry | coglog (CLI) | coglog-mcp (MCP サーバー / server) |
+|---|---|---|
 | **RubyGems** | `gem install coglog` | `gem install coglog-mcp` |
-| **Maven Central** | `mvn dependency:get ...` | 同上 / ditto |
+| **Maven Central** | `mvn dependency:get -Dartifact=io.github.harmoniaepic:coglog:0.9.1` | `mvn dependency:get -Dartifact=io.github.harmoniaepic:coglog-mcp:0.9.1` |
 | **NuGet** | `dotnet tool install -g coglog` | `dotnet tool install -g coglog-mcp` |
 | **Hackage** | `cabal install coglog` | `cabal install coglog-mcp` |
 | **Quicklisp** | `(ql:quickload :coglog)` | `(ql:quickload :coglog-mcp)` |
 
 Common Lisp リカレントクワイン / Recurrent Quine: `(ql:quickload :coglog-quine)`
 
+### 別ルート配布 / Alternative distribution
+
 C++ / Bash: [GitHub Releases](https://github.com/HarmoniaEpic/coglog/releases)
+
+C++ はユニバーサルバイナリ、Bash はリポジトリに同梱されており、パッケージレジストリを経由せず利用できます。
+C++ is distributed as a universal binary and Bash is bundled in the repository, both available without going through a package registry.
 
 ## CLI（全11言語共通） / CLI (Common across all 11 languages)
 
